@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Bài tâp từ vựng - Unit 1 </title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 5px;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #202124;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dark-blue);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .stats-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .q-num {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9em;
+            background: #fff;
+        }
+
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            padding-bottom: 20px;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #202124;
+        }
+
+        .btn-hint-toggle {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid #ffb74d;
+            color: #f57f17;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .hint-content {
+            display: none;
+            background-color: #fff3e0;
+            border-left: 4px solid #ffb74d;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #e65100;
+        }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px;
+            align-self: flex-start;
+            background: #f1f3f4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+
+        .trans-text {
+            display: none;
+            color: var(--trans-color);
+            font-style: italic;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-weight: normal;
+            border-top: 1px dashed #eee;
+            padding-top: 4px;
+        }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fffde7;
+            border-left: 4px solid #fbc02d;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.3s;
+        }
+        .modal-score { font-size: 3.5em; font-weight: bold; color: var(--dark-blue); margin: 10px 0; }
+        .modal-details { margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none;
+        border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
+
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+            .header-title { font-size: 1em; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-error {
+            color: var(--wrong-red);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Mật khẩu không đúng hoặc chưa nhập tên!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tâp từ vựng - Unit 1</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <h2 style="color: #444; margin-top:0">Kết Quả</h2>
+            <div>Điểm số của bạn</div>
+            <div class="modal-score" id="final-score">0.0</div>
+            
+            <div class="modal-details">
+                <p>Số câu đúng: <b id="final-correct">0</b> / <span id="final-total">60</span></p>
+                <p>Xếp loại: <b id="final-rank" style="color: #e65100">---</b></p>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Xem lại bài</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+
+    {
+        "q": "Mi: \"We moved to a new house last month. We’re still busy __________, you know.\"",
+        "qVi": "Mi: \"Chúng tôi đã chuyển đến nhà mới vào tháng trước. Bạn biết đấy, chúng tôi vẫn đang bận rộn __________.\"",
+        "key": ["moved to a new house", "busy"],
+        "opts": ["moving in", "looking for", "getting on", "going out"],
+        "optsVi": ["dọn vào", "tìm kiếm", "hòa thuận / tiến bộ", "đi chơi"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>move in</b> có nghĩa là 'dọn vào nhà mới để sống'. Ngữ cảnh nhắc đến việc 'chuyển đến nhà mới' (moved to a new house) nên đáp án này là chính xác nhất.<br><b>Phân tích bẫy:</b> Phương án B (<i>looking for</i>) sai vì họ đã chuyển đến rồi ('moved' ở thì quá khứ), không phải đang tìm nhà nữa.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Last Sunday, when I was __________ the way to the bus station, a lady showed me the way.",
+        "qVi": "Chủ nhật tuần trước, khi tôi đang __________ đường đến trạm xe buýt, một người phụ nữ đã chỉ đường cho tôi.",
+        "key": ["the way to the bus station", "showed me the way"],
+        "opts": ["finding out", "looking for", "coming back", "taking care"],
+        "optsVi": ["tìm hiểu", "tìm kiếm", "trở về", "chăm sóc"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>look for</b> có nghĩa là 'tìm kiếm'. Ngữ cảnh 'một người phụ nữ chỉ đường' (showed me the way) cho thấy người nói đang nỗ lực tìm đường.<br><b>Phân tích bẫy:</b> Phương án A (<i>finding out</i> - tìm hiểu/khám phá thông tin) không kết hợp với 'the way' trong tình huống đi lạc; ta dùng 'looking for' cho việc tìm đường đi.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "My new neighbours are very nice. I think we will __________ them.",
+        "qVi": "Những người hàng xóm mới của tôi rất tốt bụng. Tôi nghĩ chúng tôi sẽ __________ họ.",
+        "key": ["neighbours", "very nice"],
+        "opts": ["look around", "hand down", "get on with", "run out of"],
+        "optsVi": ["nhìn quanh", "truyền lại", "hòa thuận với", "cạn kiệt"],
+        "correct": 2,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>get on with</b> có nghĩa là 'hòa thuận, có mối quan hệ tốt với ai đó'. Hàng xóm 'rất tốt bụng' (very nice) là cơ sở để tin rằng họ sẽ hòa thuận với nhau.<br><b>Phân tích bẫy:</b> Các phương án còn lại hoàn toàn sai nghĩa và không thể dùng tân ngữ chỉ người (them/hàng xóm) trong ngữ cảnh này.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Whenever I go to a new place, I usually spend time __________ to see what is there.",
+        "qVi": "Bất cứ khi nào tôi đến một nơi ở mới, tôi thường dành thời gian __________ để xem ở đó có gì.",
+        "key": ["go to a new place", "see what is there"],
+        "opts": ["looking around", "moving in", "passing down", "finding out"],
+        "optsVi": ["nhìn quanh / ngắm nghía", "dọn vào", "truyền lại", "tìm hiểu"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>look around</b> có nghĩa là 'đi vòng quanh để tham quan, ngắm cảnh'. Mục đích 'xem ở đó có gì' (to see what is there) rất phù hợp với hành động ngắm nghía này.<br><b>Phân tích bẫy:</b> Phương án D (<i>finding out</i>) thường cần một tân ngữ cụ thể đi kèm (find out something/about something), không dùng độc lập mang sắc thái 'đi dạo ngắm cảnh' như look around.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "We __________ from our home town last Saturday and started our school week.",
+        "qVi": "Chúng tôi đã __________ từ quê nhà vào thứ Bảy tuần trước và bắt đầu tuần học mới.",
+        "key": ["from our home town", "started our school week"],
+        "opts": ["looked for", "came back", "got on with", "took care of"],
+        "optsVi": ["tìm kiếm", "trở về", "hòa thuận với", "chăm sóc"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>come back</b> có nghĩa là 'trở về'. Kết hợp với giới từ 'from' (trở về từ đâu) hoàn toàn khớp với ngữ cảnh 'từ quê nhà' để lên thành phố bắt đầu tuần học.<br><b>Phân tích bẫy:</b> Các cụm động từ còn lại không kết hợp với giới từ 'from' trong ngữ cảnh này (ví dụ không thể nói 'tìm kiếm từ quê nhà').<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Artisans in my village usually __________ their skills to their children so the craft survives.",
+        "qVi": "Các nghệ nhân trong làng tôi thường __________ kỹ năng của họ cho con cái để nghề thủ công tiếp tục tồn tại.",
+        "key": ["skills to their children", "craft survives"],
+        "opts": ["go out", "run out", "find out", "hand down"],
+        "optsVi": ["đi chơi", "cạn kiệt", "tìm hiểu", "truyền lại"],
+        "correct": 3,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>hand down</b> có nghĩa là 'truyền lại (kinh nghiệm, kỹ năng cho thế hệ sau)'. Cấu trúc <b>hand down something to somebody</b> rất phù hợp với việc truyền nghề cho con cái.<br><b>Phân tích bẫy:</b> Các đáp án A, B, C sai hoàn toàn về nghĩa và không thể đi với tân ngữ 'their skills'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Visitors to the museum can __________ about the long history of pottery-making.",
+        "qVi": "Du khách đến bảo tàng có thể __________ về lịch sử lâu đời của nghề làm gốm.",
+        "key": ["Visitors to the museum", "about the long history"],
+        "opts": ["find out", "take care", "look for", "move in"],
+        "optsVi": ["tìm hiểu", "chăm sóc", "tìm kiếm", "dọn vào"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>find out</b> có nghĩa là 'tìm hiểu thông tin, khám phá ra'. Cấu trúc <b>find out about something</b> (tìm hiểu về điều gì đó) hoàn toàn chính xác trong việc khách tham quan tìm hiểu lịch sử.<br><b>Phân tích bẫy:</b> Phương án C (<i>look for</i>) mang nghĩa tìm kiếm một vật bị mất/một người, không đi với 'about' để chỉ việc thu thập kiến thức lịch sử.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "When our parents aren't at home, our neighbour helps __________ our cats.",
+        "qVi": "Khi bố mẹ chúng tôi không có ở nhà, người hàng xóm giúp __________ những con mèo của chúng tôi.",
+        "key": ["aren't at home", "neighbour helps", "our cats"],
+        "opts": ["pass down", "come back", "take care of", "look around"],
+        "optsVi": ["truyền lại", "trở về", "chăm sóc", "nhìn quanh"],
+        "correct": 2,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>take care of</b> có nghĩa là 'chăm sóc'. Khi chủ đi vắng (aren't at home), việc hàng xóm sang giúp chăm sóc thú cưng là lựa chọn hợp lý nhất.<br><b>Phân tích bẫy:</b> Không có phương án nào khác kết nối được với tân ngữ 'our cats' để tạo ra nghĩa hợp logic thực tế.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Do you enjoy __________ with your friends at the park on weekends?",
+        "qVi": "Bạn có thích __________ với bạn bè ở công viên vào cuối tuần không?",
+        "key": ["with your friends", "at the park"],
+        "opts": ["going out", "running out", "looking for", "moving in"],
+        "optsVi": ["đi chơi", "cạn kiệt", "tìm kiếm", "dọn vào"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>go out</b> có nghĩa là 'đi ra ngoài, đi dạo, đi chơi'. Đi với bạn bè ở công viên vào cuối tuần là một hoạt động giải trí lý tưởng.<br><b>Phân tích bẫy:</b> Phương án B (<i>running out</i>) nghĩa là hết sạch đồ đạc (ví dụ: run out of time), hoàn toàn vô nghĩa trong câu hỏi này.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs] [Ngữ pháp - V-ing sau enjoy]"
+    },
+    {
+        "q": "Artisans in Vong Village preserve their techniques by __________ them __________ to their sons.",
+        "qVi": "Các nghệ nhân ở làng Vòng bảo tồn kỹ thuật của họ bằng cách __________ chúng __________ cho con trai họ.",
+        "key": ["preserve their techniques", "to their sons"],
+        "opts": ["taking / away", "passing / down", "looking / for", "coming / back"],
+        "optsVi": ["mang / đi", "truyền / lại", "tìm / kiếm", "trở / về"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>pass down</b> có nghĩa là 'truyền lại cho thế hệ sau' (đồng nghĩa với hand down). Do tân ngữ là đại từ (them) nên nó được kẹp vào giữa: <b>pass them down</b>.<br><b>Phân tích bẫy:</b> Phương án A (<i>taking away</i> - mang đi) dễ bị học sinh dịch nhầm do nghe có vẻ hợp lý, nhưng cụm từ đi với giới từ 'to' chỉ đối tượng nhận thế hệ sau (to their sons) thì bắt buộc phải là 'pass down'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "In some craft villages, people __________ the number of steps to make a product more quickly.",
+        "qVi": "Ở một số làng nghề, người ta __________ số lượng các công đoạn để làm ra sản phẩm nhanh hơn.",
+        "key": ["the number of steps", "make a product more quickly"],
+        "opts": ["get on with", "cut down on", "look around", "take care of"],
+        "optsVi": ["hòa thuận với", "cắt giảm", "nhìn quanh", "chăm sóc"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>cut down on</b> mang nghĩa 'cắt giảm bớt'. Để rút ngắn thời gian làm ra một sản phẩm (more quickly), người ta cần cắt giảm số lượng các công đoạn.<br><b>Phân tích bẫy:</b> Các phương án còn lại không mô tả được hành động can thiệp vào quy trình sản xuất (số lượng công đoạn).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Before we visit a new place, we should always __________ information about its history.",
+        "qVi": "Trước khi đến thăm một địa điểm mới, chúng ta nên luôn __________ thông tin về lịch sử của nó.",
+        "key": ["visit a new place", "information about its history"],
+        "opts": ["find out", "hand down", "move in", "go out"],
+        "optsVi": ["tìm hiểu", "truyền lại", "dọn vào", "đi chơi"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>find out</b> mang nghĩa 'tìm hiểu, khám phá thông tin'. Sự kết hợp <b>find out information</b> (tìm hiểu thông tin) là một cấu trúc kết hợp từ vựng cực kỳ phổ biến và tự nhiên.<br><b>Phân tích bẫy:</b> Phương án B (<i>hand down</i>) sai vì ta không thể 'truyền lại' thông tin lịch sử của một nơi mà mình mới chuẩn bị tới thăm (phải là người bản địa mới làm được).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs] [Collocation]"
+    },
+    {
+        "q": "My grandparents __________ the traditional weaving skills to my parents many years ago.",
+        "qVi": "Ông bà tôi đã __________ kỹ năng dệt truyền thống cho bố mẹ tôi nhiều năm trước.",
+        "key": ["grandparents", "skills to my parents"],
+        "opts": ["looked for", "got on with", "handed down", "came back"],
+        "optsVi": ["tìm kiếm", "hòa thuận với", "truyền lại", "trở về"],
+        "correct": 2,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>hand down</b> mang nghĩa 'truyền lại (kinh nghiệm, kỹ năng cho thế hệ sau)'. Hành động ông bà truyền lại kỹ năng cho bố mẹ là chuẩn xác với cấu trúc này.<br><b>Phân tích bẫy:</b> Phương án B (<i>got on with</i> - hòa thuận) không thể đi kèm với tân ngữ 'kỹ năng dệt' (weaving skills).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "I love my neighbourhood because I __________ all the people living here.",
+        "qVi": "Tôi yêu khu phố của mình vì tôi __________ tất cả những người sống ở đây.",
+        "key": ["love my neighbourhood", "all the people"],
+        "opts": ["take care of", "look around", "find out", "get on with"],
+        "optsVi": ["chăm sóc", "nhìn quanh", "tìm hiểu", "hòa thuận với"],
+        "correct": 3,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>get on with</b> có nghĩa là 'hòa hợp, có mối quan hệ tốt với ai'. Việc có quan hệ tốt với mọi người xung quanh chính là lý do khiến người nói 'yêu khu phố của mình'.<br><b>Phân tích bẫy:</b> Phương án A (<i>take care of</i>) thiếu logic thực tế, vì một người không thể một mình 'chăm sóc' tất cả mọi người trong khu phố được.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "We have __________ milk. Could you go to the store and buy some?",
+        "qVi": "Chúng ta đã __________ sữa. Bạn có thể đến cửa hàng và mua một ít được không?",
+        "key": ["milk", "go to the store and buy some"],
+        "opts": ["run out of", "cut down on", "passed down", "come back from"],
+        "optsVi": ["cạn kiệt / hết sạch", "cắt giảm", "truyền lại", "trở về từ"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>run out of</b> mang nghĩa 'hết sạch cái gì đó'. Ngữ cảnh nhờ 'đi đến cửa hàng để mua thêm' cho thấy ở nhà đã cạn kiệt sữa.<br><b>Phân tích bẫy:</b> Phương án B (<i>cut down on</i> - cắt giảm) là một bẫy quen thuộc, nhưng nếu chỉ là 'cắt giảm' thì sữa vẫn còn ở nhà, không cần thiết phải giục đi mua thêm ngay lập tức.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "On Nguyen Hue Pedestrian Street, children enjoy music while parents spend time __________.",
+        "qVi": "Trên phố đi bộ Nguyễn Huệ, trẻ em thưởng thức âm nhạc trong khi phụ huynh dành thời gian __________.",
+        "key": ["Pedestrian Street", "spend time"],
+        "opts": ["moving in", "looking around", "taking care", "finding out"],
+        "optsVi": ["dọn vào", "ngắm cảnh / nhìn quanh", "chăm sóc", "tìm hiểu"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>look around</b> có nghĩa là 'đi dạo, ngắm cảnh'. Đây là hoạt động rất điển hình và tự nhiên khi đi chơi tại phố đi bộ.<br><b>Phân tích bẫy:</b> Phương án C (<i>taking care</i>) sai ngữ pháp vì thiếu tân ngữ. Khi muốn nói chăm sóc ai đó, bắt buộc phải dùng cấu trúc 'take care <b>of someone</b>'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Do your parents often __________ late at night after work?",
+        "qVi": "Bố mẹ bạn có thường __________ vào đêm muộn sau giờ làm việc không?",
+        "key": ["late at night", "after work"],
+        "opts": ["go out", "come back", "hand down", "look for"],
+        "optsVi": ["đi ra ngoài", "trở về", "truyền lại", "tìm kiếm"],
+        "correct": 1,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>come back</b> mang nghĩa 'trở về (nhà)'. Ngữ cảnh 'sau giờ làm việc' (after work) thì hành động hợp logic nhất là trở về nhà.<br><b>Phân tích bẫy:</b> Phương án A (<i>go out</i>) mang sắc thái đi ra ngoài để chơi bời, giải trí, điều này không hợp logic với khoảng thời gian 'đêm muộn sau khi tan làm' của các bậc phụ huynh.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "In many communities, the eldest child is often responsible to __________ his or her parents.",
+        "qVi": "Ở nhiều cộng đồng, con cả thường có trách nhiệm __________ cha mẹ mình.",
+        "key": ["eldest child", "responsible to", "parents"],
+        "opts": ["take care of", "cut down on", "get on with", "find out"],
+        "optsVi": ["chăm sóc", "cắt giảm", "hòa thuận với", "tìm hiểu"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>take care of</b> mang nghĩa 'chăm sóc'. Trách nhiệm (responsible) cốt lõi của con cái đối với cha mẹ trong nhiều cộng đồng chính là phụng dưỡng và chăm sóc.<br><b>Phân tích bẫy:</b> Phương án C (<i>get on with</i> - hòa thuận) là điều nên làm, nhưng dùng từ 'trách nhiệm / nghĩa vụ' (responsible) thì việc 'chăm sóc' cha mẹ già mang tính bắt buộc và chính xác hơn về văn hóa.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "I am __________ a place where they make traditional conical hats. Do you know any?",
+        "qVi": "Tôi đang __________ một nơi họ làm nón lá truyền thống. Bạn có biết chỗ nào không?",
+        "key": ["a place", "Do you know any"],
+        "opts": ["looking for", "passing down", "moving in", "coming back"],
+        "optsVi": ["tìm kiếm", "truyền lại", "dọn vào", "trở về"],
+        "correct": 0,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>look for</b> mang nghĩa 'tìm kiếm'. Việc người nói hỏi 'Bạn có biết chỗ nào không?' (Do you know any?) chứng tỏ họ đang có nhu cầu tìm kiếm một địa điểm cụ thể.<br><b>Phân tích bẫy:</b> Các đáp án còn lại hoàn toàn sai nghĩa và không phù hợp với bối cảnh hỏi thăm địa điểm.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Last Sunday, we decided to __________ and visit the famous craft village near our house.",
+        "qVi": "Chủ nhật tuần trước, chúng tôi quyết định __________ và đến thăm làng nghề thủ công nổi tiếng gần nhà.",
+        "key": ["decided to", "visit the famous craft village"],
+        "opts": ["find out", "hand down", "go out", "take care"],
+        "optsVi": ["tìm hiểu", "truyền lại", "đi ra ngoài chơi", "chăm sóc"],
+        "correct": 2,
+        "exp": "<b>Giải thích:</b> Cụm động từ <b>go out</b> có nghĩa là 'đi ra ngoài để dạo chơi'. Theo sau là hành động đến thăm làng nghề (visit...) làm rõ cho mục đích của chuyến đi chơi này.<br><b>Phân tích bẫy:</b> Phương án A (<i>find out</i> - tìm hiểu) không liên kết tự nhiên với vế sau 'and visit'. Thường người ta quyết định 'đi chơi' (go out) rồi mới kết hợp 'thăm quan' (visit).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    }
+        ];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9001"; // Thay đổi mật khẩu tại đây
+        const LESSON_NAME = "Unit 1"; // Đổi tên cho từng bài khác nhau
+        let currentUser = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser}`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key.join('; ')}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
+                if (!confirmSubmit) return;
+            }
+
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            let rank = "";
+            if(score >= 9) rank = "Xuất sắc (Excellent)";
+            else if(score >= 8) rank = "Giỏi (Good)";
+            else if(score >= 6.5) rank = "Khá (Fair)";
+            else if(score >= 5) rank = "Trung bình (Average)";
+            else rank = "Cần cố gắng thêm (Poor)";
+
+            let wrongAnswers = [];
+            for (let i = 0; i < totalCount; i++) {
+                const navNum = document.getElementById(`nav-${i}`);
+                if (!navNum.classList.contains('done-correct')) {
+                    wrongAnswers.push(i + 1);
+                }
+            }
+            const wrongListString = wrongAnswers.length > 0 ? wrongAnswers.join(', ') : "Không sai câu nào";
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjiTHdrvfoBKoacJ82YholKR2DfATpjp5Manr2Qu2O6-sh4PipGemq7rzrHnURMW6P/exec';
+            
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Đang gửi kết quả...";
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'name': currentUser,
+                    'lesson': LESSON_NAME,
+                    'correct': correctCount,
+                    'score': score,
+                    'wrong_list': wrongListString
+                })
+            }).then(() => {
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }).catch(error => {
+                console.error('Lỗi!', error);
+                alert('Đã lưu bài thi nhưng có lỗi mạng khi gửi kết quả.');
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, rank) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-rank').innerText = rank;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
