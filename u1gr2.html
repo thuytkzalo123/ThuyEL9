@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Bài tâp Phrasal Verb - Unit 1 </title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 5px;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #202124;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dark-blue);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .stats-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .q-num {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9em;
+            background: #fff;
+        }
+
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            padding-bottom: 20px;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #202124;
+        }
+
+        .btn-hint-toggle {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid #ffb74d;
+            color: #f57f17;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .hint-content {
+            display: none;
+            background-color: #fff3e0;
+            border-left: 4px solid #ffb74d;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #e65100;
+        }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px;
+            align-self: flex-start;
+            background: #f1f3f4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+
+        .trans-text {
+            display: none;
+            color: var(--trans-color);
+            font-style: italic;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-weight: normal;
+            border-top: 1px dashed #eee;
+            padding-top: 4px;
+        }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fffde7;
+            border-left: 4px solid #fbc02d;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.3s;
+        }
+        .modal-score { font-size: 3.5em; font-weight: bold; color: var(--dark-blue); margin: 10px 0; }
+        .modal-details { margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none;
+        border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
+
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+            .header-title { font-size: 1em; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-error {
+            color: var(--wrong-red);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Mật khẩu không đúng hoặc chưa nhập tên!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tâp Phrasal Verb - Unit 1</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <h2 style="color: #444; margin-top:0">Kết Quả</h2>
+            <div>Điểm số của bạn</div>
+            <div class="modal-score" id="final-score">0.0</div>
+            
+            <div class="modal-details">
+                <p>Số câu đúng: <b id="final-correct">0</b> / <span id="final-total">60</span></p>
+                <p>Xếp loại: <b id="final-rank" style="color: #e65100">---</b></p>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Xem lại bài</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = 
+[
+    {
+        "q": "How's your new neighbourhood? It's much ______ than our old one.",
+        "qVi": "Khu phố mới của bạn thế nào? Nó ______ hơn nhiều so với khu cũ của chúng tôi.",
+        "key": ["than"],
+        "opts": ["big", "bigger", "biggest", "more big"],
+        "optsVi": ["lớn", "lớn hơn", "lớn nhất", "lớn hơn"],
+        "correct": 1,
+        "exp": "Có 'than' nên dùng so sánh hơn. 'big' là tính từ ngắn -> <b>bigger</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "In my new neighbourhood, the streets are ______, and there are fewer people.",
+        "qVi": "Trong khu phố mới của tôi, các con đường ______, và có ít người hơn.",
+        "key": ["are", "fewer people"],
+        "opts": ["wide", "widely", "wider", "more widely"],
+        "optsVi": ["rộng", "một cách rộng rãi", "rộng hơn", "rộng rãi hơn"],
+        "correct": 2,
+        "exp": "Ngữ cảnh đang ngầm so sánh, đi kèm với vế sau dùng so sánh hơn 'fewer' (ít hơn), nên vế trước cũng dùng tính từ so sánh hơn -> <b>wider</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "They see that the ______ developed the city is, the more crowded it becomes.",
+        "qVi": "Họ thấy rằng thành phố càng phát triển ______, thì nó càng trở nên đông đúc.",
+        "key": ["the", "developed", "the more crowded"],
+        "opts": ["more", "much", "most", "many"],
+        "optsVi": ["hơn", "nhiều", "nhất", "nhiều"],
+        "correct": 0,
+        "exp": "Cấu trúc so sánh kép: <b>The + so sánh hơn..., the + so sánh hơn...</b> (Càng... càng...). 'developed' là tính từ dài nên dùng <b>the more developed</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "The nearer we got to the suburb, the ______ busy the road was.",
+        "qVi": "Càng đến gần vùng ngoại ô, con đường càng ______ đông đúc.",
+        "key": ["The nearer", "the", "busy"],
+        "opts": ["less", "fewer", "least", "little"],
+        "optsVi": ["ít hơn", "ít hơn (đếm được)", "ít nhất", "ít"],
+        "correct": 0,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn..., the + so sánh hơn...</b>. 'busy' đi với dạng so sánh hơn của 'little' là <b>less</b> (ít đông đúc hơn).<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "Minh prefers the metro. He finds it ______ to go underground than above the ground.",
+        "qVi": "Minh thích tàu điện ngầm hơn. Anh ấy thấy đi ngầm dưới lòng đất ______ so với đi trên mặt đất.",
+        "key": ["finds it", "than"],
+        "opts": ["comfortably", "more comfortably", "more comfortable", "the most comfortable"],
+        "optsVi": ["thoải mái (trạng từ)", "thoải mái hơn (trạng từ)", "thoải mái hơn", "thoải mái nhất"],
+        "correct": 2,
+        "exp": "Cấu trúc <b>find + it + adj</b>, kết hợp với dấu hiệu 'than' nên cần tính từ so sánh hơn -> <b>more comfortable</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "The slower the Internet is, the ______ the users get.",
+        "qVi": "Internet càng chậm, người dùng càng trở nên ______.",
+        "key": ["The slower", "the", "get"],
+        "opts": ["angrier", "angrily", "more angrily", "angry"],
+        "optsVi": ["tức giận hơn", "tức giận (trạng từ)", "tức giận hơn (trạng từ)", "tức giận"],
+        "correct": 0,
+        "exp": "Động từ 'get' (trở nên) đi với tính từ. So sánh kép cần tính từ so sánh hơn, 'angry' tận cùng là 'y' đổi thành 'i' + er -> <b>angrier</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "The streets are getting ______. The more crowded the city is, the more polluted it becomes.",
+        "qVi": "Đường phố đang trở nên ______. Thành phố càng đông đúc, nó càng trở nên ô nhiễm.",
+        "key": ["getting"],
+        "opts": ["dirty", "dirtier", "more dirty", "dirtily"],
+        "optsVi": ["bẩn", "bẩn hơn", "bẩn hơn", "một cách bẩn thỉu"],
+        "correct": 1,
+        "exp": "Cấu trúc <b>get + tính từ so sánh hơn</b> diễn tả sự thay đổi (ngày càng...). 'dirty' đổi 'y' thành 'i' + er -> <b>dirtier</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Sự thay đổi (get + comparative)]"
+    },
+    {
+        "q": "The dirtier the air gets, the ______ it is for people to breathe.",
+        "qVi": "Không khí càng trở nên bẩn, mọi người càng ______ thở.",
+        "key": ["The dirtier", "the", "is"],
+        "opts": ["more difficultly", "more difficult", "difficultly", "most difficult"],
+        "optsVi": ["khó khăn hơn (trạng từ)", "khó khăn hơn", "khó khăn (trạng từ)", "khó khăn nhất"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh kép bắt buộc dùng <b>the + so sánh hơn</b>. Sau to be 'is' cần tính từ dài -> <b>more difficult</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "The older the city becomes, the ______ attractive it is to immigrants.",
+        "qVi": "Thành phố càng lâu đời, nó càng ______ hấp dẫn đối với người nhập cư.",
+        "key": ["The older", "the", "attractive"],
+        "opts": ["less", "little", "fewer", "least"],
+        "optsVi": ["ít hơn", "ít", "ít hơn (đếm được)", "ít nhất"],
+        "correct": 0,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn...</b>. 'attractive' đi với so sánh hơn của 'little' là <b>less</b> (ít hấp dẫn hơn).<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "She thinks the bigger the city is, ______ the cost of living gets.",
+        "qVi": "Cô ấy nghĩ thành phố càng lớn, chi phí sinh hoạt ______.",
+        "key": ["the bigger", "the cost of living gets"],
+        "opts": ["higher", "highest", "the higher", "the highest"],
+        "optsVi": ["cao hơn", "cao nhất", "càng cao hơn", "cao nhất"],
+        "correct": 2,
+        "exp": "Cấu trúc so sánh kép bắt buộc phải có mạo từ 'the' ở cả hai vế: <b>The + so sánh hơn..., the + so sánh hơn...</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "I love the spicy food in this city. The ______ the food is, the more I like it.",
+        "qVi": "Tôi thích đồ ăn cay ở thành phố này. Thức ăn càng ______, tôi càng thích.",
+        "key": ["The", "the more"],
+        "opts": ["hot", "hotter", "hottest", "more hot"],
+        "optsVi": ["cay/nóng", "cay hơn", "cay nhất", "cay hơn"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh kép yêu cầu dạng so sánh hơn ở cả 2 vế. Tính từ ngắn 'hot' gấp đôi phụ âm cuối thêm 'er' -> <b>hotter</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "I got stuck in a traffic jam yesterday. The more congested the road was, the ______ I became.",
+        "qVi": "Hôm qua tôi bị kẹt xe. Đường càng tắc nghẽn, tôi càng trở nên ______.",
+        "key": ["The more", "the", "became"],
+        "opts": ["tiredly", "more tiredly", "tired", "more tired"],
+        "optsVi": ["mệt mỏi (trạng từ)", "mệt mỏi hơn (trạng từ)", "mệt mỏi", "mệt mỏi hơn"],
+        "correct": 3,
+        "exp": "Động từ 'become' (trở nên) đi với tính từ. Dạng so sánh hơn của tính từ dài 'tired' là <b>more tired</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "Nearer the school is, the ______ it is for the students.",
+        "qVi": "Trường học càng gần, nó càng ______ cho học sinh.",
+        "key": ["Nearer", "the", "is"],
+        "opts": ["convenient", "conveniently", "more convenient", "more conveniently"],
+        "optsVi": ["thuận tiện", "một cách thuận tiện", "thuận tiện hơn", "thuận tiện hơn (trạng từ)"],
+        "correct": 2,
+        "exp": "Cấu trúc so sánh kép yêu cầu tính từ ở dạng so sánh hơn. Sau to be 'is' dùng tính từ dài -> <b>more convenient</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "I mostly get around by underground. It's ______ than the bus.",
+        "qVi": "Tôi chủ yếu đi lại bằng tàu điện ngầm. Nó ______ hơn so với xe buýt.",
+        "key": ["is", "than"],
+        "opts": ["reliable", "more reliable", "reliably", "more reliably"],
+        "optsVi": ["đáng tin cậy", "đáng tin cậy hơn", "đáng tin cậy (trạng từ)", "đáng tin cậy hơn (trạng từ)"],
+        "correct": 1,
+        "exp": "Dấu hiệu 'than' và động từ to be 'is' chỉ ra cần một tính từ so sánh hơn -> <b>more reliable</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "That bakery makes the ______ bread in our neighbourhood.",
+        "qVi": "Tiệm bánh đó làm ra loại bánh mì ______ trong khu phố của chúng tôi.",
+        "key": ["the", "in our neighbourhood"],
+        "opts": ["good", "better", "best", "well"],
+        "optsVi": ["tốt/ngon", "ngon hơn", "ngon nhất", "tốt (trạng từ)"],
+        "correct": 2,
+        "exp": "Có mạo từ 'the' và phạm vi 'in our neighbourhood' (trong khu phố) nên dùng so sánh nhất của 'good' là <b>best</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh nhất]"
+    },
+    {
+        "q": "The busier the city is, the ______ unhappy its people are.",
+        "qVi": "Thành phố càng bận rộn, người dân càng ______ không hạnh phúc.",
+        "key": ["The busier", "the"],
+        "opts": ["much", "most", "less", "more"],
+        "optsVi": ["nhiều", "nhất", "ít hơn", "nhiều hơn"],
+        "correct": 3,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn..., the + so sánh hơn...</b>. Tính từ 'unhappy' đi kèm với <b>more</b> để tạo so sánh hơn.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "She gets around the city ______ than me thanks to the apps on her phone.",
+        "qVi": "Cô ấy đi lại quanh thành phố ______ hơn tôi nhờ các ứng dụng trên điện thoại của mình.",
+        "key": ["gets around", "than"],
+        "opts": ["more easy", "more easily", "easier", "easily"],
+        "optsVi": ["dễ dàng hơn (sai ngữ pháp)", "một cách dễ dàng hơn", "dễ hơn (tính từ)", "một cách dễ dàng"],
+        "correct": 1,
+        "exp": "Bổ nghĩa cho động từ thường 'gets around' (đi lại) cần trạng từ. Dạng so sánh hơn của trạng từ 'easily' là <b>more easily</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Trạng từ / So sánh hơn]"
+    },
+    {
+        "q": "The ______ population the town has, the more difficult it is to find a job.",
+        "qVi": "Thị trấn có dân số càng ______, càng khó tìm việc làm.",
+        "key": ["The", "the more"],
+        "opts": ["large", "largely", "larger", "largest"],
+        "optsVi": ["lớn", "phần lớn", "lớn hơn", "lớn nhất"],
+        "correct": 2,
+        "exp": "Cấu trúc so sánh kép yêu cầu dạng so sánh hơn. Tính từ ngắn 'large' thêm 'r' thành <b>larger</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "My sister wondered where to buy the ______ cakes.",
+        "qVi": "Chị gái tôi tự hỏi mua bánh ngọt ______ ở đâu.",
+        "key": ["the", "cakes"],
+        "opts": ["well", "good", "better", "best"],
+        "optsVi": ["tốt (trạng từ)", "tốt/ngon", "ngon hơn", "ngon nhất"],
+        "correct": 3,
+        "exp": "Sau mạo từ 'the' dùng tính từ dạng so sánh nhất. Trạng thái ngon nhất của bánh là <b>best</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh nhất]"
+    },
+    {
+        "q": "All these things make Mia feel that her town is not as ______ as before.",
+        "qVi": "Tất cả những điều này khiến Mia cảm thấy rằng thị trấn của cô ấy không còn ______ như trước nữa.",
+        "key": ["is", "as", "as"],
+        "opts": ["safely", "safe", "safer", "safest"],
+        "optsVi": ["an toàn (trạng từ)", "an toàn", "an toàn hơn", "an toàn nhất"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh bằng <b>as + adj/adv + as</b>. Động từ to be 'is' yêu cầu một tính từ giữ nguyên thể -> <b>safe</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh bằng]"
+    },
+    {
+        "q": "The ______ the buildings are, the uglier the city becomes.",
+        "qVi": "Các tòa nhà càng ______, thành phố càng trở nên xấu xí.",
+        "key": ["The", "are", "the uglier"],
+        "opts": ["dense", "densely", "denser", "more densely"],
+        "optsVi": ["dày đặc", "một cách dày đặc", "dày đặc hơn", "một cách dày đặc hơn"],
+        "correct": 2,
+        "exp": "Vế so sánh kép cần tính từ (vì đi với to be 'are'). Tính từ 'dense' thêm 'r' thành so sánh hơn -> <b>denser</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "The ______ the library is, the more attractive it is to teenagers.",
+        "qVi": "Thư viện càng ______, nó càng hấp dẫn đối với thanh thiếu niên.",
+        "key": ["The", "is", "the more attractive"],
+        "opts": ["modern", "more modern", "modernly", "more modernly"],
+        "optsVi": ["hiện đại", "hiện đại hơn", "một cách hiện đại", "hiện đại hơn (trạng từ)"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn...</b>. 'modern' là tính từ dài nên dạng so sánh hơn là <b>more modern</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "Our new neighbourhood is ______ than the old one. There are fewer people.",
+        "qVi": "Khu phố mới của chúng tôi ______ hơn khu cũ. Có ít người hơn ở đó.",
+        "key": ["is", "than"],
+        "opts": ["quieter", "quiet", "quietly", "more quietly"],
+        "optsVi": ["yên tĩnh hơn", "yên tĩnh", "một cách yên tĩnh", "yên tĩnh hơn (trạng từ)"],
+        "correct": 0,
+        "exp": "Dấu hiệu 'than' và to be 'is' chỉ ra cần tính từ so sánh hơn. 'quiet' là tính từ ngắn -> <b>quieter</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "The ______ crowded the city is, the more polluted it becomes.",
+        "qVi": "Thành phố càng đông đúc, nó càng trở nên ô nhiễm.",
+        "key": ["The", "crowded", "the more polluted"],
+        "opts": ["more", "much", "most", "many"],
+        "optsVi": ["nhiều hơn", "nhiều", "nhất", "nhiều (đếm được)"],
+        "correct": 0,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn..., the + so sánh hơn...</b>. Tính từ dài 'crowded' cần đi với <b>more</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "I really love where I live now. It has the ______ facilities in the city.",
+        "qVi": "Tôi thực sự yêu nơi tôi sống bây giờ. Nó có các cơ sở vật chất ______ trong thành phố.",
+        "key": ["the", "in the city"],
+        "opts": ["good", "better", "best", "well"],
+        "optsVi": ["tốt", "tốt hơn", "tốt nhất", "tốt (trạng từ)"],
+        "correct": 2,
+        "exp": "Mạo từ 'the' và phạm vi 'in the city' chỉ ra cấu trúc so sánh nhất của tính từ 'good' -> <b>best</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh nhất]"
+    },
+    {
+        "q": "The ______ the town is, the less liveable it becomes.",
+        "qVi": "Thị trấn càng ______, nó càng trở nên kém đáng sống.",
+        "key": ["The", "the less liveable"],
+        "opts": ["crowded", "more crowded", "most crowded", "crowd"],
+        "optsVi": ["đông đúc", "đông đúc hơn", "đông đúc nhất", "đám đông"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh kép cần tính từ so sánh hơn. 'crowded' là tính từ dài -> <b>more crowded</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "Some cities are not safe. They have ______ crime rates than our small town.",
+        "qVi": "Một số thành phố không an toàn. Chúng có tỷ lệ tội phạm ______ hơn so với thị trấn nhỏ của chúng tôi.",
+        "key": ["than"],
+        "opts": ["high", "higher", "highly", "highest"],
+        "optsVi": ["cao", "cao hơn", "cao (trạng từ)", "cao nhất"],
+        "correct": 1,
+        "exp": "Dấu hiệu 'than' bắt buộc dùng tính từ dạng so sánh hơn. 'high' thêm 'er' -> <b>higher</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "Denby is the home of the ______ famous pottery collections.",
+        "qVi": "Denby là quê hương của những bộ sưu tập gốm sứ nổi tiếng ______.",
+        "key": ["the", "famous"],
+        "opts": ["more", "most", "much", "many"],
+        "optsVi": ["hơn", "nhất", "nhiều", "nhiều (đếm được)"],
+        "correct": 1,
+        "exp": "Có mạo từ 'the' cần dùng dạng so sánh nhất. Với tính từ dài 'famous' ta dùng <b>most</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh nhất]"
+    },
+    {
+        "q": "Tourists can find out about the history of pottery. It's ______ than reading a book.",
+        "qVi": "Khách du lịch có thể tìm hiểu về lịch sử làm gốm. Nó ______ hơn là đọc một cuốn sách.",
+        "key": ["is", "than"],
+        "opts": ["interesting", "interestingly", "more interesting", "more interestingly"],
+        "optsVi": ["thú vị", "một cách thú vị", "thú vị hơn", "một cách thú vị hơn"],
+        "correct": 2,
+        "exp": "Dấu hiệu 'than' và động từ to be 'is' chỉ ra cần một tính từ so sánh hơn -> <b>more interesting</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "The city centre is packed with ______ buildings than the suburbs.",
+        "qVi": "Trung tâm thành phố chật cứng các tòa nhà ______ hơn so với vùng ngoại ô.",
+        "key": ["than"],
+        "opts": ["high", "higher", "highly", "highest"],
+        "optsVi": ["cao", "cao hơn", "cao (trạng từ)", "cao nhất"],
+        "correct": 1,
+        "exp": "Dấu hiệu 'than' yêu cầu tính từ ở dạng so sánh hơn. 'high' là tính từ ngắn -> <b>higher</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh hơn]"
+    },
+    {
+        "q": "Traffic congestion is ______ in London than in my city.",
+        "qVi": "Tắc nghẽn giao thông ở London thì ______ hơn ở thành phố của tôi.",
+        "key": ["is", "than"],
+        "opts": ["terrible", "terribly", "more terrible", "more terribly"],
+        "optsVi": ["tồi tệ", "một cách tồi tệ", "tồi tệ hơn", "tồi tệ hơn (trạng từ)"],
+        "correct": 2,
+        "exp": "Dấu hiệu 'than' và to be 'is' yêu cầu tính từ so sánh hơn. Tính từ dài 'terrible' dùng <b>more terrible</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "New buildings make the city look ______ than before.",
+        "qVi": "Các tòa nhà mới làm cho thành phố trông ______ hơn trước.",
+        "key": ["look", "than"],
+        "opts": ["modernly", "more modernly", "modern", "more modern"],
+        "optsVi": ["một cách hiện đại", "hiện đại hơn (trạng từ)", "hiện đại", "hiện đại hơn"],
+        "correct": 3,
+        "exp": "Cấu trúc động từ giác quan <b>look + adj</b>. Có 'than' nên phải dùng tính từ so sánh hơn -> <b>more modern</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "He loves the nightlife of his city. He thinks that it is ______ than the day.",
+        "qVi": "Anh ấy yêu cuộc sống về đêm của thành phố mình. Anh ấy nghĩ rằng nó ______ hơn ban ngày.",
+        "key": ["is", "than"],
+        "opts": ["lively", "livelily", "more lively", "more livelily"],
+        "optsVi": ["sôi động", "một cách sôi động", "sôi động hơn", "sôi động hơn (trạng từ)"],
+        "correct": 2,
+        "exp": "Có 'than' và to be 'is' cần tính từ so sánh hơn. Tính từ 'lively' có thể dùng dạng so sánh hơn là <b>more lively</b> (hoặc livelier).<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "The ______ food people throw away, the more energy we can produce.",
+        "qVi": "Mọi người vứt đi ______ thức ăn, chúng ta càng có thể sản xuất nhiều năng lượng.",
+        "key": ["The", "food", "the more"],
+        "opts": ["much", "more", "most", "many"],
+        "optsVi": ["nhiều", "nhiều hơn", "nhất", "nhiều (đếm được)"],
+        "correct": 1,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn...</b>. 'food' là danh từ không đếm được nên dùng dạng so sánh hơn của 'much' là <b>more</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "In the past, there were not many people living in the town, so it was ______ than now.",
+        "qVi": "Trong quá khứ, không có nhiều người sống trong thị trấn, vì vậy nó ______ hơn bây giờ.",
+        "key": ["was", "than"],
+        "opts": ["peaceful", "peacefully", "more peaceful", "more peacefully"],
+        "optsVi": ["yên bình", "một cách yên bình", "yên bình hơn", "yên bình hơn (trạng từ)"],
+        "correct": 2,
+        "exp": "Có 'than' và động từ to be 'was' cần dùng tính từ ở dạng so sánh hơn -> <b>more peaceful</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    },
+    {
+        "q": "Tourists buy traditional handicrafts. Skilled local artisans make them ______ than factory workers.",
+        "qVi": "Khách du lịch mua đồ thủ công truyền thống. Những nghệ nhân lành nghề địa phương làm chúng ______ hơn so với công nhân nhà máy.",
+        "key": ["make", "than"],
+        "opts": ["beautiful", "beautifully", "more beautiful", "more beautifully"],
+        "optsVi": ["đẹp", "một cách đẹp đẽ", "đẹp hơn", "một cách đẹp đẽ hơn"],
+        "correct": 3,
+        "exp": "Bổ nghĩa cho động từ thường 'make' cần trạng từ. Dấu hiệu 'than' bắt buộc dùng trạng từ so sánh hơn -> <b>more beautifully</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Trạng từ / So sánh hơn]"
+    },
+    {
+        "q": "The ______ you go around the village, the more artisans you can see.",
+        "qVi": "Bạn càng đi ______ quanh ngôi làng, bạn càng có thể thấy nhiều nghệ nhân.",
+        "key": ["The", "the more"],
+        "opts": ["far", "farer", "further", "furthest"],
+        "optsVi": ["xa", "xa hơn (sai chính tả)", "xa hơn", "xa nhất"],
+        "correct": 2,
+        "exp": "Cấu trúc so sánh kép <b>The + so sánh hơn...</b>. Tính từ/trạng từ 'far' chuyển sang dạng so sánh hơn bất quy tắc là <b>further</b> (hoặc farther).<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - So sánh kép]"
+    },
+    {
+        "q": "He is hard-working. He does his job ______ than the others.",
+        "qVi": "Anh ấy rất chăm chỉ. Anh ấy làm công việc của mình ______ hơn những người khác.",
+        "key": ["does", "than"],
+        "opts": ["responsible", "responsibly", "more responsible", "more responsibly"],
+        "optsVi": ["có trách nhiệm", "một cách có trách nhiệm", "có trách nhiệm hơn", "có trách nhiệm hơn (trạng từ)"],
+        "correct": 3,
+        "exp": "Bổ nghĩa cho động từ thường 'does' cần một trạng từ. Có 'than' nên dùng trạng từ so sánh hơn -> <b>more responsibly</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Trạng từ / So sánh hơn]"
+    },
+    {
+        "q": "The garbage collector in our street does his job ______ than anyone else.",
+        "qVi": "Người thu gom rác trên đường của chúng tôi làm công việc của mình ______ hơn bất kỳ ai khác.",
+        "key": ["does", "than"],
+        "opts": ["good", "better", "best", "well"],
+        "optsVi": ["tốt", "tốt hơn", "tốt nhất", "tốt (trạng từ)"],
+        "correct": 1,
+        "exp": "Bổ nghĩa cho động từ thường 'does' cần trạng từ 'well'. Trạng từ so sánh hơn bất quy tắc của 'well' là <b>better</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Trạng từ / So sánh hơn]"
+    },
+    {
+        "q": "Com Lang Vong has a special fragrance. It smells ______ than other sticky rice.",
+        "qVi": "Cốm Làng Vòng có hương thơm đặc biệt. Nó có mùi ______ hơn so với các loại xôi khác.",
+        "key": ["smells", "than"],
+        "opts": ["good", "well", "better", "best"],
+        "optsVi": ["thơm/tốt", "tốt (trạng từ)", "thơm hơn/tốt hơn", "thơm nhất/tốt nhất"],
+        "correct": 2,
+        "exp": "Động từ giác quan 'smells' đi với tính từ 'good'. Có 'than' nên dùng tính từ dạng so sánh hơn là <b>better</b>.<br><b>Kiến thức trọng tâm:</b> [Ngữ pháp - Tính từ / So sánh hơn]"
+    }
+];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9001"; // Thay đổi mật khẩu tại đây
+        const LESSON_NAME = "Unit 1 Grammar"; // Đổi tên cho từng bài khác nhau
+        let currentUser = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser}`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key.join('; ')}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
+                if (!confirmSubmit) return;
+            }
+
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            let rank = "";
+            if(score >= 9) rank = "Xuất sắc (Excellent)";
+            else if(score >= 8) rank = "Giỏi (Good)";
+            else if(score >= 6.5) rank = "Khá (Fair)";
+            else if(score >= 5) rank = "Trung bình (Average)";
+            else rank = "Cần cố gắng thêm (Poor)";
+
+            let wrongAnswers = [];
+            for (let i = 0; i < totalCount; i++) {
+                const navNum = document.getElementById(`nav-${i}`);
+                if (!navNum.classList.contains('done-correct')) {
+                    wrongAnswers.push(i + 1);
+                }
+            }
+            const wrongListString = wrongAnswers.length > 0 ? wrongAnswers.join(', ') : "Không sai câu nào";
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjiTHdrvfoBKoacJ82YholKR2DfATpjp5Manr2Qu2O6-sh4PipGemq7rzrHnURMW6P/exec';
+            
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Đang gửi kết quả...";
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'name': currentUser,
+                    'lesson': LESSON_NAME,
+                    'correct': correctCount,
+                    'score': score,
+                    'wrong_list': wrongListString
+                })
+            }).then(() => {
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }).catch(error => {
+                console.error('Lỗi!', error);
+                alert('Đã lưu bài thi nhưng có lỗi mạng khi gửi kết quả.');
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, rank) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-rank').innerText = rank;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
