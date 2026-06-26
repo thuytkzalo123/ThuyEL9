@@ -8,7 +8,32 @@
     <style>
         :root { --bg: #FFF0F5; --primary: #FFB6C1; --correct: #B5EAD7; --incorrect: #FFDAC1; }
         body { margin: 0; font-family: 'Quicksand', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
-        
+        /* Sửa lỗi khung nhập liệu bị lệch */
+input[type="text"] {
+    width: 100%;
+    max-width: 400px; /* Giới hạn độ rộng để không bị lệch */
+    padding: 15px;
+    margin: 20px auto; /* auto giúp căn giữa */
+    display: block;    /* Quan trọng để block căn giữa hoạt động */
+    border: 2px solid #EEE;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    box-sizing: border-box; /* Đảm bảo padding không làm lệch khung */
+}
+
+/* Căn chỉnh lại phần phản hồi */
+#feedback {
+    margin-top: 20px;
+    padding: 15px;
+    text-align: justify; /* Căn lề hai bên */
+    text-justify: inter-word;
+    line-height: 1.6;
+    display: none;
+    border-top: 1px solid #eee;
+}
+
+.feedback p { margin: 5px 0; }
        /* Sidebar mặc định cho PC (luôn hiển thị) */
 #sidebar {
     width: 280px;
