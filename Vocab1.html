@@ -3,150 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Từ Vựng AI 🐻</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Flashcard AI - Học Từ Vựng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #FFF0F5; --primary: #FFB6C1; --correct: #B5EAD7; --incorrect: #FFDAC1; }
-        body { margin: 0; font-family: 'Quicksand', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
-        /* Sửa lỗi khung nhập liệu bị lệch */
-input[type="text"] {
-    width: 100%;
-    max-width: 400px; /* Giới hạn độ rộng để không bị lệch */
-    padding: 15px;
-    margin: 20px auto; /* auto giúp căn giữa */
-    display: block;    /* Quan trọng để block căn giữa hoạt động */
-    border: 2px solid #EEE;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 18px;
-    box-sizing: border-box; /* Đảm bảo padding không làm lệch khung */
-}
+        :root {
+            --mint-light: #e0f7fa;
+            --mint: #a8e6cf;
+            --mint-dark: #4db6ac;
+            --white: #ffffff;
+            --text-main: #37474f;
+            --text-light: #78909c;
+            --correct: #b4f8c8;
+            --incorrect: #ffb7b2;
+            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+            --radius: 24px;
+        }
 
-/* Căn chỉnh lại phần phản hồi */
-#feedback {
-    margin-top: 20px;
-    padding: 15px;
-    text-align: justify; /* Căn lề hai bên */
-    text-justify: inter-word;
-    line-height: 1.6;
-    display: none;
-    border-top: 1px solid #eee;
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
 
-.feedback p { margin: 5px 0; }
-       /* Sidebar mặc định cho PC (luôn hiển thị) */
-#sidebar {
-    width: 280px;
-    background: white;
-    border-right: 2px solid var(--primary);
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
-    transition: 0.3s;
-    position: relative; /* Thay đổi từ fixed sang relative để nó nằm trong dòng chảy trang web */
-}
+        body {
+            background-color: var(--mint-light);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-/* Chỉ ẩn Sidebar khi là màn hình nhỏ (Mobile) */
-@media (max-width: 768px) {
-    #sidebar {
-        position: fixed;
-        left: -280px;
-        height: 100%;
-    }
-    #sidebar.open {
-        left: 0;
-    }
-}
-        
-        /* Stats Header */
-        .stats-bar { padding: 15px; background: #fff; border-bottom: 1px solid #eee; font-size: 14px; color: #5D4037; }
-        .question-grid { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .q-btn { aspect-ratio: 1; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-weight: bold; background: white; }
-        .q-btn.active { border: 2px solid var(--primary); background: #FFF5F7; }
-        .q-btn.correct { background: var(--correct); }
-        .q-btn.incorrect { background: var(--incorrect); }
+        /* Nút Menu Mobile */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--white);
+            border: none;
+            font-size: 24px;
+            color: var(--mint-dark);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: var(--white);
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            z-index: 900;
+        }
+
+        .stats-bar {
+            background: var(--mint-light);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats-bar h3 { color: var(--mint-dark); margin-bottom: 10px; font-weight: 800;}
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-weight: 600; font-size: 14px;}
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+
+        .q-btn {
+            aspect-ratio: 1;
+            border: 2px solid var(--mint-light);
+            background: var(--white);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-main);
+        }
+
+        .q-btn:hover { border-color: var(--mint); transform: translateY(-2px); }
+        .q-btn.active { border-color: var(--mint-dark); box-shadow: 0 0 0 3px rgba(77, 182, 172, 0.2); }
+        .q-btn.correct { background: var(--correct); border-color: var(--correct); color: #1b5e20; }
+        .q-btn.incorrect { background: var(--incorrect); border-color: var(--incorrect); color: #b71c1c; }
+
+        .submit-btn {
+            margin-top: 20px;
+            background: var(--mint-dark);
+            color: var(--white);
+            border: none;
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(77, 182, 172, 0.3);
+            transition: 0.2s;
+        }
+        .submit-btn:hover { background: #3fa398; transform: translateY(-2px); }
 
         /* Main Content */
-        #main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .card { background: white; width: 100%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; }
-        input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; border-radius: 15px; text-align: center; font-size: 18px; }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .flashcard {
+            background: var(--white);
+            width: 100%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+        }
+
+        .word-display {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--mint-dark);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .answer-input {
+            width: 85%;
+            padding: 15px 20px;
+            border: 2px solid var(--mint-light);
+            border-radius: 16px;
+            font-size: 20px;
+            text-align: center; /* Căn giữa tuyệt đối text */
+            outline: none;
+            transition: 0.3s;
+            display: block;
+            margin: 0 auto; /* Căn giữa block */
+        }
+        
+        .answer-input:focus { border-color: var(--mint-dark); box-shadow: 0 0 0 4px rgba(77,182,172,0.1); }
+
+        .action-btns {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-check { background: var(--mint); color: #2c3e50; }
+        .btn-check:hover { background: #8cd6bc; }
+        .btn-next { background: var(--text-light); color: var(--white); display: none; }
+        .btn-next:hover { background: #607d8b; }
+
+        /* Feedback Area */
+        .feedback-area {
+            min-height: 120px;
+            background: #f9fbfc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none; /* Ẩn mặc định */
+        }
+
+        .result-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .result-title.correct { color: #2e7d32; }
+        .result-title.incorrect { color: #c62828; }
+        
+        .typo-fix { font-size: 14px; color: #ff9800; font-weight: 700; margin-bottom: 15px; }
+        
+        .synonyms {
+            font-size: 15px;
+            color: var(--text-main);
+            text-align: justify; /* Căn lề hai bên theo yêu cầu */
+            line-height: 1.6;
+            background: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--mint);
+        }
+
+        .loading { display: none; font-size: 14px; color: var(--mint-dark); font-weight: 600; margin-top: 15px;}
+        .loading i { animation: spin 1s linear infinite; margin-right: 8px;}
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Overlay cho mobile */
+        .overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); z-index: 800;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { position: fixed; left: -320px; }
+            .sidebar.open { left: 0; }
+            .overlay.active { display: block; }
+            .flashcard { padding: 30px 20px; }
+            .word-display { font-size: 36px; }
+            .answer-input { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-<div id="sidebar">
-    <div style="padding:20px; font-weight:bold; color:var(--primary); text-align:center;">Hành trình từ vựng 🌟</div>
-    <div class="stats-bar" id="stats">Đã làm: 0/59 | Đúng: 0 | Điểm: 0.0</div>
-    <div class="question-grid" id="grid"></div>
-    <button style="margin:15px; padding:15px; border:none; border-radius:15px; background:var(--primary); color:white; font-weight:bold;" onclick="showScore()">Nộp bài 💯</button>
-</div>
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
 
-<div id="main">
-    <button style="position:absolute; top:20px; left:20px; padding:10px; border:none; background:white; border-radius:8px;" onclick="toggleSidebar()">🍔</button>
-    <div class="card">
-        <div id="word-en" style="font-size:30px; font-weight:bold; color:#FF7B89;">...</div>
-        <input type="text" id="word-vi" placeholder="Nhập nghĩa..." autocomplete="off">
-        <button id="btn-check" style="padding:10px 25px; border-radius:10px; border:none; background:#C1E1C1;" onclick="checkAnswer()">Kiểm tra ✨</button>
-        <div id="feedback" style="margin-top:20px; display:none;"></div>
-    </div>
-</div>
-
-<script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxrEr9zPPRXLtTJX5wOu8YtaB9-QxCbex-Hxd8cmr8XWYi0byv2WNKvfKkUs55hoAc0xw/exec";
-    const words = ["local", "community", "move", "suburb", "neighbour", "facility", "shopping mall", "look for", "bus station", "remind somebody of something", "advice", "get on with someone", "police officer", "garbage collector", "electrician", "firefighter", "delivery person", "artisan", "speciality food", "break down", "take rubbish away", "lantern", "tourist attraction", "pottery", "bamboo bed", "artist", "swimming pool", "handicraft", "house-warming party", "decide", "go out", "pass down", "cut down on", "run out of", "look around", "come back", "find out", "take care of", "seagull", "suitcase", "pedestrian street", "favourite place", "preserve", "shorten", "fragrance", "original", "function", "worldwide", "symbolize", "traditional technique", "consumer", "importance", "hard-working", "responsible", "stop from", "paper fan", "famous for", "sort rubbish", "improve"];
-    
-    let data = words.map(en => ({ en, status: 'pending', feedback: '' }));
-    let cur = 0;
-
-    function updateUI() {
-        const done = data.filter(i => i.status !== 'pending').length;
-        const correct = data.filter(i => i.status === 'correct').length;
-        document.getElementById('stats').innerText = `Đã làm: ${done}/${data.length} | Đúng: ${correct} | Điểm: ${((correct/data.length)*10).toFixed(1)}`;
+    <aside class="sidebar" id="sidebar">
+        <div class="stats-bar">
+            <h3><i class="fas fa-chart-pie"></i> Tiến Độ</h3>
+            <div class="stats-grid">
+                <div>Đã làm: <span id="stat-done">0/5</span></div>
+                <div>Đúng: <span id="stat-correct">0</span></div>
+                <div style="grid-column: span 2; font-size: 18px; color: var(--mint-dark); margin-top: 5px;">
+                    Điểm: <span id="stat-score">0.0</span>/10
+                </div>
+            </div>
+        </div>
         
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        data.forEach((i, idx) => {
-            const btn = document.createElement('button');
-            btn.className = `q-btn ${i.status} ${idx === cur ? 'active' : ''}`;
-            btn.innerText = idx + 1;
-            btn.onclick = () => { cur = idx; updateUI(); showWord(); };
-            grid.appendChild(btn);
-        });
-    }
+        <div class="question-grid" id="question-grid">
+            </div>
 
-    function showWord() {
-        document.getElementById('word-en').innerText = data[cur].en;
-        document.getElementById('word-vi').value = '';
-        const fb = document.getElementById('feedback');
-        fb.style.display = data[cur].status === 'pending' ? 'none' : 'block';
-        fb.innerHTML = data[cur].feedback;
-        toggleSidebar(false);
-    }
+        <button class="submit-btn" onclick="submitTest()"><i class="fas fa-paper-plane"></i> Nộp Bài</button>
+        <div style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light); font-weight: 600;">
+            Trạng thái: <span id="connection-status" style="color: var(--mint-dark)">Sẵn sàng</span>
+        </div>
+    </aside>
 
-    async function checkAnswer() {
-        const input = document.getElementById('word-vi').value.trim();
-        const prompt = `Từ: "${data[cur].en}". HS dịch: "${input}". Trả JSON: {"isCorrect": boolean, "correctedWord": "string", "synonyms": ["..."]}`;
-        const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ prompt }) });
-        const json = await res.json();
-        const ai = JSON.parse(json.candidates[0].content.parts[0].text.replace(/```json|```/g, ''));
-        
-        data[cur].status = ai.isCorrect ? 'correct' : 'incorrect';
-        data[cur].feedback = `<strong>${ai.isCorrect ? 'ĐÚNG ✅' : 'SAI ❌'}</strong><br>Sửa lỗi: ${ai.correctedWord}<br>Nghĩa khác: ${ai.synonyms.join(', ')}`;
-        updateUI();
-        showWord();
-    }
+    <main class="main-content">
+        <div class="flashcard">
+            <div class="word-display" id="current-word">Word</div>
+            
+            <div class="input-wrapper">
+                <input type="text" id="answer-input" class="answer-input" placeholder="Nhập nghĩa tiếng Việt..." autocomplete="off" onkeypress="handleEnter(event)">
+            </div>
 
-    function toggleSidebar(force) {
-        const sb = document.getElementById('sidebar');
-        const ov = document.getElementById('overlay');
-        const isOpen = force !== undefined ? force : sb.classList.contains('open');
-        sb.classList.toggle('open', !isOpen);
-        ov.style.display = !isOpen ? 'block' : 'none';
-    }
+            <div class="action-btns">
+                <button class="btn btn-check" id="btn-check" onclick="checkAnswer()"><i class="fas fa-magic"></i> Kiểm tra</button>
+                <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">Câu tiếp <i class="fas fa-arrow-right"></i></button>
+            </div>
 
-    function showScore() { alert("Điểm của bạn: " + ((data.filter(i => i.status === 'correct').length/data.length)*10).toFixed(1)); }
-    window.onload = () => { updateUI(); showWord(); };
-</script>
+            <div class="loading" id="loading-indicator">
+                <i class="fas fa-spinner"></i> AI đang chấm bài...
+            </div>
+
+            <div class="feedback-area" id="feedback-area">
+                <div class="result-title" id="result-title"></div>
+                <div class="typo-fix" id="typo-fix"></div>
+                <div class="synonyms" id="synonyms-box">
+                    <strong>Nghĩa khác:</strong> <span id="synonyms-text"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- CẤU HÌNH API ---
+        const MIDDLEWARE_URL = "https://script.google.com/macros/s/AKfycbxrEr9zPPRXLtTJX5wOu8YtaB9-QxCbex-Hxd8cmr8XWYi0byv2WNKvfKkUs55hoAc0xw/exec"; // ĐIỀN URL MÁY CHỦ TRUNG GIAN CỦA BẠN VÀO ĐÂY
+
+        // Danh sách từ vựng mẫu
+        const vocabulary = [
+            { id: 1, en: "environment" },
+            { id: 2, en: "volunteer" },
+            { id: 3, en: "donate" },
+            { id: 4, en: "benefit" },
+            { id: 5, en: "recycle" }
+        ];
+
+        // Biến trạng thái
+        let currentIndex = 0;
+        let results = new Array(vocabulary.length).fill(null); // null, 'correct', 'incorrect'
+
+        // Khởi tạo UI
+        window.onload = () => {
+            renderGrid();
+            loadQuestion(0);
+            updateStats();
+        };
+
+        // --- GIAO DIỆN & TƯƠNG TÁC ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.overlay').classList.toggle('active');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+            vocabulary.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = `q-btn ${results[index] || ''} ${index === currentIndex ? 'active' : ''}`;
+                btn.innerText = index + 1;
+                btn.onclick = () => loadQuestion(index);
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            document.getElementById('current-word').innerText = vocabulary[index].en;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').focus();
+            
+            // Reset UI
+            document.getElementById('feedback-area').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-check').style.display = 'block';
+            document.getElementById('answer-input').disabled = false;
+            
+            renderGrid();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < vocabulary.length - 1) {
+                loadQuestion(currentIndex + 1);
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                if(document.getElementById('btn-check').style.display !== 'none') {
+                    checkAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        }
+
+        function updateStats() {
+            const done = results.filter(r => r !== null).length;
+            const correct = results.filter(r => r === 'correct').length;
+            const score = done === 0 ? 0 : ((correct / vocabulary.length) * 10).toFixed(1);
+
+            document.getElementById('stat-done').innerText = `${done}/${vocabulary.length}`;
+            document.getElementById('stat-correct').innerText = correct;
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        // --- GỌI API GEMINI ---
+        async function checkAnswer() {
+            const inputVal = document.getElementById('answer-input').value.trim();
+            if (!inputVal) return alert("Vui lòng nhập nghĩa của từ!");
+
+            const wordEn = vocabulary[currentIndex].en;
+            
+            // Cập nhật UI loading
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('loading-indicator').style.display = 'block';
+            document.getElementById('answer-input').disabled = true;
+            document.getElementById('connection-status').innerText = "Đang kết nối AI...";
+
+            // PROMPT tối ưu
+            const prompt = `Học sinh đang học từ vựng tiếng Anh.
+Từ tiếng Anh: "${wordEn}".
+Học sinh nhập nghĩa tiếng Việt là: "${inputVal}".
+Nhiệm vụ:
+1. Phát hiện và sửa lỗi chính tả/đánh máy tiếng Việt của học sinh nếu có.
+2. Kiểm tra xem nghĩa học sinh nhập (sau khi sửa lỗi) có ĐÚNG với từ gốc không.
+3. Cung cấp một vài nghĩa tiếng Việt phổ biến khác.
+Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, không dùng markdown \`\`\`json):
+{"isCorrect": true/false, "correctedWord": "từ đã sửa lỗi chính tả (để trống nếu không sai)", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
+
+            try {
+                if(!MIDDLEWARE_URL) throw new Error("Chưa cấu hình URL máy chủ trung gian.");
+
+                const response = await fetch(MIDDLEWARE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) throw new Error("Lỗi kết nối máy chủ.");
+
+                const rawData = await response.text();
+                // Lọc bỏ markdown block nếu AI cố tình trả về
+                const cleanData = rawData.replace(/```json/g, '').replace(/```/g, '').trim();
+                const aiResult = JSON.parse(cleanData);
+
+                showFeedback(aiResult);
+
+            } catch (error) {
+                console.error("Lỗi API:", error);
+                document.getElementById('connection-status').innerText = "Lỗi kết nối!";
+                document.getElementById('connection-status').style.color = "var(--incorrect)";
+                alert(`Lỗi: ${error.message}\nHệ thống không thể chấm câu này. Vui lòng thử lại sau.`);
+                
+                // Khôi phục UI
+                document.getElementById('btn-check').style.display = 'block';
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.getElementById('answer-input').disabled = false;
+            }
+        }
+
+        function showFeedback(data) {
+            document.getElementById('loading-indicator').style.display = 'none';
+            const feedbackArea = document.getElementById('feedback-area');
+            const titleBox = document.getElementById('result-title');
+            const typoBox = document.getElementById('typo-fix');
+            const synonymsBox = document.getElementById('synonyms-box');
+            
+            feedbackArea.style.display = 'block';
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('connection-status').innerText = "Đã chấm xong";
+            document.getElementById('connection-status').style.color = "var(--mint-dark)";
+
+            // Cập nhật trạng thái
+            results[currentIndex] = data.isCorrect ? 'correct' : 'incorrect';
+            updateStats();
+            renderGrid();
+
+            // Hiển thị Đúng/Sai
+            if (data.isCorrect) {
+                titleBox.className = 'result-title correct';
+                titleBox.innerHTML = '<i class="fas fa-check-circle"></i> CHÍNH XÁC!';
+            } else {
+                titleBox.className = 'result-title incorrect';
+                titleBox.innerHTML = '<i class="fas fa-times-circle"></i> CHƯA ĐÚNG!';
+            }
+
+            // Hiển thị sửa lỗi chính tả
+            if (data.correctedWord && data.correctedWord.toLowerCase() !== document.getElementById('answer-input').value.trim().toLowerCase()) {
+                typoBox.innerText = `* Sửa lỗi chính tả: ${data.correctedWord}`;
+                typoBox.style.display = 'block';
+            } else {
+                typoBox.style.display = 'none';
+            }
+
+            // Hiển thị nghĩa khác
+            if (data.synonyms && data.synonyms.length > 0) {
+                document.getElementById('synonyms-text').innerText = data.synonyms.join(', ');
+                synonymsBox.style.display = 'block';
+            } else {
+                synonymsBox.style.display = 'none';
+            }
+        }
+
+        function submitTest() {
+            const done = results.filter(r => r !== null).length;
+            if(done < vocabulary.length) {
+                const confirmSubmit = confirm(`Bạn mới làm ${done}/${vocabulary.length} câu. Bạn có chắc chắn muốn nộp bài không?`);
+                if(!confirmSubmit) return;
+            }
+            alert(`Chúc mừng! Điểm của bạn là: ${document.getElementById('stat-score').innerText}/10`);
+            // Có thể thêm code xử lý gửi điểm lên server ở đây
+        }
+    </script>
 </body>
 </html>
