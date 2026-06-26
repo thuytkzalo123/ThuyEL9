@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gia Sư Từ Vựng AI 🐻</title>
+    <!-- Nhúng font chữ Quicksand siêu dễ thương từ Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -256,17 +257,20 @@
 </head>
 <body>
 
+    <!-- SIDEBAR -->
     <div id="sidebar">
         <div class="sidebar-header">
             <h2>Hành trình từ vựng 🌟</h2>
         </div>
         <div class="question-grid" id="question-grid">
-            </div>
+            <!-- JS sẽ tự động tạo các nút 1->59 vào đây -->
+        </div>
         <div class="submit-section">
             <button class="btn-submit" onclick="showScore()">Nộp bài 💯</button>
         </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div id="main-content">
         <div class="top-bar">
             <button class="menu-toggle" onclick="toggleSidebar()">🍔 Mở menu</button>
@@ -288,6 +292,7 @@
         </div>
     </div>
 
+    <!-- MÀN HÌNH CHẤM ĐIỂM -->
     <div id="overlay">
         <div class="score-card">
             <h2>Kết quả của bạn 🎉</h2>
@@ -299,8 +304,8 @@
     </div>
 
 <script>
-    // Link máy chủ trung gian Apps Script của bạn
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfN6MqVgsL93OaXCJQWvg4rLSlYqdPaEi9e7mnfgt9gRr8-jbMyYcb31nldY_aE5nWXQ/exec";
+    // DÁN LINK GOOGLE APPS SCRIPT MỚI CỦA BẠN VÀO ĐÂY NHÉ:
+    const WEB_APP_URL = "DÁN_LINK_VÀO_ĐÂY";
 
     // Danh sách 59 từ vựng
     const rawWords = [
@@ -418,9 +423,20 @@
                 body: JSON.stringify({ prompt: promptText })
             });
 
-            if (!response.ok) throw new Error("Mạng lỗi");
+            if (!response.ok) throw new Error("Mạng lỗi, không thể kết nối đến máy chủ.");
 
             const data = await response.json();
+            
+            // ĐOẠN MÃ MỚI ĐỂ BẮT LỖI TỪ API GOOGLE
+            if (data.error) {
+                console.error("Lỗi từ Google API:", data.error.message);
+                throw new Error("Lỗi API: " + data.error.message);
+            }
+            
+            if (!data.candidates || data.candidates.length === 0) {
+                 throw new Error("Lỗi dữ liệu: Máy chủ không trả về kết quả.");
+            }
+
             let aiResponseText = data.candidates[0].content.parts[0].text;
             aiResponseText = aiResponseText.replace(/```json/g, "").replace(/```/g, "").trim();
             const aiResult = JSON.parse(aiResponseText);
@@ -448,7 +464,7 @@
 
         } catch (error) {
             console.error(error);
-            feedbackEl.innerHTML = "❌ Úi, lỗi kết nối tới AI rồi. Thử lại nhé!";
+            feedbackEl.innerHTML = `❌ Úi, có lỗi rồi: ${error.message}`;
             feedbackEl.className = "feedback-box show incorrect";
             checkBtn.disabled = false;
             document.getElementById("word-vi").disabled = false;
