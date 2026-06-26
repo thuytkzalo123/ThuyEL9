@@ -78,24 +78,34 @@
         fb.className = `feedback ${appData[currentIndex].status === 'correct' ? 'correct' : 'incorrect'}`;
     }
 
-    async function checkAnswer() {
-        const input = document.getElementById("word-vi").value.trim();
-        if (!input) return;
-        appData[currentIndex].userAnswer = input;
+async function checkAnswer() {
+        const userInput = document.getElementById("word-vi").value.trim();
+        if (!userInput) return;
+        appData[currentIndex].userAnswer = userInput;
         document.getElementById("btn-check").disabled = true;
 
-        const promptText = `Dịch "${appData[currentIndex].en}" sang tiếng Việt là "${input}". Trả JSON: {"isCorrect": boolean, "explanation": "string"}`;
+        const promptText = `Dịch "${appData[currentIndex].en}" sang tiếng Việt là "${userInput}". Trả JSON: {"isCorrect": boolean, "explanation": "string"}`;
 
         try {
             const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ prompt: promptText }) });
             const data = await res.json();
-            const ai = JSON.parse(data.candidates[0].content.parts[0].text);
             
-            appData[currentIndex].status = ai.isCorrect ? 'correct' : 'incorrect';
-            appData[currentIndex].feedbackHtml = ai.explanation;
-            renderGrid();
-            selectQuestion();
-        } catch (e) { alert("Lỗi kết nối: " + e.message); }
+            // BẪY LỖI MỚI: In ra Console nếu cấu trúc bị lạ
+            console.log("Dữ liệu nhận được từ máy chủ:", data);
+            
+            if (data.candidates && data.candidates[0].content) {
+                const ai = JSON.parse(data.candidates[0].content.parts[0].text);
+                appData[currentIndex].status = ai.isCorrect ? 'correct' : 'incorrect';
+                appData[currentIndex].feedbackHtml = ai.explanation;
+                renderGrid();
+                selectQuestion();
+            } else {
+                throw new Error("Cấu trúc phản hồi không hợp lệ: " + JSON.stringify(data));
+            }
+        } catch (e) { 
+            console.error(e);
+            alert("Lỗi kết nối: " + e.message); 
+        }
         document.getElementById("btn-check").disabled = false;
     }
 
