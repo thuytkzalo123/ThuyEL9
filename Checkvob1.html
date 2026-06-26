@@ -84,13 +84,13 @@ async function checkAnswer() {
         appData[currentIndex].userAnswer = userInput;
         document.getElementById("btn-check").disabled = true;
 
-        // Prompt được tối ưu: Yêu cầu sửa lỗi chính tả trước khi đánh giá
+        // Prompt đã được tinh chỉnh: Loại bỏ yêu cầu giải thích
         const promptText = `Từ tiếng Anh: "${appData[currentIndex].en}". 
         Học sinh dịch là: "${userInput}".
-        1. Hãy tự động sửa các lỗi chính tả hoặc lỗi đánh máy (nếu có) trong câu trả lời của học sinh.
-        2. Dựa vào từ đã sửa, đánh giá xem nghĩa đó ĐÚNG hay SAI.
-        3. Cung cấp 2-3 nghĩa khác của từ đó.
-        Trả về đúng định dạng JSON: {"isCorrect": boolean, "correctedWord": "string", "explanation": "string", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
+        1. Tự sửa lỗi chính tả (nếu có).
+        2. Đánh giá ĐÚNG/SAI.
+        3. Cung cấp 2-3 nghĩa khác (từ đồng nghĩa).
+        TRẢ VỀ JSON: {"isCorrect": boolean, "correctedWord": "string", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
 
         try {
             const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ prompt: promptText }) });
@@ -101,18 +101,19 @@ async function checkAnswer() {
             
             appData[currentIndex].status = ai.isCorrect ? 'correct' : 'incorrect';
             
-            // Hiển thị kết quả: Sửa lỗi (nếu có) + Đúng/Sai + Nghĩa khác
+            // Xây dựng feedback không có phần giải thích
             let correctionMsg = (ai.correctedWord.toLowerCase() !== userInput.toLowerCase()) 
-                ? `<br><small><i>(Bạn có lỗi chính tả, hệ thống đã sửa thành: <strong>${ai.correctedWord}</strong>)</i></small>` 
+                ? `<br><small><i>(Sửa lỗi: <strong>${ai.correctedWord}</strong>)</i></small>` 
                 : "";
                 
-            let feedback = `<strong>Kết quả: ${ai.isCorrect ? 'ĐÚNG ✅' : 'SAI ❌'}</strong>${correctionMsg}<br><br>${ai.explanation}<br><br><strong>Nghĩa khác:</strong> ${ai.synonyms.join(", ")}`;
+            let feedback = `<strong>Kết quả: ${ai.isCorrect ? 'ĐÚNG ✅' : 'SAI ❌'}</strong>${correctionMsg}<br><br>
+                            <strong>Nghĩa khác:</strong> ${ai.synonyms.join(", ")}`;
             
             appData[currentIndex].feedbackHtml = feedback;
             
             renderGrid();
             selectQuestion();
-        } catch (e) { alert("Lỗi kết nối AI: " + e.message); }
+        } catch (e) { alert("Lỗi kết nối: " + e.message); }
         document.getElementById("btn-check").disabled = false;
     }
 
