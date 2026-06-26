@@ -84,28 +84,35 @@ async function checkAnswer() {
         appData[currentIndex].userAnswer = userInput;
         document.getElementById("btn-check").disabled = true;
 
-        const promptText = `Dịch "${appData[currentIndex].en}" sang tiếng Việt là "${userInput}". Trả JSON: {"isCorrect": boolean, "explanation": "string"}`;
+        // Prompt được tối ưu: Yêu cầu sửa lỗi chính tả trước khi đánh giá
+        const promptText = `Từ tiếng Anh: "${appData[currentIndex].en}". 
+        Học sinh dịch là: "${userInput}".
+        1. Hãy tự động sửa các lỗi chính tả hoặc lỗi đánh máy (nếu có) trong câu trả lời của học sinh.
+        2. Dựa vào từ đã sửa, đánh giá xem nghĩa đó ĐÚNG hay SAI.
+        3. Cung cấp 2-3 nghĩa khác của từ đó.
+        Trả về đúng định dạng JSON: {"isCorrect": boolean, "correctedWord": "string", "explanation": "string", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
 
         try {
             const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ prompt: promptText }) });
             const data = await res.json();
             
-            // BẪY LỖI MỚI: In ra Console nếu cấu trúc bị lạ
-            console.log("Dữ liệu nhận được từ máy chủ:", data);
+            const aiText = data.candidates[0].content.parts[0].text.replace(/```json/g, "").replace(/```/g, "").trim();
+            const ai = JSON.parse(aiText);
             
-            if (data.candidates && data.candidates[0].content) {
-                const ai = JSON.parse(data.candidates[0].content.parts[0].text);
-                appData[currentIndex].status = ai.isCorrect ? 'correct' : 'incorrect';
-                appData[currentIndex].feedbackHtml = ai.explanation;
-                renderGrid();
-                selectQuestion();
-            } else {
-                throw new Error("Cấu trúc phản hồi không hợp lệ: " + JSON.stringify(data));
-            }
-        } catch (e) { 
-            console.error(e);
-            alert("Lỗi kết nối: " + e.message); 
-        }
+            appData[currentIndex].status = ai.isCorrect ? 'correct' : 'incorrect';
+            
+            // Hiển thị kết quả: Sửa lỗi (nếu có) + Đúng/Sai + Nghĩa khác
+            let correctionMsg = (ai.correctedWord.toLowerCase() !== userInput.toLowerCase()) 
+                ? `<br><small><i>(Bạn có lỗi chính tả, hệ thống đã sửa thành: <strong>${ai.correctedWord}</strong>)</i></small>` 
+                : "";
+                
+            let feedback = `<strong>Kết quả: ${ai.isCorrect ? 'ĐÚNG ✅' : 'SAI ❌'}</strong>${correctionMsg}<br><br>${ai.explanation}<br><br><strong>Nghĩa khác:</strong> ${ai.synonyms.join(", ")}`;
+            
+            appData[currentIndex].feedbackHtml = feedback;
+            
+            renderGrid();
+            selectQuestion();
+        } catch (e) { alert("Lỗi kết nối AI: " + e.message); }
         document.getElementById("btn-check").disabled = false;
     }
 
