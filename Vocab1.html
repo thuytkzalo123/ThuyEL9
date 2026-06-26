@@ -401,7 +401,7 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
 
                 const response = await fetch(MIDDLEWARE_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ prompt: prompt })
                 });
 
