@@ -72,24 +72,23 @@
         .stats-bar h3 { color: var(--mint-dark); margin-bottom: 10px; font-weight: 800;}
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-weight: 600; font-size: 14px;}
 
-        /* Lưới câu hỏi đã được sửa lỗi kéo giãn */
+        /* Lưới câu hỏi */
         .question-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 cột cho danh sách dài */
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
             overflow-y: auto;
             flex-grow: 1;
             padding-right: 5px;
-            align-content: flex-start; /* FIX: Ngăn các nút tự động giãn dọc */
+            align-content: flex-start;
         }
 
-        /* Tùy chỉnh thanh cuộn cho lưới câu hỏi */
         .question-grid::-webkit-scrollbar { width: 6px; }
         .question-grid::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .question-grid::-webkit-scrollbar-thumb { background: var(--mint); border-radius: 10px; }
 
         .q-btn {
-            height: 40px; /* FIX: Chiều cao cố định thay vì aspect-ratio */
+            height: 40px;
             border: 2px solid var(--mint-light);
             background: var(--white);
             border-radius: 8px;
@@ -308,7 +307,7 @@
         // --- CẤU HÌNH API ---
         const MIDDLEWARE_URL = "https://script.google.com/macros/s/AKfycbzkEEQ06uZuy2KowpwlkF8J6QeoTBi7JVx4x4DkzMoTEoe74Bl4R4KOFBV-rRrP58Dlig/exec";
 
-        // Danh sách từ vựng cập nhật (59 từ)
+        // Danh sách 59 từ vựng
         const vocabulary = [
             { id: 1, en: "local" }, { id: 2, en: "community" }, { id: 3, en: "move" },
             { id: 4, en: "suburb" }, { id: 5, en: "neighbour" }, { id: 6, en: "facility" },
@@ -422,22 +421,24 @@
             document.getElementById('answer-input').disabled = true;
             document.getElementById('connection-status').innerText = "Đang kết nối AI...";
 
-            const prompt = `Học sinh đang học từ vựng tiếng Anh.
-Từ tiếng Anh: "${wordEn}".
-Học sinh nhập nghĩa tiếng Việt là: "${inputVal}".
-Nhiệm vụ:
-1. Phát hiện và sửa lỗi chính tả tiếng Việt của học sinh nếu có.
-2. Kiểm tra xem nghĩa học sinh nhập có ĐÚNG với từ gốc không.
-3. Cung cấp một vài nghĩa tiếng Việt phổ biến khác.
-Chỉ trả về định dạng JSON (không dùng markdown):
-{"isCorrect": true/false, "correctedWord": "từ đã sửa", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
+            // PROMPT ĐÃ ĐƯỢC CẬP NHẬT
+            const prompt = `Đóng vai một giáo viên chấm điểm từ vựng tiếng Anh bao dung và linh hoạt.
+Từ tiếng Anh gốc: "${wordEn}"
+Nghĩa tiếng Việt học sinh nhập: "${inputVal}"
+
+Quy tắc chấm điểm:
+1. Xử lý lỗi đánh máy (Typo): Nếu học sinh gõ sai dấu, sai vần nhẹ hoặc thiếu ký tự (VD: "hanh phuc" -> "hạnh phúc", "công đong" -> "cộng đồng"), hãy nhận diện ý đồ và sửa lại cho đúng chính tả tiếng Việt.
+2. Đánh giá nghĩa (Linh hoạt & Rộng mở): Đánh giá là ĐÚNG (true) nếu từ học sinh nhập mang nghĩa tương đương, đồng nghĩa, gần nghĩa, hoặc là một cách diễn đạt hợp lý có thể thay thế cho từ gốc (VD: "happy" = "vui vẻ", "hạnh phúc", "vui sướng"). CHỈ đánh giá SAI (false) khi từ hoàn toàn không liên quan hoặc sai bản chất.
+3. Mở rộng: Cung cấp 2-3 nghĩa tiếng Việt phổ biến khác của từ gốc để học sinh tham khảo thêm.
+
+CHỈ trả về kết quả dưới định dạng JSON nguyên bản, không dùng markdown (\`\`\`json), không giải thích gì thêm:
+{"isCorrect": true/false, "correctedWord": "từ đã sửa lỗi chính tả (để trống nếu học sinh gõ đúng)", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
 
             try {
                 if(!MIDDLEWARE_URL) throw new Error("Chưa cấu hình URL máy chủ trung gian.");
 
                 const response = await fetch(MIDDLEWARE_URL, {
                     method: 'POST',
-                    // SỬ DỤNG text/plain ĐỂ KHẮC PHỤC LỖI CORS CỦA GOOGLE APPS SCRIPT
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ prompt: prompt })
                 });
