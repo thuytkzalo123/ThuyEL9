@@ -50,7 +50,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 300px;
+            width: 320px;
             background: var(--white);
             height: 100%;
             padding: 20px;
@@ -72,25 +72,35 @@
         .stats-bar h3 { color: var(--mint-dark); margin-bottom: 10px; font-weight: 800;}
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-weight: 600; font-size: 14px;}
 
+        /* Lưới câu hỏi đã được sửa lỗi kéo giãn */
         .question-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(5, 1fr); /* 5 cột cho danh sách dài */
+            gap: 8px;
             overflow-y: auto;
             flex-grow: 1;
             padding-right: 5px;
+            align-content: flex-start; /* FIX: Ngăn các nút tự động giãn dọc */
         }
 
+        /* Tùy chỉnh thanh cuộn cho lưới câu hỏi */
+        .question-grid::-webkit-scrollbar { width: 6px; }
+        .question-grid::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .question-grid::-webkit-scrollbar-thumb { background: var(--mint); border-radius: 10px; }
+
         .q-btn {
-            aspect-ratio: 1;
+            height: 40px; /* FIX: Chiều cao cố định thay vì aspect-ratio */
             border: 2px solid var(--mint-light);
             background: var(--white);
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
             color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .q-btn:hover { border-color: var(--mint); transform: translateY(-2px); }
@@ -110,6 +120,7 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(77, 182, 172, 0.3);
             transition: 0.2s;
+            flex-shrink: 0;
         }
         .submit-btn:hover { background: #3fa398; transform: translateY(-2px); }
 
@@ -126,7 +137,7 @@
         .flashcard {
             background: var(--white);
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             border-radius: var(--radius);
             padding: 40px;
             box-shadow: var(--shadow);
@@ -135,11 +146,12 @@
         }
 
         .word-display {
-            font-size: 42px;
+            font-size: 38px;
             font-weight: 800;
             color: var(--mint-dark);
             margin-bottom: 30px;
             letter-spacing: 1px;
+            word-wrap: break-word;
         }
 
         .input-wrapper {
@@ -155,11 +167,11 @@
             border: 2px solid var(--mint-light);
             border-radius: 16px;
             font-size: 20px;
-            text-align: center; /* Căn giữa tuyệt đối text */
+            text-align: center;
             outline: none;
             transition: 0.3s;
             display: block;
-            margin: 0 auto; /* Căn giữa block */
+            margin: 0 auto;
         }
         
         .answer-input:focus { border-color: var(--mint-dark); box-shadow: 0 0 0 4px rgba(77,182,172,0.1); }
@@ -193,7 +205,7 @@
             border-radius: 16px;
             padding: 20px;
             margin-top: 20px;
-            display: none; /* Ẩn mặc định */
+            display: none;
         }
 
         .result-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -205,7 +217,7 @@
         .synonyms {
             font-size: 15px;
             color: var(--text-main);
-            text-align: justify; /* Căn lề hai bên theo yêu cầu */
+            text-align: justify;
             line-height: 1.6;
             background: var(--white);
             padding: 12px;
@@ -231,7 +243,7 @@
             .sidebar.open { left: 0; }
             .overlay.active { display: block; }
             .flashcard { padding: 30px 20px; }
-            .word-display { font-size: 36px; }
+            .word-display { font-size: 32px; }
             .answer-input { width: 100%; }
         }
     </style>
@@ -241,11 +253,12 @@
     <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="stats-bar">
             <h3><i class="fas fa-chart-pie"></i> Tiến Độ</h3>
             <div class="stats-grid">
-                <div>Đã làm: <span id="stat-done">0/5</span></div>
+                <div>Đã làm: <span id="stat-done">0/0</span></div>
                 <div>Đúng: <span id="stat-correct">0</span></div>
                 <div style="grid-column: span 2; font-size: 18px; color: var(--mint-dark); margin-top: 5px;">
                     Điểm: <span id="stat-score">0.0</span>/10
@@ -254,7 +267,8 @@
         </div>
         
         <div class="question-grid" id="question-grid">
-            </div>
+            <!-- Nút câu hỏi được tạo bằng JS -->
+        </div>
 
         <button class="submit-btn" onclick="submitTest()"><i class="fas fa-paper-plane"></i> Nộp Bài</button>
         <div style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light); font-weight: 600;">
@@ -262,6 +276,7 @@
         </div>
     </aside>
 
+    <!-- Main Content -->
     <main class="main-content">
         <div class="flashcard">
             <div class="word-display" id="current-word">Word</div>
@@ -291,20 +306,43 @@
 
     <script>
         // --- CẤU HÌNH API ---
-        const MIDDLEWARE_URL = "https://script.google.com/macros/s/AKfycbzkEEQ06uZuy2KowpwlkF8J6QeoTBi7JVx4x4DkzMoTEoe74Bl4R4KOFBV-rRrP58Dlig/exec"; // ĐIỀN URL MÁY CHỦ TRUNG GIAN CỦA BẠN VÀO ĐÂY
+        const MIDDLEWARE_URL = "https://script.google.com/macros/s/AKfycbzkEEQ06uZuy2KowpwlkF8J6QeoTBi7JVx4x4DkzMoTEoe74Bl4R4KOFBV-rRrP58Dlig/exec";
 
-        // Danh sách từ vựng mẫu
+        // Danh sách từ vựng cập nhật (59 từ)
         const vocabulary = [
-            { id: 1, en: "environment" },
-            { id: 2, en: "volunteer" },
-            { id: 3, en: "donate" },
-            { id: 4, en: "benefit" },
-            { id: 5, en: "recycle" }
+            { id: 1, en: "local" }, { id: 2, en: "community" }, { id: 3, en: "move" },
+            { id: 4, en: "suburb" }, { id: 5, en: "neighbour" }, { id: 6, en: "facility" },
+            { id: 7, en: "shopping mall" }, { id: 8, en: "look for" }, { id: 9, en: "bus station" },
+            { id: 10, en: "remind somebody of something" }, { id: 11, en: "advice" },
+            { id: 12, en: "get on with someone" }, { id: 13, en: "police officer" },
+            { id: 14, en: "garbage collector" }, { id: 15, en: "electrician" },
+            { id: 16, en: "firefighter" }, { id: 17, en: "delivery person" },
+            { id: 18, en: "artisan" }, { id: 19, en: "speciality food" },
+            { id: 20, en: "break down" }, { id: 21, en: "take rubbish away" },
+            { id: 22, en: "lantern" }, { id: 23, en: "tourist attraction" },
+            { id: 24, en: "pottery" }, { id: 25, en: "bamboo bed" },
+            { id: 26, en: "artist" }, { id: 27, en: "swimming pool" },
+            { id: 28, en: "handicraft" }, { id: 29, en: "house-warming party" },
+            { id: 30, en: "decide" }, { id: 31, en: "go out" },
+            { id: 32, en: "pass down" }, { id: 33, en: "cut down on" },
+            { id: 34, en: "run out of" }, { id: 35, en: "look around" },
+            { id: 36, en: "come back" }, { id: 37, en: "find out" },
+            { id: 38, en: "take care of" }, { id: 39, en: "seagull" },
+            { id: 40, en: "suitcase" }, { id: 41, en: "pedestrian street" },
+            { id: 42, en: "favourite place" }, { id: 43, en: "preserve" },
+            { id: 44, en: "shorten" }, { id: 45, en: "fragrance" },
+            { id: 46, en: "original" }, { id: 47, en: "function" },
+            { id: 48, en: "worldwide" }, { id: 49, en: "symbolize" },
+            { id: 50, en: "traditional technique" }, { id: 51, en: "consumer" },
+            { id: 52, en: "importance" }, { id: 53, en: "hard-working" },
+            { id: 54, en: "responsible" }, { id: 55, en: "stop from" },
+            { id: 56, en: "paper fan" }, { id: 57, en: "famous for" },
+            { id: 58, en: "sort rubbish" }, { id: 59, en: "improve" }
         ];
 
         // Biến trạng thái
         let currentIndex = 0;
-        let results = new Array(vocabulary.length).fill(null); // null, 'correct', 'incorrect'
+        let results = new Array(vocabulary.length).fill(null);
 
         // Khởi tạo UI
         window.onload = () => {
@@ -379,28 +417,27 @@
 
             const wordEn = vocabulary[currentIndex].en;
             
-            // Cập nhật UI loading
             document.getElementById('btn-check').style.display = 'none';
             document.getElementById('loading-indicator').style.display = 'block';
             document.getElementById('answer-input').disabled = true;
             document.getElementById('connection-status').innerText = "Đang kết nối AI...";
 
-            // PROMPT tối ưu
             const prompt = `Học sinh đang học từ vựng tiếng Anh.
 Từ tiếng Anh: "${wordEn}".
 Học sinh nhập nghĩa tiếng Việt là: "${inputVal}".
 Nhiệm vụ:
-1. Phát hiện và sửa lỗi chính tả/đánh máy tiếng Việt của học sinh nếu có.
-2. Kiểm tra xem nghĩa học sinh nhập (sau khi sửa lỗi) có ĐÚNG với từ gốc không.
+1. Phát hiện và sửa lỗi chính tả tiếng Việt của học sinh nếu có.
+2. Kiểm tra xem nghĩa học sinh nhập có ĐÚNG với từ gốc không.
 3. Cung cấp một vài nghĩa tiếng Việt phổ biến khác.
-Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, không dùng markdown \`\`\`json):
-{"isCorrect": true/false, "correctedWord": "từ đã sửa lỗi chính tả (để trống nếu không sai)", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
+Chỉ trả về định dạng JSON (không dùng markdown):
+{"isCorrect": true/false, "correctedWord": "từ đã sửa", "synonyms": ["nghĩa 1", "nghĩa 2"]}`;
 
             try {
                 if(!MIDDLEWARE_URL) throw new Error("Chưa cấu hình URL máy chủ trung gian.");
 
                 const response = await fetch(MIDDLEWARE_URL, {
                     method: 'POST',
+                    // SỬ DỤNG text/plain ĐỂ KHẮC PHỤC LỖI CORS CỦA GOOGLE APPS SCRIPT
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ prompt: prompt })
                 });
@@ -408,7 +445,6 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
                 if (!response.ok) throw new Error("Lỗi kết nối máy chủ.");
 
                 const rawData = await response.text();
-                // Lọc bỏ markdown block nếu AI cố tình trả về
                 const cleanData = rawData.replace(/```json/g, '').replace(/```/g, '').trim();
                 const aiResult = JSON.parse(cleanData);
 
@@ -420,7 +456,6 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
                 document.getElementById('connection-status').style.color = "var(--incorrect)";
                 alert(`Lỗi: ${error.message}\nHệ thống không thể chấm câu này. Vui lòng thử lại sau.`);
                 
-                // Khôi phục UI
                 document.getElementById('btn-check').style.display = 'block';
                 document.getElementById('loading-indicator').style.display = 'none';
                 document.getElementById('answer-input').disabled = false;
@@ -439,12 +474,10 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
             document.getElementById('connection-status').innerText = "Đã chấm xong";
             document.getElementById('connection-status').style.color = "var(--mint-dark)";
 
-            // Cập nhật trạng thái
             results[currentIndex] = data.isCorrect ? 'correct' : 'incorrect';
             updateStats();
             renderGrid();
 
-            // Hiển thị Đúng/Sai
             if (data.isCorrect) {
                 titleBox.className = 'result-title correct';
                 titleBox.innerHTML = '<i class="fas fa-check-circle"></i> CHÍNH XÁC!';
@@ -453,7 +486,6 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
                 titleBox.innerHTML = '<i class="fas fa-times-circle"></i> CHƯA ĐÚNG!';
             }
 
-            // Hiển thị sửa lỗi chính tả
             if (data.correctedWord && data.correctedWord.toLowerCase() !== document.getElementById('answer-input').value.trim().toLowerCase()) {
                 typoBox.innerText = `* Sửa lỗi chính tả: ${data.correctedWord}`;
                 typoBox.style.display = 'block';
@@ -461,7 +493,6 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
                 typoBox.style.display = 'none';
             }
 
-            // Hiển thị nghĩa khác
             if (data.synonyms && data.synonyms.length > 0) {
                 document.getElementById('synonyms-text').innerText = data.synonyms.join(', ');
                 synonymsBox.style.display = 'block';
@@ -477,7 +508,6 @@ Chỉ trả về ĐÚNG định dạng JSON sau (không kèm text nào khác, kh
                 if(!confirmSubmit) return;
             }
             alert(`Chúc mừng! Điểm của bạn là: ${document.getElementById('stat-score').innerText}/10`);
-            // Có thể thêm code xử lý gửi điểm lên server ở đây
         }
     </script>
 </body>
