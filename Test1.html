@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Bảng Đáp Án - Thêm Mã Đề</title>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --active-blue: #2563eb;
+            --light-bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-muted: #4b5563;
+            --green-btn: #4caf50;
+            --red-trash: #ef4444;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Thiết kế Responsive tối ưu cho điện thoại */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 80px; /* Chừa khoảng trống cho thanh điều hướng dưới đáy */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (min-width: 451px) {
+            body {
+                padding: 20px 10px;
+            }
+            .app-container {
+                min-height: 850px;
+                border-radius: 16px;
+            }
+        }
+
+        /* Top Header giống ảnh */
+        .top-bar {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .top-bar .icon-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        .top-bar .right-icons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .vietnam-flag {
+            width: 24px;
+            height: 16px;
+            background-color: #da251d;
+            position: relative;
+            display: inline-block;
+            border-radius: 2px;
+        }
+        .vietnam-flag::after {
+            content: "★";
+            color: #ffff00;
+            font-size: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Ẩn hoàn toàn hộp cấu hình để học sinh không nhìn thấy link */
+        .gas-config-box {
+            display: none;
+        }
+
+        /* Form nhập liệu chính */
+        .form-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .input-row label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            min-width: 90px;
+        }
+        .input-row input {
+            flex: 1;
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            background: #ffffff;
+        }
+        .input-row input:focus {
+            border-color: var(--active-blue);
+        }
+
+        .trash-btn {
+            background: none;
+            border: none;
+            color: var(--red-trash);
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #fee2e2;
+            background-color: #fff5f5;
+            border-radius: 6px;
+        }
+
+        /* Bảng danh sách chọn đáp án tròn */
+        .answer-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .answer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .answer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 2px 0;
+        }
+        .q-number {
+            font-size: 14px;
+            color: var(--text-muted);
+            width: 24px;
+        }
+        .bubble-group {
+            display: flex;
+            gap: 14px;
+            flex: 1;
+            justify-content: center;
+        }
+        .bubble {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+        }
+        
+        /* Màu xanh dương đậm chuẩn như ảnh khi được chọn */
+        .bubble.selected {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+        }
+
+        .row-trash {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 6px;
+        }
+        .row-trash:hover {
+            color: var(--red-trash);
+        }
+
+        /* Nút thêm mã đề màu xanh lá cây */
+        .add-code-btn {
+            background-color: #64dd17;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(100, 221, 23, 0.2);
+        }
+
+        /* Khung Action Buttons dưới đáy (Hủy / Lưu) */
+        .action-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+            margin-top: auto;
+        }
+        .btn {
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            min-width: 85px;
+        }
+        .btn-cancel {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-save {
+            background-color: #1d4ed8;
+            color: white;
+        }
+
+        /* Vùng hiển thị nhận xét AI sau khi nhấn Lưu thành công */
+        .ai-result-box {
+            display: none;
+            background-color: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            white-space: pre-line;
+        }
+
+        /* Bottom Navigation Bar chuẩn thiết kế di động dưới cùng */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #1e3a8a;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="top-bar">
+        <button class="icon-btn">❮</button>
+        <div class="right-icons">
+            <span class="vietnam-flag"></span>
+            <span style="font-size: 18px; cursor: pointer;">🔔</span>
+            <span style="width: 24px; height: 24px; background: #cbd5e1; border-radius: 50%; display: inline-block;"></span>
+        </div>
+    </div>
+
+    <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbzb-FRTnyQf4pMTapWjk6zwtUosSybVVmrF5XFzcXWqPz7MFuXsl-D5VcE-ydztX0K5/exec">
+
+    <div class="form-content">
+        <div class="input-row">
+            <label>Mã đề</label>
+            <input type="text" id="examCode" value="234">
+            <button class="trash-btn" title="Xóa mã đề">🗑️</button>
+        </div>
+
+        <div class="input-row">
+            <label>Nhập số câu</label>
+            <input type="number" id="numQuestions" value="40" min="1" max="100">
+        </div>
+
+        <div class="answer-section">
+            <div class="section-title">Bảng đáp án</div>
+            <div class="answer-list" id="answerListContainer">
+                </div>
+            
+            <button class="add-code-btn" id="addCodeBtn">
+                <span>+</span> Thêm mã đề
+            </button>
+
+            <div id="aiResultBox" class="ai-result-box"></div>
+        </div>
+    </div>
+
+    <div class="action-footer">
+        <button class="btn btn-cancel">Hủy</button>
+        <button class="btn btn-save" id="saveBtn">Lưu</button>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <div>Trang chủ</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📖</div>
+            <div>Thư viện</div>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">📄</div>
+            <div>Đề thi</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🔲</div>
+            <div>Tiện ích</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">👥</div>
+            <div>Tài khoản</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const numQuestionsInput = document.getElementById('numQuestions');
+    const answerListContainer = document.getElementById('answerListContainer');
+    const saveBtn = document.getElementById('saveBtn');
+    const aiResultBox = document.getElementById('aiResultBox');
+
+    // Dữ liệu đáp án mặc định ban đầu cho 5 câu đầu tiên như trong ảnh mẫu
+    let selectedAnswers = {
+        1: 'B',
+        2: 'B',
+        3: 'C',
+        4: 'D',
+        5: 'D'
+    };
+
+    // Hàm tự động xây dựng giao diện bảng vòng tròn trắc nghiệm A, B, C, D
+    function renderAnswerSheet() {
+        const totalQuestions = parseInt(numQuestionsInput.value) || 0;
+        answerListContainer.innerHTML = '';
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const row = document.createElement('div');
+            row.className = 'answer-row';
+
+            // Số thứ tự câu hỏi
+            const numSpan = document.createElement('span');
+            numSpan.className = 'q-number';
+            numSpan.innerText = `${i}.`;
+            row.appendChild(numSpan);
+
+            // Cụm nút bấm lựa chọn tròn A, B, C, D
+            const bubbleGroup = document.createElement('div');
+            bubbleGroup.className = 'bubble-group';
+
+            ['A', 'B', 'C', 'D'].forEach(option => {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerText = option;
+
+                // Đồng bộ tô màu xanh nếu có đáp án sẵn
+                if (selectedAnswers[i] === option) {
+                    bubble.classList.add('selected');
+                }
+
+                // Sự kiện chạm chọn đáp án
+                bubble.addEventListener('click', () => {
+                    const siblingBubbles = bubbleGroup.querySelectorAll('.bubble');
+                    siblingBubbles.forEach(b => b.classList.remove('selected'));
+
+                    bubble.classList.add('selected');
+                    selectedAnswers[i] = option;
+                });
+
+                bubbleGroup.appendChild(bubble);
+            });
+            row.appendChild(bubbleGroup);
+
+            // Nút xóa nhanh dòng câu hỏi hiện tại
+            const deleteRowBtn = document.createElement('button');
+            deleteRowBtn.className = 'row-trash';
+            deleteRowBtn.innerHTML = '🗑️';
+            deleteRowBtn.addEventListener('click', () => {
+                delete selectedAnswers[i];
+                numQuestionsInput.value = Math.max(0, totalQuestions - 1);
+                renderAnswerSheet();
+            });
+            row.appendChild(deleteRowBtn);
+
+            answerListContainer.appendChild(row);
+        }
+    }
+
+    // Lắng nghe sự kiện đổi số câu hỏi để thay đổi kích thước bảng
+    numQuestionsInput.addEventListener('input', () => {
+        renderAnswerSheet();
+    });
+
+    // Xử lý sự kiện nhấn nút "Lưu" để đóng gói dữ liệu đẩy lên Google Script backend xử lý AI
+    saveBtn.addEventListener('click', async () => {
+        const examCode = document.getElementById('examCode').value.trim();
+        const gasUrl = document.getElementById('gasUrl').value.trim();
+
+        if (!examCode) {
+            alert('Vui lòng nhập Mã đề!');
+            return;
+        }
+
+        // Đóng gói cấu trúc payload gửi API
+        const dataToSave = {
+            examCode: examCode,
+            answers: selectedAnswers
+        };
+
+        try {
+            saveBtn.innerText = 'Đang xử lý...';
+            saveBtn.disabled = true;
+            aiResultBox.style.display = 'block';
+            aiResultBox.innerHTML = '⏳ Hệ thống đang gửi bài làm và đợi AI chấm điểm, phân tích năng lực học sinh...';
+
+            // Gửi dữ liệu POST qua giao thức CORS an toàn lên Google Apps Script
+            const response = await fetch(gasUrl, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSave)
+            });
+
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('Đã đồng bộ dữ liệu và nhận đánh giá từ AI thành công!');
+                // Hiển thị lời nhận xét năng lực tự động của AI trả về ngay trên màn hình
+                aiResultBox.innerHTML = `<strong>🤖 ĐÁNH GIÁ NĂNG LỰC TỪ AI:</strong>\n${result.evaluation}`;
+            } else {
+                aiResultBox.innerHTML = `❌ Lỗi máy chủ Google Script: ${result.message}`;
+                alert('Có lỗi xảy ra trong quá trình xử lý.');
+            }
+        } catch (error) {
+            aiResultBox.innerHTML = `❌ Không thể kết nối tới Google Web App.\nKhắc phục: Thầy/cô hãy đảm bảo đã "Triển khai ứng dụng" (Deploy) ở chế độ "Bất kỳ ai" (Anyone) trên Google Apps Script.`;
+            console.error(error);
+        } finally {
+            saveBtn.innerText = 'Lưu';
+            saveBtn.disabled = false;
+        }
+    });
+
+    // Kích hoạt hiển thị bảng đáp án ngay khi mở trang
+    renderAnswerSheet();
+</script>
+
+</body>
+</html>
