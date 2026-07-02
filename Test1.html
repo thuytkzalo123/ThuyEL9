@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Bảng Đáp Án - Thêm Mã Đề</title>
+    <title>Bảng Làm Bài Trắc Nghiệm Pastel</title>
     <style>
         :root {
-            --primary-blue: #1e3a8a;
-            --active-blue: #2563eb;
-            --light-bg: #f3f4f6;
+            --bg-pastel: #fff5f5; /* Hồng phấn cực nhẹ làm nền */
             --card-bg: #ffffff;
-            --text-dark: #1f2937;
-            --text-muted: #4b5563;
-            --green-btn: #4caf50;
-            --red-trash: #ef4444;
-            --border-color: #e5e7eb;
+            --pastel-blue: #bbdefb; /* Màu xanh pastel khi chọn đáp án */
+            --pastel-blue-dark: #64b5f6;
+            --pastel-mint: #c8e6c9; /* Màu xanh lá pastel cho nút nộp bài */
+            --pastel-mint-dark: #a5d6a7;
+            --text-dark: #4a4a4a;
+            --text-muted: #9e9e9e;
+            --border-color: #f5f5f5;
         }
 
         * {
@@ -25,7 +25,7 @@
         }
 
         body {
-            background-color: #f1f5f9;
+            background-color: var(--bg-pastel);
             color: var(--text-dark);
             display: flex;
             justify-content: center;
@@ -34,7 +34,7 @@
             padding: 0;
         }
 
-        /* Thiết kế Responsive tối ưu cho điện thoại */
+        /* Khung giao diện Responsive tối ưu mượt mà cho điện thoại */
         .app-container {
             width: 100%;
             max-width: 450px;
@@ -44,8 +44,7 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            padding-bottom: 80px; /* Chừa khoảng trống cho thanh điều hướng dưới đáy */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 24px rgba(255, 182, 193, 0.2);
         }
 
         @media (min-width: 451px) {
@@ -54,18 +53,19 @@
             }
             .app-container {
                 min-height: 850px;
-                border-radius: 16px;
+                border-radius: 24px;
+                border: 4px solid #ffe4e6;
             }
         }
 
-        /* Top Header giống ảnh */
+        /* Top Header dễ thương với flag và icon */
         .top-bar {
-            padding: 14px 16px;
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #fff;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid #fff5f5;
         }
         .top-bar .icon-btn {
             background: none;
@@ -85,7 +85,7 @@
             background-color: #da251d;
             position: relative;
             display: inline-block;
-            border-radius: 2px;
+            border-radius: 3px;
         }
         .vietnam-flag::after {
             content: "★";
@@ -97,83 +97,54 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Ẩn hoàn toàn hộp cấu hình để học sinh không nhìn thấy link */
-        .gas-config-box {
-            display: none;
+        /* Thanh trạng thái tiến độ làm bài (Progress Bar) */
+        .status-container {
+            padding: 16px 20px 8px 20px;
+            background-color: #fff;
+        }
+        .status-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #616161;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
 
-        /* Form nhập liệu chính */
+        /* Form Content hiển thị danh sách đáp án */
         .form-content {
-            padding: 16px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
             gap: 16px;
             flex: 1;
+            overflow-y: auto;
         }
 
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background-color: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-        .input-row label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-            min-width: 90px;
-        }
-        .input-row input {
-            flex: 1;
-            border: 1px solid #cbd5e1;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-            background: #ffffff;
-        }
-        .input-row input:focus {
-            border-color: var(--active-blue);
-        }
-
-        .trash-btn {
-            background: none;
-            border: none;
-            color: var(--red-trash);
-            cursor: pointer;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #fee2e2;
-            background-color: #fff5f5;
-            border-radius: 6px;
-        }
-
-        /* Bảng danh sách chọn đáp án tròn */
         .answer-section {
-            border-top: 1px solid var(--border-color);
-            padding-top: 16px;
             display: flex;
             flex-direction: column;
             flex: 1;
-        }
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--text-dark);
-            margin-bottom: 12px;
         }
 
         .answer-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-            padding-right: 2px;
+            gap: 14px;
         }
 
         .answer-row {
@@ -184,243 +155,180 @@
             padding: 2px 0;
         }
         .q-number {
-            font-size: 14px;
-            color: var(--text-muted);
-            width: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #757575;
+            width: 30px;
         }
         .bubble-group {
             display: flex;
-            gap: 14px;
+            gap: 16px;
             flex: 1;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-left: 10px;
         }
         .bubble {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            border: 1px solid #cbd5e1;
+            border: 2px solid #eeeeee;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            font-weight: 500;
-            color: var(--text-dark);
+            font-weight: bold;
+            color: #757575;
             cursor: pointer;
             user-select: none;
-            transition: all 0.1s ease;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+        .bubble:hover {
+            border-color: var(--pastel-blue-dark);
+            background-color: #fafafa;
         }
         
-        /* Màu xanh dương đậm chuẩn như ảnh khi được chọn */
+        /* Khi được chọn: Đổi sang màu xanh Pastel dịu mắt, mềm mại */
         .bubble.selected {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-            color: #ffffff;
-            font-weight: bold;
-            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+            background-color: var(--pastel-blue);
+            border-color: var(--pastel-blue-dark);
+            color: #1565c0;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(100, 181, 246, 0.2);
         }
 
-        .row-trash {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 6px;
-        }
-        .row-trash:hover {
-            color: var(--red-trash);
-        }
-
-        /* Nút thêm mã đề màu xanh lá cây */
-        .add-code-btn {
-            background-color: #64dd17;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            align-self: flex-start;
-            margin-top: 10px;
-            box-shadow: 0 2px 4px rgba(100, 221, 23, 0.2);
-        }
-
-        /* Khung Action Buttons dưới đáy (Hủy / Lưu) */
-        .action-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            padding: 14px 16px;
-            border-top: 1px solid var(--border-color);
-            background: #fff;
-            margin-top: auto;
-        }
-        .btn {
-            padding: 10px 28px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            min-width: 85px;
-        }
-        .btn-cancel {
-            background-color: #e2e8f0;
-            color: #4a5568;
-        }
-        .btn-save {
-            background-color: #1d4ed8;
-            color: white;
-        }
-
-        /* Vùng hiển thị nhận xét AI sau khi nhấn Lưu thành công */
+        /* Vùng hiển thị nhận xét từ hệ thống */
         .ai-result-box {
             display: none;
             background-color: #f3e8ff;
             border-left: 4px solid #8b5cf6;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 12px;
-            font-size: 13px;
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.5;
             white-space: pre-line;
+            color: #4a0e4e;
         }
 
-        /* Bottom Navigation Bar chuẩn thiết kế di động dưới cùng */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+        /* Nút Nộp Bài Pastel cố định ở góc dưới */
+        .action-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+            display: flex;
+            justify-content: center;
+        }
+        .btn-submit {
             width: 100%;
-            height: 60px;
-            background-color: #1e3a8a;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 10;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 11px;
-            text-decoration: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            border: none;
+            color: #2e7d32;
+            background-color: var(--pastel-mint);
+            box-shadow: 0 4px 12px rgba(200, 230, 201, 0.5);
+            transition: all 0.2s ease;
         }
-        .nav-item.active {
-            color: #ffffff;
-            font-weight: 500;
+        .btn-submit:hover {
+            background-color: var(--pastel-mint-dark);
+            transform: translateY(-1px);
         }
-        .nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
+        .btn-submit:active {
+            transform: translateY(1px);
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Top Header -->
     <div class="top-bar">
         <button class="icon-btn">❮</button>
+        <span style="font-weight: bold; color: var(--text-dark); font-size: 16px;">Phiếu Trả Lời Trắc Nghiệm</span>
         <div class="right-icons">
             <span class="vietnam-flag"></span>
-            <span style="font-size: 18px; cursor: pointer;">🔔</span>
-            <span style="width: 24px; height: 24px; background: #cbd5e1; border-radius: 50%; display: inline-block;"></span>
+            <span style="width: 24px; height: 24px; background: #ffe4e6; border-radius: 50%; display: inline-block;"></span>
         </div>
     </div>
 
+    <!-- Thanh trạng thái tiến độ (Đã làm / Tổng số câu) -->
+    <div class="status-container">
+        <div class="status-text">
+            <span>Tiến độ làm bài</span>
+            <span id="progressText">Đã làm: 0 / 40 câu</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Ẩn ngầm URL Web App của thầy/cô để xử lý dữ liệu -->
     <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbzb-FRTnyQf4pMTapWjk6zwtUosSybVVmrF5XFzcXWqPz7MFuXsl-D5VcE-ydztX0K5/exec">
 
+    <!-- Danh sách câu hỏi bảng đáp án trắng -->
     <div class="form-content">
-        <div class="input-row">
-            <label>Mã đề</label>
-            <input type="text" id="examCode" value="234">
-            <button class="trash-btn" title="Xóa mã đề">🗑️</button>
-        </div>
-
-        <div class="input-row">
-            <label>Nhập số câu</label>
-            <input type="number" id="numQuestions" value="40" min="1" max="100">
-        </div>
-
         <div class="answer-section">
-            <div class="section-title">Bảng đáp án</div>
             <div class="answer-list" id="answerListContainer">
-                </div>
+                <!-- Tự động vẽ 40 câu hỏi trắng tinh bằng JavaScript -->
+            </div>
             
-            <button class="add-code-btn" id="addCodeBtn">
-                <span>+</span> Thêm mã đề
-            </button>
-
+            <!-- Hộp kết quả nhận xét học lực từ AI -->
             <div id="aiResultBox" class="ai-result-box"></div>
         </div>
     </div>
 
+    <!-- Nút Nộp Bài dưới đáy -->
     <div class="action-footer">
-        <button class="btn btn-cancel">Hủy</button>
-        <button class="btn btn-save" id="saveBtn">Lưu</button>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item">
-            <div class="nav-icon">🏠</div>
-            <div>Trang chủ</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">📖</div>
-            <div>Thư viện</div>
-        </div>
-        <div class="nav-item active">
-            <div class="nav-icon">📄</div>
-            <div>Đề thi</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">🔲</div>
-            <div>Tiện ích</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">👥</div>
-            <div>Tài khoản</div>
-        </div>
+        <button class="btn-submit" id="submitBtn">Nộp Bài & Chấm Điểm</button>
     </div>
 </div>
 
 <script>
-    const numQuestionsInput = document.getElementById('numQuestions');
     const answerListContainer = document.getElementById('answerListContainer');
-    const saveBtn = document.getElementById('saveBtn');
+    const submitBtn = document.getElementById('submitBtn');
     const aiResultBox = document.getElementById('aiResultBox');
+    const progressText = document.getElementById('progressText');
+    const progressBarFill = document.getElementById('progressBarFill');
 
-    // Dữ liệu đáp án mặc định ban đầu cho 5 câu đầu tiên như trong ảnh mẫu
-    let selectedAnswers = {
-        1: 'B',
-        2: 'B',
-        3: 'C',
-        4: 'D',
-        5: 'D'
-    };
+    const totalQuestions = 40; // Đặt mặc định 40 câu theo đề thi lớp 9 của thầy/cô
+    let selectedAnswers = {};  // Khởi tạo đối tượng rỗng (để trắng hoàn toàn ban đầu)
 
-    // Hàm tự động xây dựng giao diện bảng vòng tròn trắc nghiệm A, B, C, D
+    // Hàm tự động cập nhật thanh trạng thái tiến độ làm bài
+    function updateProgress() {
+        const doneCount = Object.keys(selectedAnswers).length;
+        progressText.innerText = `Đã làm: ${doneCount} / ${totalQuestions} câu`;
+        
+        const percentage = (doneCount / totalQuestions) * 100;
+        progressBarFill.style.width = `${percentage}%`;
+
+        // Thay đổi màu sắc thanh tiến độ mềm mại dần sang xanh khi làm nhiều câu hơn
+        if (percentage < 30) {
+            progressBarFill.style.background = '#ff8a80'; // Đỏ pastel nhẹ
+        } else if (percentage < 70) {
+            progressBarFill.style.background = '#ffe082'; // Vàng pastel nhẹ
+        } else {
+            progressBarFill.style.background = '#a5d6a7'; // Xanh lá pastel nhẹ
+        }
+    }
+
+    // Hàm dựng bảng đáp án 40 câu trắng tinh
     function renderAnswerSheet() {
-        const totalQuestions = parseInt(numQuestionsInput.value) || 0;
         answerListContainer.innerHTML = '';
 
         for (let i = 1; i <= totalQuestions; i++) {
             const row = document.createElement('div');
             row.className = 'answer-row';
 
-            // Số thứ tự câu hỏi
+            // STT câu hỏi
             const numSpan = document.createElement('span');
             numSpan.className = 'q-number';
-            numSpan.innerText = `${i}.`;
+            numSpan.innerText = `${i}`;
             row.appendChild(numSpan);
 
-            // Cụm nút bấm lựa chọn tròn A, B, C, D
+            // Cụm vòng tròn A, B, C, D
             const bubbleGroup = document.createElement('div');
             bubbleGroup.className = 'bubble-group';
 
@@ -429,96 +337,71 @@
                 bubble.className = 'bubble';
                 bubble.innerText = option;
 
-                // Đồng bộ tô màu xanh nếu có đáp án sẵn
-                if (selectedAnswers[i] === option) {
-                    bubble.classList.add('selected');
-                }
-
-                // Sự kiện chạm chọn đáp án
+                // Thêm sự kiện click chọn phương án
                 bubble.addEventListener('click', () => {
                     const siblingBubbles = bubbleGroup.querySelectorAll('.bubble');
                     siblingBubbles.forEach(b => b.classList.remove('selected'));
 
                     bubble.classList.add('selected');
                     selectedAnswers[i] = option;
+                    
+                    // Cập nhật lại thanh trạng thái ngay lập tức
+                    updateProgress();
                 });
 
                 bubbleGroup.appendChild(bubble);
             });
             row.appendChild(bubbleGroup);
-
-            // Nút xóa nhanh dòng câu hỏi hiện tại
-            const deleteRowBtn = document.createElement('button');
-            deleteRowBtn.className = 'row-trash';
-            deleteRowBtn.innerHTML = '🗑️';
-            deleteRowBtn.addEventListener('click', () => {
-                delete selectedAnswers[i];
-                numQuestionsInput.value = Math.max(0, totalQuestions - 1);
-                renderAnswerSheet();
-            });
-            row.appendChild(deleteRowBtn);
-
             answerListContainer.appendChild(row);
         }
+        updateProgress();
     }
 
-    // Lắng nghe sự kiện đổi số câu hỏi để thay đổi kích thước bảng
-    numQuestionsInput.addEventListener('input', () => {
-        renderAnswerSheet();
-    });
-
-    // Xử lý sự kiện nhấn nút "Lưu" để đóng gói dữ liệu đẩy lên Google Script backend xử lý AI
-    saveBtn.addEventListener('click', async () => {
-        const examCode = document.getElementById('examCode').value.trim();
+    // Xử lý nộp bài qua Form POST ẩn để tránh triệt để lỗi chặn CORS trên trình duyệt máy tính
+    submitBtn.addEventListener('click', function() {
         const gasUrl = document.getElementById('gasUrl').value.trim();
+        const doneCount = Object.keys(selectedAnswers).length;
 
-        if (!examCode) {
-            alert('Vui lòng nhập Mã đề!');
-            return;
+        // Cảnh báo nếu học sinh chưa làm hết bài
+        if (doneCount < totalQuestions) {
+            const confirmSubmit = confirm(`Bạn mới làm được ${doneCount}/${totalQuestions} câu. Bạn vẫn muốn nộp bài chứ?`);
+            if (!confirmSubmit) return;
         }
 
-        // Đóng gói cấu trúc payload gửi API
         const dataToSave = {
-            examCode: examCode,
+            examCode: "GlobalSuccess_Unit1_2", // Định danh cố định theo bộ đề
             answers: selectedAnswers
         };
 
         try {
-            saveBtn.innerText = 'Đang xử lý...';
-            saveBtn.disabled = true;
             aiResultBox.style.display = 'block';
-            aiResultBox.innerHTML = '⏳ Hệ thống đang gửi bài làm và đợi AI chấm điểm, phân tích năng lực học sinh...';
+            aiResultBox.innerHTML = '✨ Đang chuyển dữ liệu bài làm lên hệ thống xử lý chấm điểm AI...';
 
-            // Gửi dữ liệu POST qua giao thức CORS an toàn lên Google Apps Script
-            const response = await fetch(gasUrl, {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dataToSave)
-            });
+            // GIẢI PHÁP CORS: Tạo Form gửi dữ liệu an toàn mở sang tab mới nhận nhận xét AI
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = gasUrl;
+            form.target = '_blank';
 
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                alert('Đã đồng bộ dữ liệu và nhận đánh giá từ AI thành công!');
-                // Hiển thị lời nhận xét năng lực tự động của AI trả về ngay trên màn hình
-                aiResultBox.innerHTML = `<strong>🤖 ĐÁNH GIÁ NĂNG LỰC TỪ AI:</strong>\n${result.evaluation}`;
-            } else {
-                aiResultBox.innerHTML = `❌ Lỗi máy chủ Google Script: ${result.message}`;
-                alert('Có lỗi xảy ra trong quá trình xử lý.');
-            }
+            const hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = 'contents';
+            hiddenField.value = JSON.stringify(dataToSave);
+
+            form.appendChild(hiddenField);
+            document.body.appendChild(form);
+            form.submit();
+
+            document.body.removeChild(form);
+            aiResultBox.innerHTML = '🎉 Bài làm đã được nộp thành công! Vui lòng xem bảng điểm và nhận xét chi tiết của AI ở cửa sổ/tab mới vừa mở ra.';
+
         } catch (error) {
-            aiResultBox.innerHTML = `❌ Không thể kết nối tới Google Web App.\nKhắc phục: Thầy/cô hãy đảm bảo đã "Triển khai ứng dụng" (Deploy) ở chế độ "Bất kỳ ai" (Anyone) trên Google Apps Script.`;
+            aiResultBox.innerHTML = `❌ Hệ thống gửi bài gặp sự cố. Vui lòng kiểm tra lại đường truyền mạng.`;
             console.error(error);
-        } finally {
-            saveBtn.innerText = 'Lưu';
-            saveBtn.disabled = false;
         }
     });
 
-    // Kích hoạt hiển thị bảng đáp án ngay khi mở trang
+    // Chạy chương trình tạo bảng đáp án ngay khi mở trang web
     renderAnswerSheet();
 </script>
 
