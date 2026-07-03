@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Làm Bài Trắc Nghiệm Pastel</title>
+    <style>
+        :root {
+            --bg-pastel: #fff5f5; /* Hồng phấn cực nhẹ làm nền */
+            --card-bg: #ffffff;
+            --pastel-blue: #bbdefb; /* Màu xanh pastel khi chọn đáp án */
+            --pastel-blue-dark: #64b5f6;
+            --pastel-mint: #c8e6c9; /* Màu xanh lá pastel cho nút nộp bài */
+            --pastel-mint-dark: #a5d6a7;
+            --text-dark: #4a4a4a;
+            --text-muted: #9e9e9e;
+            --border-color: #f5f5f5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-pastel);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Khung giao diện Responsive tối ưu mượt mà cho điện thoại */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(255, 182, 193, 0.2);
+        }
+
+        @media (min-width: 451px) {
+            body {
+                padding: 20px 10px;
+            }
+            .app-container {
+                min-height: 850px;
+                border-radius: 24px;
+                border: 4px solid #ffe4e6;
+            }
+        }
+
+        /* Top Header dễ thương với flag và icon */
+        .top-bar {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border-bottom: 2px solid #fff5f5;
+        }
+        .top-bar .icon-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        .top-bar .right-icons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .vietnam-flag {
+            width: 24px;
+            height: 16px;
+            background-color: #da251d;
+            position: relative;
+            display: inline-block;
+            border-radius: 3px;
+        }
+        .vietnam-flag::after {
+            content: "★";
+            color: #ffff00;
+            font-size: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Thanh trạng thái tiến độ làm bài (Progress Bar) */
+        .status-container {
+            padding: 16px 20px 8px 20px;
+            background-color: #fff;
+        }
+        .status-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #616161;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* Form Content hiển thị danh sách đáp án */
+        .form-content {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .answer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .answer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 2px 0;
+        }
+        .q-number {
+            font-size: 15px;
+            font-weight: 600;
+            color: #757575;
+            width: 30px;
+        }
+        .bubble-group {
+            display: flex;
+            gap: 16px;
+            flex: 1;
+            justify-content: flex-start;
+            padding-left: 10px;
+        }
+        .bubble {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #eeeeee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #757575;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+        .bubble:hover {
+            border-color: var(--pastel-blue-dark);
+            background-color: #fafafa;
+        }
+        
+        /* Khi được chọn: Đổi sang màu xanh Pastel dịu mắt, mềm mại */
+        .bubble.selected {
+            background-color: var(--pastel-blue);
+            border-color: var(--pastel-blue-dark);
+            color: #1565c0;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(100, 181, 246, 0.2);
+        }
+
+        /* Vùng hiển thị thông báo trạng thái */
+        .result-box {
+            display: none;
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-line;
+            color: #0d47a1;
+        }
+
+        /* Nút Nộp Bài Pastel cố định ở góc dưới */
+        .action-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+            display: flex;
+            justify-content: center;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            color: #2e7d32;
+            background-color: var(--pastel-mint);
+            box-shadow: 0 4px 12px rgba(200, 230, 201, 0.5);
+            transition: all 0.2s ease;
+        }
+        .btn-submit:hover {
+            background-color: var(--pastel-mint-dark);
+            transform: translateY(-1px);
+        }
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Top Header -->
+    <div class="top-bar">
+        <button class="icon-btn">❮</button>
+        <span style="font-weight: bold; color: var(--text-dark); font-size: 16px;">Phiếu Trả Lời Trắc Nghiệm</span>
+        <div class="right-icons">
+            <span class="vietnam-flag"></span>
+            <span style="width: 24px; height: 24px; background: #ffe4e6; border-radius: 50%; display: inline-block;"></span>
+        </div>
+    </div>
+
+    <!-- Thanh trạng thái tiến độ (Đã làm / Tổng số câu) -->
+    <div class="status-container">
+        <div class="status-text">
+            <span>Tiến độ làm bài</span>
+            <span id="progressText">Đã làm: 0 / 40 câu</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Ẩn ngầm URL Web App của thầy/cô để xử lý dữ liệu -->
+    <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbwLxxM3Axd4fxOtrNqJN71u3DqnsafnWxd3YQmKTHCSGsF07kn_-wTslVyydTqf-LOS/exec">
+
+    <!-- Danh sách câu hỏi bảng đáp án trắng -->
+    <div class="form-content">
+        <div class="answer-section">
+            <div class="answer-list" id="answerListContainer">
+                <!-- Tự động vẽ 40 câu hỏi trắng tinh bằng JavaScript -->
+            </div>
+            
+            <!-- Hộp kết quả thông báo -->
+            <div id="resultBox" class="result-box"></div>
+        </div>
+    </div>
+
+    <!-- Nút Nộp Bài dưới đáy -->
+    <div class="action-footer">
+        <button class="btn-submit" id="submitBtn">Nộp Bài</button>
+    </div>
+</div>
+
+<script>
+    const answerListContainer = document.getElementById('answerListContainer');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultBox = document.getElementById('resultBox');
+    const progressText = document.getElementById('progressText');
+    const progressBarFill = document.getElementById('progressBarFill');
+
+    const totalQuestions = 40; // Đặt mặc định 40 câu theo đề thi lớp 9 của thầy/cô
+    let selectedAnswers = {};  // Khởi tạo đối tượng rỗng (để trắng hoàn toàn ban đầu)
+
+    // Hàm tự động cập nhật thanh trạng thái tiến độ làm bài
+    function updateProgress() {
+        const doneCount = Object.keys(selectedAnswers).length;
+        progressText.innerText = `Đã làm: ${doneCount} / ${totalQuestions} câu`;
+        
+        const percentage = (doneCount / totalQuestions) * 100;
+        progressBarFill.style.width = `${percentage}%`;
+
+        // Thay đổi màu sắc thanh tiến độ mềm mại dần sang xanh khi làm nhiều câu hơn
+        if (percentage < 30) {
+            progressBarFill.style.background = '#ff8a80'; // Đỏ pastel nhẹ
+        } else if (percentage < 70) {
+            progressBarFill.style.background = '#ffe082'; // Vàng pastel nhẹ
+        } else {
+            progressBarFill.style.background = '#a5d6a7'; // Xanh lá pastel nhẹ
+        }
+    }
+
+    // Hàm dựng bảng đáp án 40 câu trắng tinh
+    function renderAnswerSheet() {
+        answerListContainer.innerHTML = '';
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const row = document.createElement('div');
+            row.className = 'answer-row';
+
+            // STT câu hỏi
+            const numSpan = document.createElement('span');
+            numSpan.className = 'q-number';
+            numSpan.innerText = `${i}`;
+            row.appendChild(numSpan);
+
+            // Cụm vòng tròn A, B, C, D
+            const bubbleGroup = document.createElement('div');
+            bubbleGroup.className = 'bubble-group';
+
+            ['A', 'B', 'C', 'D'].forEach(option => {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.innerText = option;
+
+                // Thêm sự kiện click chọn phương án
+                bubble.addEventListener('click', () => {
+                    const siblingBubbles = bubbleGroup.querySelectorAll('.bubble');
+                    siblingBubbles.forEach(b => b.classList.remove('selected'));
+
+                    bubble.classList.add('selected');
+                    selectedAnswers[i] = option;
+                    
+                    // Cập nhật lại thanh trạng thái ngay lập tức
+                    updateProgress();
+                });
+
+                bubbleGroup.appendChild(bubble);
+            });
+            row.appendChild(bubbleGroup);
+            answerListContainer.appendChild(row);
+        }
+        updateProgress();
+    }
+
+    // Xử lý nộp bài qua Form POST ẩn để tránh triệt để lỗi chặn CORS trên trình duyệt máy tính
+    submitBtn.addEventListener('click', function() {
+        const gasUrl = document.getElementById('gasUrl').value.trim();
+        const doneCount = Object.keys(selectedAnswers).length;
+
+        // Cảnh báo nếu học sinh chưa làm hết bài
+        if (doneCount < totalQuestions) {
+            const confirmSubmit = confirm(`Bạn mới làm được ${doneCount}/${totalQuestions} câu. Bạn vẫn muốn nộp bài chứ?`);
+            if (!confirmSubmit) return;
+        }
+
+        const dataToSave = {
+            examCode: "GlobalSuccess_Unit1_2", // Định danh cố định theo bộ đề
+            answers: selectedAnswers
+        };
+
+        try {
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '✨ Đang chuyển dữ liệu bài làm lên hệ thống...';
+
+            // GIẢI PHÁP CORS: Tạo Form gửi dữ liệu an toàn mở sang tab mới
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = gasUrl;
+            form.target = '_blank';
+
+            const hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = 'contents';
+            hiddenField.value = JSON.stringify(dataToSave);
+
+            form.appendChild(hiddenField);
+            document.body.appendChild(form);
+            form.submit();
+
+            document.body.removeChild(form);
+            resultBox.innerHTML = '🎉 Bài làm đã được nộp thành công!';
+
+        } catch (error) {
+            resultBox.innerHTML = `❌ Hệ thống gửi bài gặp sự cố. Vui lòng kiểm tra lại đường truyền mạng.`;
+            console.error(error);
+        }
+    });
+
+    // Chạy chương trình tạo bảng đáp án ngay khi mở trang web
+    renderAnswerSheet();
+</script>
+
+</body>
+</html>
