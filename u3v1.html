@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Bài tâp từ vựng - Unit 1 </title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 5px;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #202124;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dark-blue);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .stats-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .q-num {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9em;
+            background: #fff;
+        }
+
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            padding-bottom: 20px;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #202124;
+        }
+
+        .btn-hint-toggle {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid #ffb74d;
+            color: #f57f17;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .hint-content {
+            display: none;
+            background-color: #fff3e0;
+            border-left: 4px solid #ffb74d;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #e65100;
+        }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px;
+            align-self: flex-start;
+            background: #f1f3f4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+
+        .trans-text {
+            display: none;
+            color: var(--trans-color);
+            font-style: italic;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-weight: normal;
+            border-top: 1px dashed #eee;
+            padding-top: 4px;
+        }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fffde7;
+            border-left: 4px solid #fbc02d;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.3s;
+        }
+        .modal-score { font-size: 3.5em; font-weight: bold; color: var(--dark-blue); margin: 10px 0; }
+        .modal-details { margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none;
+        border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
+
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+            .header-title { font-size: 1em; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-error {
+            color: var(--wrong-red);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Mật khẩu không đúng hoặc chưa nhập tên!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tâp từ vựng - Unit 1</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <h2 style="color: #444; margin-top:0">Kết Quả</h2>
+            <div>Điểm số của bạn</div>
+            <div class="modal-score" id="final-score">0.0</div>
+            
+            <div class="modal-details">
+                <p>Số câu đúng: <b id="final-correct">0</b> / <span id="final-total">60</span></p>
+                <p>Xếp loại: <b id="final-rank" style="color: #e65100">---</b></p>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Xem lại bài</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+    {
+        "q": "You should get enough _________, eat a healthy diet, and do physical exercise regularly.",
+        "qVi": "Bạn nên ngủ đủ _________, ăn một chế độ ăn uống lành mạnh và tập thể dục thường xuyên.",
+        "key": ["get enough"],
+        "opts": ["sleep", "break", "rest", "mind"],
+        "optsVi": ["giấc ngủ", "nghỉ ngơi", "nghỉ ngơi", "tâm trí"],
+        "correct": 0,
+        "exp": "Cụm từ <b>get enough sleep</b> có nghĩa là 'ngủ đủ giấc'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "We often find it difficult to get a good night's _________, especially before exams.",
+        "qVi": "Chúng ta thường thấy khó khăn để có một _________ ngon giấc, đặc biệt là trước các kỳ thi.",
+        "key": ["a good night's"],
+        "opts": ["appearance", "sleep", "habit", "mood"],
+        "optsVi": ["vẻ bề ngoài", "giấc ngủ", "thói quen", "tâm trạng"],
+        "correct": 1,
+        "exp": "Cụm từ cố định <b>a good night's sleep</b> mang nghĩa là 'một giấc ngủ ngon'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "I understand that exams bring _________ lots of stress.",
+        "qVi": "Tôi hiểu rằng các kỳ thi mang _________ nhiều căng thẳng.",
+        "key": ["bring", "stress"],
+        "opts": ["about", "on", "up", "in"],
+        "optsVi": ["mang lại / gây ra", "gây ra (tiêu cực)", "nuôi dưỡng", "mang vào"],
+        "correct": 0,
+        "exp": "Cụm động từ <b>bring about</b> có nghĩa là 'gây ra, mang lại' một điều gì đó (ở đây là căng thẳng).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "You can _________ this stress by studying long before the exam, not waiting until the night before it.",
+        "qVi": "Bạn có thể _________ căng thẳng này bằng cách học từ lâu trước kỳ thi, không phải chờ đến đêm trước đó.",
+        "key": ["this stress", "studying long before"],
+        "opts": ["increase", "reduce", "suffer", "require"],
+        "optsVi": ["tăng", "giảm", "chịu đựng", "yêu cầu"],
+        "correct": 1,
+        "exp": "Hành động 'học từ lâu trước kỳ thi' sẽ giúp <b>reduce</b> (giảm bớt) căng thẳng.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "Do you have any tips about looking _________ our mental health?",
+        "qVi": "Bạn có mẹo nào về việc chăm sóc _________ sức khỏe tinh thần của chúng ta không?",
+        "key": ["looking", "our mental health"],
+        "opts": ["for", "at", "after", "up"],
+        "optsVi": ["tìm kiếm", "nhìn vào", "chăm sóc", "tra cứu"],
+        "correct": 2,
+        "exp": "Cụm động từ <b>look after</b> có nghĩa là 'chăm sóc, quan tâm đến'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "If you want to have good mental health, you should have a _________ life.",
+        "qVi": "Nếu bạn muốn có sức khỏe tinh thần tốt, bạn nên có một cuộc sống _________.",
+        "key": ["good mental health", "life"],
+        "opts": ["well-balanced", "urgent", "physical", "optimistic"],
+        "optsVi": ["cân bằng tốt", "khẩn cấp", "thể chất", "lạc quan"],
+        "correct": 0,
+        "exp": "Để có sức khỏe tinh thần tốt (good mental health), cần một cuộc sống <b>well-balanced</b> (cân bằng).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "You have to _________ your time by planning your schedule and giving priority to your work.",
+        "qVi": "Bạn phải _________ thời gian của mình bằng cách lập kế hoạch lịch trình và ưu tiên cho công việc.",
+        "key": ["your time", "planning your schedule"],
+        "opts": ["manage", "accomplish", "achieve", "connect"],
+        "optsVi": ["quản lý", "hoàn thành", "đạt được", "kết nối"],
+        "correct": 0,
+        "exp": "Cụm từ <b>manage one's time</b> có nghĩa là 'quản lý thời gian'. Việc lập kế hoạch lịch trình (planning schedule) là một cách để quản lý thời gian.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "You should make a list of all the jobs you have to do and give _________ to them.",
+        "qVi": "Bạn nên lập một danh sách tất cả các công việc bạn phải làm và ưu tiên _________ cho chúng.",
+        "key": ["give", "to them"],
+        "opts": ["distraction", "priority", "anxiety", "advice"],
+        "optsVi": ["sự xao nhãng", "sự ưu tiên", "sự lo âu", "lời khuyên"],
+        "correct": 1,
+        "exp": "Cụm từ cố định <b>give priority to something</b> mang nghĩa là 'dành sự ưu tiên cho việc gì'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "You should take a _________ and do some physical exercise.",
+        "qVi": "Bạn nên nghỉ một _________ và tập một vài bài thể dục.",
+        "key": ["take a", "and do some physical exercise"],
+        "opts": ["break", "note", "list", "class"],
+        "optsVi": ["sự nghỉ ngơi", "ghi chú", "danh sách", "lớp học"],
+        "correct": 0,
+        "exp": "Cụm từ <b>take a break</b> có nghĩa là 'nghỉ ngơi'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "David works out at his home gym to maintain his _________ health.",
+        "qVi": "David tập luyện tại phòng tập thể dục ở nhà để duy trì sức khỏe _________ của mình.",
+        "key": ["works out", "health"],
+        "opts": ["mental", "physical", "urgent", "additional"],
+        "optsVi": ["tinh thần", "thể chất", "khẩn cấp", "bổ sung"],
+        "correct": 1,
+        "exp": "Tập luyện (works out) là hoạt động để duy trì sức khỏe <b>physical</b> (thể chất).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "I tried to _________ my goal of cycling five kilometres a day.",
+        "qVi": "Tôi đã cố gắng _________ mục tiêu đạp xe năm km mỗi ngày.",
+        "key": ["my goal"],
+        "opts": ["overcome", "accomplish", "advise", "consult"],
+        "optsVi": ["vượt qua", "hoàn thành", "khuyên bảo", "tham khảo"],
+        "correct": 1,
+        "exp": "Động từ đi kèm với 'goal' (mục tiêu) là <b>accomplish</b> (hoàn thành, đạt được).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "I want to know the due _________ for my history assignment.",
+        "qVi": "Tôi muốn biết hạn chót _________ cho bài tập lịch sử của mình.",
+        "key": ["due"],
+        "opts": ["time", "date", "day", "schedule"],
+        "optsVi": ["thời gian", "ngày tháng", "ngày", "lịch trình"],
+        "correct": 1,
+        "exp": "Cụm từ <b>due date</b> có nghĩa là 'hạn chót, ngày đến hạn'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "I'm trying to go to bed earlier because I'm feeling _________ out at the moment.",
+        "qVi": "Tôi đang cố gắng đi ngủ sớm hơn vì hiện tại tôi cảm thấy _________.",
+        "key": ["feeling", "out"],
+        "opts": ["stressed", "tired", "burnt", "awake"],
+        "optsVi": ["căng thẳng", "mệt mỏi", "kiệt sức", "tỉnh táo"],
+        "correct": 2,
+        "exp": "Cụm tính từ <b>burnt out</b> có nghĩa là 'kiệt sức, mệt mỏi rã rời'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "I prefer to study in the school library because there are too many _________ at home.",
+        "qVi": "Tôi thích học ở thư viện trường hơn vì có quá nhiều _________ ở nhà.",
+        "key": ["too many", "at home"],
+        "opts": ["instructions", "sessions", "priorities", "distractions"],
+        "optsVi": ["hướng dẫn", "buổi/phiên", "ưu tiên", "sự xao nhãng"],
+        "correct": 3,
+        "exp": "Lý do thích học ở thư viện (nơi yên tĩnh) là vì ở nhà có nhiều <b>distractions</b> (sự xao nhãng/mất tập trung).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "If you do physical _________ regularly, your health will improve.",
+        "qVi": "Nếu bạn thực hiện _________ thể chất thường xuyên, sức khỏe của bạn sẽ được cải thiện.",
+        "key": ["do physical"],
+        "opts": ["appearance", "exercise", "habit", "diet"],
+        "optsVi": ["ngoại hình", "thể dục", "thói quen", "chế độ ăn"],
+        "correct": 1,
+        "exp": "Cụm từ <b>do physical exercise</b> có nghĩa là 'tập thể dục'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "You must get _________ of all the distractions if you want to manage your time effectively.",
+        "qVi": "Bạn phải _________ khỏi tất cả những sự xao nhãng nếu bạn muốn quản lý thời gian hiệu quả.",
+        "key": ["get", "of"],
+        "opts": ["out", "rid", "away", "through"],
+        "optsVi": ["ra ngoài", "loại bỏ", "tránh xa", "vượt qua"],
+        "correct": 1,
+        "exp": "Cụm động từ <b>get rid of</b> mang nghĩa 'loại bỏ, tống khứ' một điều gì đó.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "If Mai doesn't want to _________ weight, she shouldn't eat much fast food.",
+        "qVi": "Nếu Mai không muốn _________ cân, cô ấy không nên ăn nhiều đồ ăn nhanh.",
+        "key": ["want to", "weight", "eat much fast food"],
+        "opts": ["gain", "lose", "put", "reduce"],
+        "optsVi": ["tăng", "giảm", "đặt", "giảm"],
+        "correct": 0,
+        "exp": "Việc ăn nhiều đồ ăn nhanh (fast food) sẽ dẫn đến <b>gain weight</b> (tăng cân). (Lưu ý: 'put on weight' cũng mang nghĩa tăng cân nhưng ở đây không có 'on').[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "If you stay _________ too late tonight, you might feel tired tomorrow morning.",
+        "qVi": "Nếu bạn thức _________ quá muộn tối nay, bạn có thể cảm thấy mệt mỏi vào sáng mai.",
+        "key": ["stay", "too late tonight"],
+        "opts": ["on", "up", "in", "out"],
+        "optsVi": ["tiếp tục", "thức", "ở trong", "ở ngoài"],
+        "correct": 1,
+        "exp": "Cụm động từ <b>stay up</b> mang nghĩa là 'thức (để làm việc gì đó, không đi ngủ)'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "You must be careful if you don't want to get _________.",
+        "qVi": "Bạn phải cẩn thận nếu bạn không muốn bị _________.",
+        "key": ["be careful", "get"],
+        "opts": ["burnt", "tired", "stressed", "awake"],
+        "optsVi": ["kiệt sức / bị bỏng", "mệt mỏi", "căng thẳng", "tỉnh táo"],
+        "correct": 0,
+        "exp": "Từ 'get burnt' ở đây có thể hiểu theo 2 nghĩa: bị bỏng (nghĩa đen) hoặc kiệt sức (burnt out). Trong ngữ cảnh cẩn thận (be careful), <b>burnt</b> là lựa chọn phù hợp.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "If you put too much sugar in your coffee, you may put _________ more weight.",
+        "qVi": "Nếu bạn cho quá nhiều đường vào cà phê, bạn có thể _________ cân nhiều hơn.",
+        "key": ["put", "more weight"],
+        "opts": ["up", "on", "off", "in"],
+        "optsVi": ["đặt lên", "tăng (cân)", "hoãn", "đặt vào"],
+        "correct": 1,
+        "exp": "Cụm động từ <b>put on weight</b> có nghĩa là 'tăng cân'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "If you take a cooking _________, you can make your favourite food at home.",
+        "qVi": "Nếu bạn tham gia một _________ nấu ăn, bạn có thể tự làm món ăn yêu thích ở nhà.",
+        "key": ["take a cooking"],
+        "opts": ["class", "room", "school", "session"],
+        "optsVi": ["lớp học", "phòng", "trường học", "phiên/buổi"],
+        "correct": 0,
+        "exp": "Tham gia học nấu ăn thì dùng cụm <b>take a cooking class</b> (tham gia một lớp học nấu ăn).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "If you want to have perfect white teeth, you must _________ your teeth regularly.",
+        "qVi": "Nếu bạn muốn có hàm răng trắng hoàn hảo, bạn phải _________ răng thường xuyên.",
+        "key": ["your teeth regularly"],
+        "opts": ["wash", "clean", "brush", "take"],
+        "optsVi": ["rửa", "làm sạch", "đánh", "lấy"],
+        "correct": 2,
+        "exp": "Động từ chỉ hành động làm sạch răng là <b>brush</b> (đánh răng).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "You should use a calendar to plan your work _________.",
+        "qVi": "Bạn nên sử dụng lịch để lên kế hoạch cho công việc của bạn _________.",
+        "key": ["plan your work"],
+        "opts": ["ahead", "before", "front", "early"],
+        "optsVi": ["trước", "trước (khi)", "trước (vị trí)", "sớm"],
+        "correct": 0,
+        "exp": "Cụm từ <b>plan ahead</b> có nghĩa là 'lên kế hoạch trước'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trạng từ]"
+    },
+    {
+        "q": "Maintaining a well-balanced life often means _________ time for the things you have to do.",
+        "qVi": "Duy trì một cuộc sống cân bằng thường có nghĩa là _________ thời gian cho những việc bạn phải làm.",
+        "key": ["time for the things"],
+        "opts": ["doing", "taking", "making", "getting"],
+        "optsVi": ["làm", "lấy", "tạo / dành", "đạt được"],
+        "correct": 2,
+        "exp": "Cụm từ <b>make time for something</b> có nghĩa là 'dành thời gian cho việc gì'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "Taking _________ of yourself can bring you good health and happiness.",
+        "qVi": "_________ bản thân có thể mang lại cho bạn sức khỏe tốt và hạnh phúc.",
+        "key": ["Taking", "of yourself"],
+        "opts": ["care", "note", "time", "break"],
+        "optsVi": ["sự chăm sóc", "ghi chú", "thời gian", "nghỉ ngơi"],
+        "correct": 0,
+        "exp": "Cụm từ <b>take care of</b> mang nghĩa là 'chăm sóc'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "There will always be bad things and difficulties to _________ at school, but they don't last long.",
+        "qVi": "Sẽ luôn có những điều tồi tệ và khó khăn để _________ ở trường, nhưng chúng không kéo dài lâu.",
+        "key": ["difficulties to"],
+        "opts": ["manage", "overcome", "accomplish", "achieve"],
+        "optsVi": ["quản lý", "vượt qua", "hoàn thành", "đạt được"],
+        "correct": 1,
+        "exp": "Động từ đi với 'difficulties' (những khó khăn) là <b>overcome</b> (vượt qua).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "If you have an unhappy day, you should try to get _________ it!",
+        "qVi": "Nếu bạn có một ngày không vui, bạn nên cố gắng _________ nó!",
+        "key": ["try to get", "it"],
+        "opts": ["in", "over", "through", "on"],
+        "optsVi": ["vào", "vượt qua", "vượt qua (khó khăn)", "tiếp tục"],
+        "correct": 1,
+        "exp": "Cụm động từ <b>get over</b> có nghĩa là 'vượt qua, phục hồi' sau một cú sốc, nỗi buồn hay bệnh tật.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "You should make others feel happy by giving them _________ or being thankful to them.",
+        "qVi": "Bạn nên làm cho người khác cảm thấy hạnh phúc bằng cách dành cho họ _________ hoặc biết ơn họ.",
+        "key": ["feel happy by giving them"],
+        "opts": ["encouragement", "omission", "obstacle", "anxiety"],
+        "optsVi": ["sự động viên", "sự bỏ sót", "trở ngại", "sự lo âu"],
+        "correct": 0,
+        "exp": "Để làm người khác vui, ta nên dành cho họ sự biết ơn (thankful) và <b>encouragement</b> (sự khích lệ, động viên).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "I started to plan my schedule, made a weekly work list and _________ priority to some of my work.",
+        "qVi": "Tôi bắt đầu lập kế hoạch lịch trình của mình, lập danh sách công việc hàng tuần và _________ ưu tiên cho một số công việc.",
+        "key": ["priority to"],
+        "opts": ["gave", "took", "made", "did"],
+        "optsVi": ["đã dành / cho", "đã lấy", "đã làm (tạo ra)", "đã làm"],
+        "correct": 0,
+        "exp": "Cụm từ cố định <b>give priority to</b> (quá khứ là gave) có nghĩa là 'dành sự ưu tiên cho'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "This helped me _________ on my most important tasks.",
+        "qVi": "Điều này đã giúp tôi _________ vào những nhiệm vụ quan trọng nhất của mình.",
+        "key": ["on my most important tasks"],
+        "opts": ["connect", "concentrate", "suffer", "depend"],
+        "optsVi": ["kết nối", "tập trung", "chịu đựng", "phụ thuộc"],
+        "correct": 1,
+        "exp": "Động từ <b>concentrate</b> thường đi với giới từ 'on' mang nghĩa 'tập trung vào' (nhiệm vụ quan trọng).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "I communicated with my family, friends, and teachers so they would offer me _________ support.",
+        "qVi": "Tôi đã giao tiếp với gia đình, bạn bè và giáo viên để họ có thể cung cấp cho tôi sự hỗ trợ _________.",
+        "key": ["communicated with", "offer me", "support"],
+        "opts": ["physical", "additional", "urgent", "mental"],
+        "optsVi": ["thể chất", "bổ sung", "khẩn cấp", "tinh thần"],
+        "correct": 3,
+        "exp": "Việc giao tiếp, chia sẻ với gia đình, bạn bè mang lại sự hỗ trợ về mặt <b>mental</b> (tinh thần).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "I also took breaks _________ because they helped me keep away from stress and anxiety.",
+        "qVi": "Tôi cũng đã nghỉ ngơi _________ vì chúng giúp tôi tránh xa căng thẳng và lo âu.",
+        "key": ["took breaks"],
+        "opts": ["effectively", "appropriately", "regularly", "heavily"],
+        "optsVi": ["một cách hiệu quả", "một cách thích hợp", "một cách thường xuyên", "một cách nặng nề"],
+        "correct": 1,
+        "exp": "Nghỉ ngơi <b>appropriately</b> (một cách hợp lý / thích hợp) giúp giảm căng thẳng.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trạng từ]"
+    },
+    {
+        "q": "Besides, I also tried to _________ a healthy diet.",
+        "qVi": "Bên cạnh đó, tôi cũng cố gắng _________ một chế độ ăn uống lành mạnh.",
+        "key": ["a healthy diet"],
+        "opts": ["follow", "make", "do", "give"],
+        "optsVi": ["tuân theo", "tạo ra", "làm", "cho"],
+        "correct": 0,
+        "exp": "Cụm từ <b>follow a diet</b> mang nghĩa 'tuân theo một chế độ ăn'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "I ate little _________ foods and avoided junk foods like chips, cookies, pizza, etc.",
+        "qVi": "Tôi ăn ít đồ ăn _________ và tránh đồ ăn vặt như khoai tây chiên, bánh quy, pizza, v.v.",
+        "key": ["ate little", "foods and avoided junk foods"],
+        "opts": ["healthy", "fattening", "balanced", "optimistic"],
+        "optsVi": ["lành mạnh", "gây béo", "cân bằng", "lạc quan"],
+        "correct": 1,
+        "exp": "Từ 'little' ở đây mang nghĩa 'ít'. Để sống khỏe thì cần ăn ít thức ăn <b>fattening</b> (gây béo phì).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "I ate a lot of fruit and vegetables and avoided _________ foods like chips, cookies, pizza, etc.",
+        "qVi": "Tôi đã ăn rất nhiều trái cây và rau quả và tránh những đồ ăn _________ như khoai tây chiên, bánh quy, pizza, v.v.",
+        "key": ["avoided", "foods like chips, cookies, pizza"],
+        "opts": ["fast", "junk", "bad", "fat"],
+        "optsVi": ["nhanh", "vặt / rác", "xấu", "béo"],
+        "correct": 1,
+        "exp": "Các loại thức ăn như khoai tây chiên, bánh quy, pizza được phân loại là <b>junk foods</b> (đồ ăn vặt / không có lợi cho sức khỏe).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "Trang enters what she has to do into a _________ at the beginning of each term.",
+        "qVi": "Trang nhập những việc cô ấy phải làm vào một _________ vào đầu mỗi học kỳ.",
+        "key": ["enters what she has to do into a"],
+        "opts": ["schedule", "calendar", "diary", "book"],
+        "optsVi": ["lịch trình", "lịch", "nhật ký", "sách"],
+        "correct": 0,
+        "exp": "Nơi để ghi lại những việc cần làm trong suốt học kỳ là <b>schedule</b> (lịch trình / thời khóa biểu).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "You shouldn't _________ doing your homework or assignment or preparing for a test.",
+        "qVi": "Bạn không nên _________ làm bài tập về nhà hoặc bài tập được giao hoặc chuẩn bị cho một bài kiểm tra.",
+        "key": ["doing your homework"],
+        "opts": ["delay", "require", "reduce", "minimize"],
+        "optsVi": ["trì hoãn", "yêu cầu", "giảm bớt", "tối thiểu hóa"],
+        "correct": 0,
+        "exp": "Động từ <b>delay</b> (trì hoãn) đi với V-ing (doing) mang nghĩa 'trì hoãn làm việc gì'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "I've got too much to do, and I'm completely _________ out.",
+        "qVi": "Tôi có quá nhiều việc phải làm, và tôi hoàn toàn _________.",
+        "key": ["too much to do", "completely", "out"],
+        "opts": ["tired", "burnt", "stressed", "worked"],
+        "optsVi": ["mệt mỏi", "kiệt sức", "căng thẳng", "làm việc"],
+        "correct": 1,
+        "exp": "Cụm tính từ <b>burnt out</b> có nghĩa là 'kiệt sức, suy kiệt' (do làm việc quá nhiều).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "There are too many distractions in this classroom - it's hard for me to pay _________ to the lesson.",
+        "qVi": "Có quá nhiều sự xao nhãng trong lớp học này - thật khó để tôi _________ vào bài học.",
+        "key": ["pay", "to the lesson"],
+        "opts": ["time", "effort", "priority", "attention"],
+        "optsVi": ["thời gian", "nỗ lực", "ưu tiên", "sự chú ý"],
+        "correct": 3,
+        "exp": "Cụm từ cố định <b>pay attention to</b> mang nghĩa 'chú ý, tập trung vào' điều gì đó.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "He was in a good _________ when he got home from school.",
+        "qVi": "Cậu ấy đã ở trong một _________ tốt khi cậu ấy về nhà sau giờ học.",
+        "key": ["in a good"],
+        "opts": ["feeling", "mind", "mood", "attitude"],
+        "optsVi": ["cảm giác", "tâm trí", "tâm trạng", "thái độ"],
+        "correct": 2,
+        "exp": "Cụm từ <b>in a good mood</b> có nghĩa là 'trong một tâm trạng tốt, vui vẻ'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "To most people, healthy living means both physical and ______ health are functioning well together.",
+        "qVi": "Đối với hầu hết mọi người, sống lành mạnh có nghĩa là cả sức khỏe thể chất và _________ đều hoạt động tốt cùng nhau.",
+        "key": ["physical and", "health"],
+        "opts": ["mental", "medical", "urgent", "additional"],
+        "optsVi": ["tinh thần", "y tế", "khẩn cấp", "bổ sung"],
+        "correct": 0,
+        "exp": "Từ vựng thường đi đôi với 'physical health' (sức khỏe thể chất) là <b>mental health</b> (sức khỏe tinh thần).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "When we _________ our task, we headed home.",
+        "qVi": "Khi chúng tôi _________ nhiệm vụ của mình, chúng tôi đã đi về nhà.",
+        "key": ["our task", "headed home"],
+        "opts": ["achieved", "accomplished", "managed", "overcame"],
+        "optsVi": ["đạt được", "hoàn thành", "quản lý", "vượt qua"],
+        "correct": 1,
+        "exp": "Động từ đi cùng với 'task' (nhiệm vụ) là <b>accomplished</b> (hoàn thành).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "He shouldn't stay up late tonight if he wants to feel _________ and alert tomorrow morning.",
+        "qVi": "Anh ấy không nên thức khuya tối nay nếu anh ấy muốn cảm thấy _________ và tỉnh táo vào sáng mai.",
+        "key": ["feel", "and alert"],
+        "opts": ["sleep", "awake", "optimistic", "well-balanced"],
+        "optsVi": ["ngủ (danh từ/động từ)", "thức giấc / tỉnh táo", "lạc quan", "cân bằng"],
+        "correct": 1,
+        "exp": "Đi đôi với 'alert' (tỉnh táo) là tính từ <b>awake</b> (thức tỉnh, không buồn ngủ).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "The school _________ is willing to listen to the students to help them solve their problems.",
+        "qVi": "_________ của trường sẵn sàng lắng nghe học sinh để giúp họ giải quyết các vấn đề của họ.",
+        "key": ["listen to the students to help them solve their problems"],
+        "opts": ["teacher", "counsellor", "doctor", "friend"],
+        "optsVi": ["giáo viên", "người cố vấn", "bác sĩ", "bạn bè"],
+        "correct": 1,
+        "exp": "Người ở trường có nhiệm vụ lắng nghe và giúp học sinh giải quyết các vấn đề tâm lý là <b>counsellor</b> (cố vấn học đường).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ chỉ người]"
+    },
+    {
+        "q": "And you should keep a _________ between study and play.",
+        "qVi": "Và bạn nên giữ một _________ giữa việc học và chơi.",
+        "key": ["keep a", "between study and play"],
+        "opts": ["distance", "balance", "break", "schedule"],
+        "optsVi": ["khoảng cách", "sự cân bằng", "sự nghỉ ngơi", "lịch trình"],
+        "correct": 1,
+        "exp": "Cụm từ <b>keep a balance</b> mang nghĩa là 'giữ sự cân bằng' (giữa việc học và chơi).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "The police asked them to describe his physical _________.",
+        "qVi": "Cảnh sát yêu cầu họ miêu tả _________ thể chất của anh ta.",
+        "key": ["describe his physical"],
+        "opts": ["appearance", "health", "mood", "anxiety"],
+        "optsVi": ["ngoại hình", "sức khỏe", "tâm trạng", "sự lo âu"],
+        "correct": 0,
+        "exp": "Cụm từ <b>physical appearance</b> có nghĩa là 'ngoại hình, vẻ bề ngoài'. Đây là điều cảnh sát cần miêu tả.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "I'm _________ about the result of the exam I took last week.",
+        "qVi": "Tôi đang _________ về kết quả của kỳ thi mà tôi đã tham gia vào tuần trước.",
+        "key": ["about the result of the exam"],
+        "opts": ["stressed", "optimistic", "urgent", "appropriate"],
+        "optsVi": ["căng thẳng", "lạc quan", "khẩn cấp", "thích hợp"],
+        "correct": 0,
+        "exp": "Cảm giác phổ biến sau một kỳ thi và chờ đợi kết quả là <b>stressed</b> (căng thẳng/lo lắng). Tính từ 'optimistic' đi với giới từ 'about' nhưng thường mang nghĩa tích cực, trong bối cảnh chung chung thì 'stressed' hợp lý hơn.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ cảm xúc]"
+    },
+    {
+        "q": "He intended to _________ telling her the news, waiting for the right moment.",
+        "qVi": "Anh ấy định _________ việc nói cho cô ấy biết tin tức, chờ đợi thời điểm thích hợp.",
+        "key": ["telling", "waiting for the right moment"],
+        "opts": ["delay", "avoid", "reduce", "overcome"],
+        "optsVi": ["trì hoãn", "tránh né", "giảm bớt", "vượt qua"],
+        "correct": 0,
+        "exp": "Động từ <b>delay</b> đi với V-ing (telling) mang nghĩa 'trì hoãn'. Việc chờ thời điểm thích hợp (waiting) đồng nghĩa với việc đang trì hoãn.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+    },
+    {
+        "q": "When you complete your homework or _________ ahead of time, you will feel less worried about it.",
+        "qVi": "Khi bạn hoàn thành bài tập về nhà hoặc _________ trước thời hạn, bạn sẽ cảm thấy ít lo lắng hơn về nó.",
+        "key": ["complete your homework or", "ahead of time"],
+        "opts": ["assignment", "session", "instruction", "priority"],
+        "optsVi": ["bài tập / nhiệm vụ", "phiên / buổi", "hướng dẫn", "sự ưu tiên"],
+        "correct": 0,
+        "exp": "Từ vựng đi cùng nhóm với 'homework' (bài tập về nhà) là <b>assignment</b> (bài tập/nhiệm vụ được giao).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "Keep healthy by eating well and exercising _________.",
+        "qVi": "Giữ gìn sức khỏe bằng cách ăn uống tốt và tập thể dục _________.",
+        "key": ["exercising"],
+        "opts": ["regularly", "effectively", "appropriately", "carefully"],
+        "optsVi": ["một cách thường xuyên", "một cách hiệu quả", "một cách thích hợp", "một cách cẩn thận"],
+        "correct": 0,
+        "exp": "Việc tập thể dục để duy trì sức khỏe thì cần làm <b>regularly</b> (thường xuyên).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trạng từ]"
+    },
+    {
+        "q": "If you don't want to get in an accident, follow these safety _________.",
+        "qVi": "Nếu bạn không muốn gặp tai nạn, hãy làm theo những _________ an toàn này.",
+        "key": ["follow these safety"],
+        "opts": ["ingredients", "instructions", "assignments", "omissions"],
+        "optsVi": ["thành phần", "hướng dẫn", "bài tập", "sự bỏ sót"],
+        "correct": 1,
+        "exp": "Cụm từ cố định <b>safety instructions</b> có nghĩa là 'những hướng dẫn an toàn'.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "If you feel unwell, you should _________ a doctor.",
+        "qVi": "Nếu bạn cảm thấy không khỏe, bạn nên _________ bác sĩ.",
+        "key": ["feel unwell", "a doctor"],
+        "opts": ["advise", "consult", "require", "connect"],
+        "optsVi": ["khuyên", "tham khảo ý kiến", "yêu cầu", "kết nối"],
+        "correct": 1,
+        "exp": "Cụm từ <b>consult a doctor</b> mang nghĩa là 'hỏi/tham khảo ý kiến bác sĩ' (khi bị ốm).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "A well-balanced meal or _________ contains all the different things you need to keep you healthy.",
+        "qVi": "Một bữa ăn cân bằng hoặc _________ chứa tất cả những thứ khác nhau bạn cần để giữ cho bạn khỏe mạnh.",
+        "key": ["well-balanced meal or"],
+        "opts": ["food", "diet", "dish", "ingredient"],
+        "optsVi": ["thực phẩm", "chế độ ăn", "món ăn", "thành phần"],
+        "correct": 1,
+        "exp": "Từ đồng nghĩa/liên quan với một bữa ăn cân bằng (well-balanced meal) là một <b>diet</b> (chế độ ăn uống).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "You should decide which is the most _____and important task so that you can concentrate on it first.",
+        "qVi": "Bạn nên quyết định đâu là nhiệm vụ quan trọng và _________ nhất để bạn có thể tập trung vào nó trước.",
+        "key": ["most", "and important task", "concentrate on it first"],
+        "opts": ["urgent", "physical", "mental", "optimistic"],
+        "optsVi": ["khẩn cấp", "thể chất", "tinh thần", "lạc quan"],
+        "correct": 0,
+        "exp": "Việc cần phải làm trước tiên (first) là những việc quan trọng và <b>urgent</b> (khẩn cấp).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "By doing this, you may not be at a loss to _________ with too much work at the same time.",
+        "qVi": "Bằng cách này, bạn có thể không bị bối rối để _________ với quá nhiều công việc cùng một lúc.",
+        "key": ["with too much work"],
+        "opts": ["deal", "connect", "solve", "overcome"],
+        "optsVi": ["giải quyết", "kết nối", "giải quyết", "vượt qua"],
+        "correct": 0,
+        "exp": "Cụm động từ <b>deal with</b> có nghĩa là 'đối phó, giải quyết' (với công việc). (Lưu ý: solve không đi với with).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "You have to manage your time by planning your _________ and giving priority to your work.",
+        "qVi": "Bạn phải quản lý thời gian của mình bằng cách lên kế hoạch cho _________ và ưu tiên công việc của bạn.",
+        "key": ["planning your"],
+        "opts": ["schedule", "deadline", "session", "due date"],
+        "optsVi": ["lịch trình", "hạn chót", "phiên/buổi", "ngày tới hạn"],
+        "correct": 0,
+        "exp": "Việc lên kế hoạch quản lý thời gian gọi là planning <b>schedule</b> (lên lịch trình/thời khóa biểu).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+    },
+    {
+        "q": "Your friend invites you out for an ice cream, but it's possible that you will have a sore _________.",
+        "qVi": "Bạn của bạn rủ bạn ra ngoài ăn kem, nhưng có khả năng bạn sẽ bị đau _________.",
+        "key": ["ice cream", "have a sore"],
+        "opts": ["eye", "head", "throat", "mouth"],
+        "optsVi": ["mắt", "đầu", "cổ họng", "miệng"],
+        "correct": 2,
+        "exp": "Ăn kem lạnh có thể dẫn đến việc bị đau họng: <b>a sore throat</b>.[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Bệnh tật/Triệu chứng]"
+    },
+    {
+        "q": "You're able to make a delicious pizza when you have all the needed _________.",
+        "qVi": "Bạn có thể làm một chiếc bánh pizza ngon khi bạn có tất cả các _________ cần thiết.",
+        "key": ["make a delicious pizza", "needed"],
+        "opts": ["instructions", "ingredients", "assignments", "meals"],
+        "optsVi": ["hướng dẫn", "nguyên liệu / thành phần", "bài tập", "bữa ăn"],
+        "correct": 1,
+        "exp": "Để nấu ăn (làm bánh pizza), bạn cần có đầy đủ các <b>ingredients</b> (nguyên liệu).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Ẩm thực]"
+    },
+    {
+        "q": "You must get rid of all the distractions if you want to manage your time _________.",
+        "qVi": "Bạn phải loại bỏ mọi sự xao nhãng nếu bạn muốn quản lý thời gian của mình một cách _________.",
+        "key": ["manage your time"],
+        "opts": ["effectively", "regularly", "optimistically", "appropriately"],
+        "optsVi": ["hiệu quả", "thường xuyên", "lạc quan", "thích hợp"],
+        "correct": 0,
+        "exp": "Quản lý thời gian thì cần một cách <b>effectively</b> (hiệu quả).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trạng từ]"
+    },
+    {
+        "q": "I also took breaks appropriately because they helped me keep _________ from stress and anxiety.",
+        "qVi": "Tôi cũng nghỉ ngơi một cách hợp lý vì chúng giúp tôi tránh _________ khỏi căng thẳng và lo âu.",
+        "key": ["keep", "from stress"],
+        "opts": ["out", "off", "away", "up"],
+        "optsVi": ["ngoài", "tắt", "xa", "lên"],
+        "correct": 2,
+        "exp": "Cụm động từ <b>keep away from</b> mang nghĩa 'tránh xa khỏi' (căng thẳng/lo âu).[cite: 2]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    }
+];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9001"; // Thay đổi mật khẩu tại đây
+        const LESSON_NAME = "Unit 1"; // Đổi tên cho từng bài khác nhau
+        let currentUser = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser}`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key.join('; ')}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
+                if (!confirmSubmit) return;
+            }
+
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            let rank = "";
+            if(score >= 9) rank = "Xuất sắc (Excellent)";
+            else if(score >= 8) rank = "Giỏi (Good)";
+            else if(score >= 6.5) rank = "Khá (Fair)";
+            else if(score >= 5) rank = "Trung bình (Average)";
+            else rank = "Cần cố gắng thêm (Poor)";
+
+            let wrongAnswers = [];
+            for (let i = 0; i < totalCount; i++) {
+                const navNum = document.getElementById(`nav-${i}`);
+                if (!navNum.classList.contains('done-correct')) {
+                    wrongAnswers.push(i + 1);
+                }
+            }
+            const wrongListString = wrongAnswers.length > 0 ? wrongAnswers.join(', ') : "Không sai câu nào";
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjiTHdrvfoBKoacJ82YholKR2DfATpjp5Manr2Qu2O6-sh4PipGemq7rzrHnURMW6P/exec';
+            
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Đang gửi kết quả...";
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'name': currentUser,
+                    'lesson': LESSON_NAME,
+                    'correct': correctCount,
+                    'score': score,
+                    'wrong_list': wrongListString
+                })
+            }).then(() => {
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }).catch(error => {
+                console.error('Lỗi!', error);
+                alert('Đã lưu bài thi nhưng có lỗi mạng khi gửi kết quả.');
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, rank) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-rank').innerText = rank;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
