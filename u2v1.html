@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Bài tâp từ vựng - Unit 1 </title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 5px;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #202124;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dark-blue);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .stats-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .q-num {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9em;
+            background: #fff;
+        }
+
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            padding-bottom: 20px;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #202124;
+        }
+
+        .btn-hint-toggle {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid #ffb74d;
+            color: #f57f17;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .hint-content {
+            display: none;
+            background-color: #fff3e0;
+            border-left: 4px solid #ffb74d;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #e65100;
+        }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px;
+            align-self: flex-start;
+            background: #f1f3f4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+
+        .trans-text {
+            display: none;
+            color: var(--trans-color);
+            font-style: italic;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-weight: normal;
+            border-top: 1px dashed #eee;
+            padding-top: 4px;
+        }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fffde7;
+            border-left: 4px solid #fbc02d;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.3s;
+        }
+        .modal-score { font-size: 3.5em; font-weight: bold; color: var(--dark-blue); margin: 10px 0; }
+        .modal-details { margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none;
+        border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
+
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+            .header-title { font-size: 1em; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-error {
+            color: var(--wrong-red);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Mật khẩu không đúng hoặc chưa nhập tên!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tâp từ vựng - Unit 1</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <h2 style="color: #444; margin-top:0">Kết Quả</h2>
+            <div>Điểm số của bạn</div>
+            <div class="modal-score" id="final-score">0.0</div>
+            
+            <div class="modal-details">
+                <p>Số câu đúng: <b id="final-correct">0</b> / <span id="final-total">60</span></p>
+                <p>Xếp loại: <b id="final-rank" style="color: #e65100">---</b></p>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Xem lại bài</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+    {
+        "q": "Sorry I couldn't get online earlier. I got stuck in a __________ and came home late.[cite: 3]",
+        "qVi": "Xin lỗi tôi không thể lên mạng sớm hơn. Tôi bị kẹt trong một __________ và về nhà muộn.",
+        "key": ["got stuck in a", "came home late"],
+        "opts": ["traffic light", "traffic jam", "traffic flow", "traffic rule"],
+        "optsVi": ["đèn giao thông", "vụ tắc đường", "luồng giao thông", "luật giao thông"],
+        "correct": 1,
+        "exp": "Cụm từ <b>traffic jam</b> (vụ tắc đường) kết hợp với 'got stuck in' (bị kẹt trong) giải thích lý do về nhà muộn.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "I rarely use the bus. It's slow and __________ with people.[cite: 3]",
+        "qVi": "Tôi hiếm khi sử dụng xe buýt. Nó chậm và __________ người.",
+        "key": ["with people"],
+        "opts": ["packed", "peaceful", "empty", "dusty"],
+        "optsVi": ["chật cứng", "yên bình", "trống rỗng", "bụi bặm"],
+        "correct": 0,
+        "exp": "Tính từ <b>packed</b> đi với giới từ 'with' mang nghĩa là 'chật cứng (người)'.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ đi với giới từ]"
+    },
+    {
+        "q": "I mostly get around by __________. It's more reliable than the bus.[cite: 3]",
+        "qVi": "Tôi chủ yếu đi lại bằng __________. Nó đáng tin cậy hơn xe buýt.",
+        "key": ["get around by", "more reliable than the bus"],
+        "opts": ["concrete jungle", "underground", "pavement", "arrival"],
+        "optsVi": ["khu rừng bê tông", "tàu điện ngầm", "vỉa hè", "sự đến nơi"],
+        "correct": 1,
+        "exp": "Sau 'by' cần một phương tiện giao thông. <b>underground</b> (tàu điện ngầm) là một phương tiện giao thông phổ biến và thường đáng tin cậy hơn xe buýt.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phương tiện giao thông]"
+    },
+    {
+        "q": "But __________ is terrible in London. You know, the more crowded the city gets, the more congested the streets are.[cite: 3]",
+        "qVi": "Nhưng __________ thì tồi tệ ở London. Bạn biết đấy, thành phố càng đông đúc, đường phố càng tắc nghẽn.",
+        "key": ["congested the streets are"],
+        "opts": ["noise pollution", "health service", "traffic congestion", "public transport"],
+        "optsVi": ["ô nhiễm tiếng ồn", "dịch vụ y tế", "tắc nghẽn giao thông", "giao thông công cộng"],
+        "correct": 2,
+        "exp": "Việc đường phố đông đúc và tắc nghẽn (congested) liên quan trực tiếp đến <b>traffic congestion</b> (sự tắc nghẽn giao thông).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "There's a __________ in my neighbourhood. It's dusty, so people easily get itchy eyes.[cite: 3]",
+        "qVi": "Có một __________ trong khu phố của tôi. Nó đầy bụi, vì vậy mọi người dễ bị ngứa mắt.",
+        "key": ["dusty", "get itchy eyes"],
+        "opts": ["learning space", "cafeteria", "green space", "construction site"],
+        "optsVi": ["không gian học tập", "quán ăn tự phục vụ", "không gian xanh", "công trường xây dựng"],
+        "correct": 3,
+        "exp": "Nơi sinh ra nhiều bụi bẩn (dusty) gây ngứa mắt là <b>construction site</b> (công trường xây dựng).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Đô thị]"
+    },
+    {
+        "q": "New buildings make the city look modern and attractive. Do you remember the grand building __________?[cite: 3]",
+        "qVi": "Những tòa nhà mới làm cho thành phố trông hiện đại và hấp dẫn. Bạn có nhớ tòa nhà tráng lệ __________ không?",
+        "key": ["the grand building"],
+        "opts": ["downtown", "indoors", "coastal", "outside"],
+        "optsVi": ["ở trung tâm thành phố", "ở trong nhà", "ven biển", "ở ngoài"],
+        "correct": 0,
+        "exp": "Từ <b>downtown</b> (trung tâm thành phố) thường dùng như một trạng từ chỉ địa điểm, bổ nghĩa cho vị trí của tòa nhà.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Địa điểm]"
+    },
+    {
+        "q": "Sometimes. I watch movies there with my sister. I want to go there more often, but it's a bit __________.[cite: 3]",
+        "qVi": "Thỉnh thoảng. Tôi xem phim ở đó với em gái tôi. Tôi muốn đến đó thường xuyên hơn, nhưng nó hơi __________.",
+        "key": ["want to go there more often, but"],
+        "opts": ["cheap", "liveable", "pricey", "peaceful"],
+        "optsVi": ["rẻ", "đáng sống", "đắt đỏ", "yên bình"],
+        "correct": 2,
+        "exp": "Liên từ 'but' chỉ sự đối lập. Muốn đi thường xuyên nhưng không được vì lý do tiêu cực: <b>pricey</b> (đắt đỏ).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "The road is narrow, so traffic congestion often occurs at __________.[cite: 3]",
+        "qVi": "Đường hẹp nên thường xảy ra ùn tắc giao thông vào __________.",
+        "key": ["traffic congestion often occurs at"],
+        "opts": ["arrival", "rush hour", "drop-off time", "weekend"],
+        "optsVi": ["sự đến nơi", "giờ cao điểm", "thời gian đưa đón", "cuối tuần"],
+        "correct": 1,
+        "exp": "Tắc nghẽn giao thông (traffic congestion) thường xảy ra nhiều nhất vào <b>rush hour</b> (giờ cao điểm).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "Many teens fancy spending their weekends in an __________ centre.[cite: 3]",
+        "qVi": "Nhiều thanh thiếu niên thích dành những ngày cuối tuần của họ trong một trung tâm __________.",
+        "key": ["centre"],
+        "opts": ["entertainment", "industry", "business", "agriculture"],
+        "optsVi": ["giải trí", "công nghiệp", "kinh doanh", "nông nghiệp"],
+        "correct": 0,
+        "exp": "Thanh thiếu niên thường thích đến trung tâm <b>entertainment</b> (giải trí) vào cuối tuần.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Hoạt động giải trí]"
+    },
+    {
+        "q": "People can travel by __________, like buses and the metro.[cite: 3]",
+        "qVi": "Mọi người có thể đi lại bằng __________, như xe buýt và tàu điện ngầm.",
+        "key": ["travel by", "like buses and the metro"],
+        "opts": ["private car", "means of transport", "public transport", "sky train"],
+        "optsVi": ["xe hơi riêng", "phương tiện giao thông", "giao thông công cộng", "tàu điện trên cao"],
+        "correct": 2,
+        "exp": "Xe buýt (buses) và tàu điện ngầm (metro) là những ví dụ điển hình của <b>public transport</b> (giao thông công cộng).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "There are good schools and hospitals, and other __________ such as parks, cinemas, and sports facilities.[cite: 3]",
+        "qVi": "Có những trường học và bệnh viện tốt, và các __________ khác như công viên, rạp chiếu phim và cơ sở thể thao.",
+        "key": ["such as parks, cinemas, and sports facilities"],
+        "opts": ["public amenities", "traffic rules", "health services", "concrete jungles"],
+        "optsVi": ["tiện ích công cộng", "luật giao thông", "dịch vụ y tế", "những khu rừng bê tông"],
+        "correct": 0,
+        "exp": "Công viên, rạp chiếu phim, cơ sở thể thao được gọi chung là <b>public amenities</b> (tiện ích công cộng).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Cơ sở hạ tầng đô thị]"
+    },
+    {
+        "q": "Some cities are not safe because of __________.[cite: 3]",
+        "qVi": "Một số thành phố không an toàn vì __________.",
+        "key": ["not safe because of"],
+        "opts": ["green spaces", "high crime rates", "public transport", "traffic jams"],
+        "optsVi": ["không gian xanh", "tỷ lệ tội phạm cao", "giao thông công cộng", "vụ tắc đường"],
+        "correct": 1,
+        "exp": "Nguyên nhân khiến thành phố không an toàn (not safe) là do <b>high crime rates</b> (tỷ lệ tội phạm cao).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Vấn đề xã hội]"
+    },
+    {
+        "q": "The __________ is packed with commuters at rush hour.[cite: 3]",
+        "qVi": "__________ chật cứng người đi làm vào giờ cao điểm.",
+        "key": ["packed with commuters at rush hour"],
+        "opts": ["bus line", "sky train", "traffic light", "means of transport"],
+        "optsVi": ["tuyến xe buýt", "tàu điện trên cao", "đèn giao thông", "phương tiện giao thông"],
+        "correct": 1,
+        "exp": "Chủ ngữ phù hợp chứa người đi làm (commuters) là <b>sky train</b> (tàu điện trên cao).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "Hong Kong is like a __________ with so many people in it. It's a bustling city.[cite: 3]",
+        "qVi": "Hồng Kông giống như một __________ với rất nhiều người trong đó. Nó là một thành phố nhộn nhịp.",
+        "key": ["like a", "so many people in it"],
+        "opts": ["concrete jungle", "peaceful village", "coastal city", "safe place"],
+        "optsVi": ["khu rừng bê tông", "ngôi làng yên bình", "thành phố ven biển", "nơi an toàn"],
+        "correct": 0,
+        "exp": "Thành phố nhộn nhịp, chật chội và nhiều nhà cao tầng thường được ví như <b>concrete jungle</b> (rừng bê tông).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Đô thị / Ẩn dụ]"
+    },
+    {
+        "q": "I'm coming __________ a cold. I have a runny nose and a sore throat.[cite: 3]",
+        "qVi": "Tôi đang mắc __________ một cơn cảm lạnh. Tôi bị sổ mũi và đau họng.",
+        "key": ["coming", "a cold"],
+        "opts": ["out with", "down on", "down with", "up with"],
+        "optsVi": ["(không tồn tại)", "(không tồn tại)", "mắc (bệnh)", "nảy ra (ý tưởng)"],
+        "correct": 2,
+        "exp": "Cụm động từ <b>come down with</b> có nghĩa là 'mắc bệnh' (như cảm lạnh).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "Where do teenagers in your neighbourhood often hang __________ each other?[cite: 3]",
+        "qVi": "Thanh thiếu niên trong khu phố của bạn thường đi chơi __________ nhau ở đâu?",
+        "key": ["hang", "each other"],
+        "opts": ["around with", "out with", "in with", "down with"],
+        "optsVi": ["quanh quẩn với", "đi chơi với", "(không tồn tại)", "(không tồn tại)"],
+        "correct": 1,
+        "exp": "Cụm động từ <b>hang out with</b> có nghĩa là 'đi chơi với' ai đó.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "The authority is carrying __________ a plan to solve traffic congestion in the downtown area.[cite: 3]",
+        "qVi": "Chính quyền đang thực hiện __________ một kế hoạch để giải quyết tắc nghẽn giao thông ở khu vực trung tâm thành phố.",
+        "key": ["carrying", "a plan"],
+        "opts": ["out", "on", "away", "down"],
+        "optsVi": ["thực hiện", "tiếp tục", "mang đi", "(không tồn tại)"],
+        "correct": 0,
+        "exp": "Cụm động từ <b>carry out</b> có nghĩa là 'thực hiện, tiến hành' (một kế hoạch).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "We all need to cut __________ using our cars and ride our bikes more to reduce air pollution.[cite: 3]",
+        "qVi": "Tất cả chúng ta cần cắt giảm __________ việc sử dụng ô tô và đạp xe nhiều hơn để giảm ô nhiễm không khí.",
+        "key": ["cut", "using our cars"],
+        "opts": ["down with", "out with", "away", "down on"],
+        "optsVi": ["(không tồn tại)", "(không tồn tại)", "cắt đứt", "cắt giảm"],
+        "correct": 3,
+        "exp": "Cụm động từ <b>cut down on</b> mang nghĩa 'cắt giảm' (số lượng/việc sử dụng).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "I live in the __________ of Ha Noi. I use my bike to get around.[cite: 3]",
+        "qVi": "Tôi sống ở __________ của Hà Nội. Tôi sử dụng xe đạp của mình để đi lại.",
+        "key": ["live in the"],
+        "opts": ["downtown", "suburbs", "centre", "pavement"],
+        "optsVi": ["trung tâm thành phố", "vùng ngoại ô", "trung tâm", "vỉa hè"],
+        "correct": 1,
+        "exp": "Sống ở khu vực ngoại vi thành phố thì dùng <b>suburbs</b>. 'downtown' thường không đi với giới từ 'in the' trong trường hợp này, 'centre' cần có thêm 'city'.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Địa điểm]"
+    },
+    {
+        "q": "My favourite means of transport in Bangkok is the sky train. It's crowded at rush hour, but it's always _____.[cite: 3]",
+        "qVi": "Phương tiện giao thông yêu thích của tôi ở Bangkok là tàu điện trên cao. Nó đông đúc vào giờ cao điểm, nhưng nó luôn _____.",
+        "key": ["favourite means of transport", "crowded at rush hour, but it's always"],
+        "opts": ["unreliable", "late", "on time", "pricey"],
+        "optsVi": ["không đáng tin cậy", "muộn", "đúng giờ", "đắt đỏ"],
+        "correct": 2,
+        "exp": "Liên từ 'but' chỉ sự đối lập với sự bất tiện (crowded), nên ưu điểm của nó là <b>on time</b> (đúng giờ).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "I use my bike to get around. It's __________ because I can ride it to places where the bus line doesn't reach.[cite: 3]",
+        "qVi": "Tôi sử dụng xe đạp của mình để đi lại. Nó thì __________ bởi vì tôi có thể đi nó đến những nơi mà tuyến xe buýt không đến được.",
+        "key": ["because I can ride it to places where the bus line doesn't reach"],
+        "opts": ["dangerous", "convenient", "unreliable", "noisy"],
+        "optsVi": ["nguy hiểm", "tiện lợi", "không đáng tin cậy", "ồn ào"],
+        "correct": 1,
+        "exp": "Việc có thể đi đến những nơi xe buýt không tới thể hiện tính <b>convenient</b> (tiện lợi).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "My favourite __________ in Bangkok is the sky train.[cite: 3]",
+        "qVi": "__________ yêu thích của tôi ở Bangkok là tàu điện trên cao.",
+        "key": ["favourite", "is the sky train"],
+        "opts": ["public amenity", "learning space", "means of transport", "health service"],
+        "optsVi": ["tiện ích công cộng", "không gian học tập", "phương tiện giao thông", "dịch vụ y tế"],
+        "correct": 2,
+        "exp": "Sky train (tàu điện trên cao) được phân loại là một <b>means of transport</b> (phương tiện giao thông).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giao thông]"
+    },
+    {
+        "q": "They suggest carrying out a project which turns __________ into energy.[cite: 3]",
+        "qVi": "Họ đề nghị thực hiện một dự án biến __________ thành năng lượng.",
+        "key": ["turns", "into energy"],
+        "opts": ["food waste", "street food", "heavy rain", "noise pollution"],
+        "optsVi": ["rác thải thực phẩm", "thức ăn đường phố", "mưa lớn", "ô nhiễm tiếng ồn"],
+        "correct": 0,
+        "exp": "Một dự án bảo vệ môi trường phổ biến là biến <b>food waste</b> (rác thải thực phẩm) thành năng lượng sinh học.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Môi trường]"
+    },
+    {
+        "q": "Students would sort their __________ at school canteens.[cite: 3]",
+        "qVi": "Học sinh sẽ phân loại __________ của họ tại căng tin trường.",
+        "key": ["sort their", "at school canteens"],
+        "opts": ["traffic rules", "public amenities", "leftovers", "immigrants"],
+        "optsVi": ["luật giao thông", "tiện ích công cộng", "đồ ăn thừa", "người nhập cư"],
+        "correct": 2,
+        "exp": "Tại căng tin trường (school canteens), hành động phân loại (sort) liên quan đến <b>leftovers</b> (đồ ăn thừa).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trường học]"
+    },
+    {
+        "q": "Some of them include designing lively __________ for teens and having teen's favourite desserts in the cafeteria.[cite: 3]",
+        "qVi": "Một số trong đó bao gồm việc thiết kế __________ sống động cho thanh thiếu niên và có các món tráng miệng yêu thích của tuổi teen trong quán ăn tự phục vụ.",
+        "key": ["designing lively", "for teens"],
+        "opts": ["concrete jungles", "learning spaces", "construction sites", "traffic lights"],
+        "optsVi": ["khu rừng bê tông", "không gian học tập", "công trường xây dựng", "đèn giao thông"],
+        "correct": 1,
+        "exp": "Thiết kế không gian sống động cho học sinh/thanh thiếu niên phù hợp nhất với <b>learning spaces</b> (không gian học tập).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Cơ sở hạ tầng]"
+    },
+    {
+        "q": "Helena realises that there are too many vehicles around school gates. This is __________ for children who walk to school.[cite: 3]",
+        "qVi": "Helena nhận ra rằng có quá nhiều phương tiện xung quanh cổng trường. Điều này là __________ đối với những trẻ em đi bộ đến trường.",
+        "key": ["too many vehicles", "for children who walk"],
+        "opts": ["safe", "attractive", "convenient", "unsafe"],
+        "optsVi": ["an toàn", "hấp dẫn", "tiện lợi", "không an toàn"],
+        "correct": 3,
+        "exp": "Quá nhiều phương tiện (too many vehicles) tạo ra tình huống <b>unsafe</b> (không an toàn) cho trẻ em đi bộ.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+    },
+    {
+        "q": "She suggests that the __________ not allow cars at school gates at drop-off and pick-up times.[cite: 3]",
+        "qVi": "Cô ấy đề xuất rằng __________ không cho phép ô tô ở cổng trường vào thời gian đưa đón.",
+        "key": ["suggests that the", "not allow cars"],
+        "opts": ["chairmen", "immigrants", "city authorities", "teenagers"],
+        "optsVi": ["chủ tịch", "người nhập cư", "chính quyền thành phố", "thanh thiếu niên"],
+        "correct": 2,
+        "exp": "Chủ thể có quyền ra quyết định cấm phương tiện là <b>city authorities</b> (chính quyền thành phố).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Chủ thể / Tổ chức]"
+    },
+    {
+        "q": "In addition, they should not let motorbikes park on the __________ near school gates.[cite: 3]",
+        "qVi": "Ngoài ra, họ không nên để xe máy đậu trên __________ gần cổng trường.",
+        "key": ["park on the"],
+        "opts": ["pavement", "concrete jungle", "sky train", "downtown"],
+        "optsVi": ["vỉa hè", "khu rừng bê tông", "tàu điện trên cao", "trung tâm thành phố"],
+        "correct": 0,
+        "exp": "Hành vi đỗ xe (park) sai quy định thường diễn ra trên <b>pavement</b> (vỉa hè).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Đường phố]"
+    },
+    {
+        "q": "In Chi's city, many teens like __________ more than food prepared at home.[cite: 3]",
+        "qVi": "Ở thành phố của Chi, nhiều thanh thiếu niên thích __________ hơn là đồ ăn chuẩn bị ở nhà.",
+        "key": ["like", "more than food prepared at home"],
+        "opts": ["leftovers", "food waste", "street food", "public transport"],
+        "optsVi": ["đồ ăn thừa", "rác thải thực phẩm", "thức ăn đường phố", "giao thông công cộng"],
+        "correct": 2,
+        "exp": "Đối tượng được so sánh sở thích với 'đồ ăn nấu ở nhà' là <b>street food</b> (thức ăn đường phố).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Ẩm thực]"
+    },
+    {
+        "q": "Ho Chi Minh City is a __________ city. It is always full of activities.[cite: 3]",
+        "qVi": "Thành phố Hồ Chí Minh là một thành phố __________. Nó luôn tràn đầy các hoạt động.",
+        "key": ["city", "always full of activities"],
+        "opts": ["bustling", "peaceful", "slow", "quiet"],
+        "optsVi": ["nhộn nhịp", "yên bình", "chậm", "yên tĩnh"],
+        "correct": 0,
+        "exp": "Thành phố đầy ắp hoạt động (full of activities) thì được miêu tả là <b>bustling</b> (nhộn nhịp, sầm uất).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ miêu tả]"
+    },
+    {
+        "q": "Mia lives in a small town. In the past, there were not many people living in the town, so it was rather quiet and __________.[cite: 3]",
+        "qVi": "Mia sống trong một thị trấn nhỏ. Trong quá khứ, không có nhiều người sống trong thị trấn, vì vậy nó khá yên tĩnh và __________.",
+        "key": ["not many people", "quiet and"],
+        "opts": ["noisy", "crowded", "peaceful", "polluted"],
+        "optsVi": ["ồn ào", "đông đúc", "yên bình", "ô nhiễm"],
+        "correct": 2,
+        "exp": "Từ đồng nghĩa và cùng sắc thái tích cực đi kèm với 'quiet' (yên tĩnh) là <b>peaceful</b> (yên bình).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ miêu tả]"
+    },
+    {
+        "q": "Moreover, many car drivers don't obey __________, so they indirectly cause traffic congestion.[cite: 3]",
+        "qVi": "Hơn nữa, nhiều tài xế ô tô không tuân thủ __________, vì vậy họ gián tiếp gây ra ùn tắc giao thông.",
+        "key": ["don't obey", "cause traffic congestion"],
+        "opts": ["traffic safety", "traffic rules", "traffic flows", "bus lines"],
+        "optsVi": ["an toàn giao thông", "luật giao thông", "luồng giao thông", "tuyến xe buýt"],
+        "correct": 1,
+        "exp": "Việc không tuân thủ (don't obey) đi với <b>traffic rules</b> (luật giao thông) sẽ gây ra tắc nghẽn.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+    },
+    {
+        "q": "The dust and dirt from these sites have caused many problems for people's health, for example __________ eyes, runny noses, and acne.[cite: 3]",
+        "qVi": "Bụi bẩn từ các địa điểm này đã gây ra nhiều vấn đề cho sức khỏe của mọi người, ví dụ như mắt __________, sổ mũi và mụn trứng cá.",
+        "key": ["eyes", "runny noses"],
+        "opts": ["itchy", "safe", "liveable", "attractive"],
+        "optsVi": ["ngứa", "an toàn", "đáng sống", "hấp dẫn"],
+        "correct": 0,
+        "exp": "Triệu chứng về mắt do bụi bẩn gây ra là <b>itchy eyes</b> (ngứa mắt).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Sức khỏe]"
+    },
+    {
+        "q": "All these things make Mia feel that her town is not as __________ as before.[cite: 3]",
+        "qVi": "Tất cả những điều này khiến Mia cảm thấy rằng thị trấn của cô không còn __________ như trước nữa.",
+        "key": ["not as", "as before"],
+        "opts": ["ugly", "terrible", "dangerous", "liveable"],
+        "optsVi": ["xấu xí", "tồi tệ", "nguy hiểm", "đáng sống"],
+        "correct": 3,
+        "exp": "Sự xuất hiện của bụi bẩn, tắc nghẽn làm giảm chất lượng cuộc sống, khiến thị trấn không còn <b>liveable</b> (đáng sống) như trước.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ miêu tả đô thị]"
+    },
+    {
+        "q": "People are throwing __________ tons of food each year. This is such a waste![cite: 3]",
+        "qVi": "Mọi người đang vứt __________ hàng tấn thức ăn mỗi năm. Thật là một sự lãng phí!",
+        "key": ["throwing", "tons of food"],
+        "opts": ["away", "out", "down", "on"],
+        "optsVi": ["đi (vứt)", "ra ngoài", "xuống", "lên"],
+        "correct": 0,
+        "exp": "Cụm động từ <b>throw away</b> có nghĩa là 'vứt đi'.[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+    },
+    {
+        "q": "She came up with a cold after walking in the __________.[cite: 3]",
+        "qVi": "Cô ấy bị cảm lạnh sau khi đi bộ dưới __________.",
+        "key": ["came up with a cold after walking in the"],
+        "opts": ["heavy rain", "drop-off time", "noise pollution", "rush hour"],
+        "optsVi": ["mưa lớn", "thời gian đưa đón", "ô nhiễm tiếng ồn", "giờ cao điểm"],
+        "correct": 0,
+        "exp": "Nguyên nhân gây ra cảm lạnh (cold) khi đi bộ ngoài trời là <b>heavy rain</b> (mưa lớn). (Lưu ý: câu gốc dùng 'came up with' thay vì 'came down with' có thể là lỗi in của đề, nhưng nghĩa ngữ cảnh vẫn chỉ sự mắc bệnh).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Thời tiết / Bệnh tật]"
+    },
+    {
+        "q": "The chairman comes from a __________ city.[cite: 3]",
+        "qVi": "Chủ tịch đến từ một thành phố __________.",
+        "key": ["from a", "city"],
+        "opts": ["downtown", "concrete", "coastal", "pavement"],
+        "optsVi": ["trung tâm thành phố", "bê tông", "ven biển", "vỉa hè"],
+        "correct": 2,
+        "exp": "Từ bổ nghĩa phù hợp cho 'city' (thành phố) là <b>coastal</b> (ven biển).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Loại thành phố]"
+    },
+    {
+        "q": "The older the city becomes, the less attractive it is to __________.[cite: 3]",
+        "qVi": "Thành phố càng cũ, nó càng ít hấp dẫn đối với __________.",
+        "key": ["attractive it is to"],
+        "opts": ["chairmen", "immigrants", "city authorities", "farmers"],
+        "optsVi": ["chủ tịch", "người nhập cư", "chính quyền thành phố", "nông dân"],
+        "correct": 1,
+        "exp": "Sự hấp dẫn của thành phố (để đến sống và làm việc) thường hướng tới đối tượng <b>immigrants</b> (người nhập cư).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ chỉ người]"
+    },
+    {
+        "q": "Your home town should cut down on __________.[cite: 3]",
+        "qVi": "Quê hương của bạn nên cắt giảm __________.",
+        "key": ["cut down on"],
+        "opts": ["health service", "green space", "public amenity", "noise pollution"],
+        "optsVi": ["dịch vụ y tế", "không gian xanh", "tiện ích công cộng", "ô nhiễm tiếng ồn"],
+        "correct": 3,
+        "exp": "Thứ cần được cắt giảm (cut down on) là điều tiêu cực: <b>noise pollution</b> (ô nhiễm tiếng ồn).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Môi trường]"
+    },
+    {
+        "q": "I'm coming down with a cold. I have a runny nose and a __________.[cite: 3]",
+        "qVi": "Tôi đang bị cảm lạnh. Tôi bị sổ mũi và __________.",
+        "key": ["coming down with a cold", "have a runny nose and a"],
+        "opts": ["sore throat", "leftover", "itchy eye", "food waste"],
+        "optsVi": ["đau họng", "đồ ăn thừa", "ngứa mắt", "rác thải thực phẩm"],
+        "correct": 0,
+        "exp": "Triệu chứng đi kèm với cảm lạnh và sổ mũi thường là <b>sore throat</b> (đau họng).[cite: 3]<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Bệnh tật]"
+    }
+];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9001"; // Thay đổi mật khẩu tại đây
+        const LESSON_NAME = "Unit 1"; // Đổi tên cho từng bài khác nhau
+        let currentUser = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser}`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key.join('; ')}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
+                if (!confirmSubmit) return;
+            }
+
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            let rank = "";
+            if(score >= 9) rank = "Xuất sắc (Excellent)";
+            else if(score >= 8) rank = "Giỏi (Good)";
+            else if(score >= 6.5) rank = "Khá (Fair)";
+            else if(score >= 5) rank = "Trung bình (Average)";
+            else rank = "Cần cố gắng thêm (Poor)";
+
+            let wrongAnswers = [];
+            for (let i = 0; i < totalCount; i++) {
+                const navNum = document.getElementById(`nav-${i}`);
+                if (!navNum.classList.contains('done-correct')) {
+                    wrongAnswers.push(i + 1);
+                }
+            }
+            const wrongListString = wrongAnswers.length > 0 ? wrongAnswers.join(', ') : "Không sai câu nào";
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjiTHdrvfoBKoacJ82YholKR2DfATpjp5Manr2Qu2O6-sh4PipGemq7rzrHnURMW6P/exec';
+            
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Đang gửi kết quả...";
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'name': currentUser,
+                    'lesson': LESSON_NAME,
+                    'correct': correctCount,
+                    'score': score,
+                    'wrong_list': wrongListString
+                })
+            }).then(() => {
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }).catch(error => {
+                console.error('Lỗi!', error);
+                alert('Đã lưu bài thi nhưng có lỗi mạng khi gửi kết quả.');
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, rank) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-rank').innerText = rank;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
