@@ -1044,94 +1044,71 @@
             return report;
         }
 
-        function submitQuiz() {
-            if (window.innerWidth <= 768) toggleSidebar();
-            if (answeredSet.size < totalCount) {
-                const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
-                if (!confirmSubmit) return;
-            }
+      function submitQuiz() {
+    if (window.innerWidth <= 768) toggleSidebar();
+    if (answeredSet.size < totalCount) {
+        if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
+    }
 
-            const submitBtn = document.querySelector('.sidebar .btn-submit');
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = "Đang phân tích & gửi...";
-            submitBtn.disabled = true;
+    const submitBtn = document.querySelector('.sidebar .btn-submit');
+    submitBtn.innerText = "Đang gửi...";
+    submitBtn.disabled = true;
 
-            // XỬ LÝ SỐ LIỆU ĐỂ ĐÁNH GIÁ (Map theo tag)
-            let stats = {
-                vocab: { total: 0, correct: 0 },
-                collocations: { total: 0, correct: 0 },
-                phrasalVerbs: { total: 0, correct: 0 },
-                wordForm: { total: 0, correct: 0 }
-            };
+    // Tính toán dữ liệu
+    let stats = { vocab: { total: 0, correct: 0 }, collocations: { total: 0, correct: 0 }, phrasalVerbs: { total: 0, correct: 0 }, wordForm: { total: 0, correct: 0 } };
+    let correctList = [];
+    let wrongList = [];
 
-            let correctList = [];
-            let wrongList = [];
-
-            for (let i = 0; i < totalCount; i++) {
-                let tag = quizData[i].tag || 'vocab'; 
-                if(!stats[tag]) stats[tag] = { total: 0, correct: 0 };
-                stats[tag].total++;
-
-                const navNum = document.getElementById(`nav-${i}`);
-                if (navNum.classList.contains('done-correct')) {
-                    correctList.push(i + 1);
-                    stats[tag].correct++;
-                } else {
-                    wrongList.push(i + 1);
-                }
-            }
-
-            let scoresObj = {
-                vocab: stats.vocab.total > 0 ? (stats.vocab.correct / stats.vocab.total) * 100 : 100,
-                collocations: stats.collocations.total > 0 ? (stats.collocations.correct / stats.collocations.total) * 100 : 100,
-                phrasalVerbs: stats.phrasalVerbs.total > 0 ? (stats.phrasalVerbs.correct / stats.phrasalVerbs.total) * 100 : 100,
-                wordForm: stats.wordForm.total > 0 ? (stats.wordForm.correct / stats.wordForm.total) * 100 : 100
-            };
-
-            // Lấy Báo cáo Đánh giá
-            let report = generateFeedbackReport(scoresObj);
-            const finalScore = (correctCount / totalCount * 10).toFixed(1);
-
-            // Chuẩn bị Text để hiển thị Modal & Gửi Sheets
-            let strengthsText = "- " + report.strengths.join("\n- ");
-            let weaknessesText = "- " + report.weaknesses.join("\n- ");
-            let actionPlanText = "- " + report.actionPlan.join("\n- ");
-            let correctText = correctList.length > 0 ? correctList.join(', ') : "Không có";
-            let wrongText = wrongList.length > 0 ? wrongList.join(', ') : "Không sai câu nào";
-
-            // ĐÓNG GÓI PAYLOAD GỬI LÊN GOOGLE SHEETS
-            const payload = {
-                studentName: currentUser,
-                className: currentClass,
-                quizName: LESSON_NAME,
-                score: `${finalScore} (${correctCount}/${totalCount})`,
-                correctAnswers: correctText,
-                wrongAnswers: wrongText,
-                level: report.level,
-                strengths: strengthsText,
-                weaknesses: weaknessesText,
-                actionPlan: actionPlanText
-            };
-
-            // GỬI DỮ LIỆU BẰNG JSON
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                showResultModal(finalScore, report);
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-            }).catch(error => {
-                console.error('Lỗi!', error);
-                alert('Lỗi mạng khi gửi kết quả về máy chủ.');
-                showResultModal(finalScore, report);
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-            });
+    for (let i = 0; i < totalCount; i++) {
+        let tag = quizData[i].tag || 'vocab';
+        if(!stats[tag]) stats[tag] = { total: 0, correct: 0 };
+        stats[tag].total++;
+        const navNum = document.getElementById(`nav-${i}`);
+        if (navNum.classList.contains('done-correct')) {
+            correctList.push(i + 1);
+            stats[tag].correct++;
+        } else {
+            wrongList.push(i + 1);
         }
+    }
 
+    let scoresObj = {
+        vocab: stats.vocab.total > 0 ? (stats.vocab.correct / stats.vocab.total) * 100 : 100,
+        collocations: stats.collocations.total > 0 ? (stats.collocations.correct / stats.collocations.total) * 100 : 100,
+        phrasalVerbs: stats.phrasalVerbs.total > 0 ? (stats.phrasalVerbs.correct / stats.phrasalVerbs.total) * 100 : 100,
+        wordForm: stats.wordForm.total > 0 ? (stats.wordForm.correct / stats.wordForm.total) * 100 : 100
+    };
+
+    let report = generateFeedbackReport(scoresObj);
+    const finalScore = (correctCount / totalCount * 10).toFixed(1);
+
+    // Chuẩn bị dữ liệu gửi (Dạng URLSearchParams)
+    let formData = new URLSearchParams();
+    formData.append('studentName', currentUser);
+    formData.append('className', currentClass);
+    formData.append('quizName', LESSON_NAME);
+    formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
+    formData.append('correctAnswers', correctList.join(', '));
+    formData.append('wrongAnswers', wrongList.join(', '));
+    formData.append('level', report.level);
+    formData.append('strengths', report.strengths.join('\n'));
+    formData.append('weaknesses', report.weaknesses.join('\n'));
+    formData.append('actionPlan', report.actionPlan.join('\n'));
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+    }).then(() => {
+        showResultModal(finalScore, report);
+        submitBtn.innerText = "Nộp bài";
+        submitBtn.disabled = false;
+    }).catch(() => {
+        alert("Lỗi mạng!");
+        submitBtn.innerText = "Nộp bài";
+        submitBtn.disabled = false;
+    });
+}
         function showResultModal(score, report) {
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-correct').innerText = correctCount;
