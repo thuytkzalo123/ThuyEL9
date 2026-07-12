@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài tập Tiếng Anh: Tổng hợp (60 Câu)</title>
+    <title> Bài tâp từ vựng - Unit 4 </title>
     <style>
         :root {
             --primary-blue: #e8f0fe;
@@ -23,7 +23,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden; 
+            overflow: hidden;
         }
 
         /* === HEADER === */
@@ -317,7 +317,8 @@
         }
         .modal-score { font-size: 3.5em; font-weight: bold; color: var(--dark-blue); margin: 10px 0; }
         .modal-details { margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; }
-        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
+        .modal-btn { padding: 12px 30px; background: var(--dark-blue); color: white; border: none;
+        border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; }
 
         /* === RESPONSIVE FIXES === */
         @media (max-width: 768px) {
@@ -335,14 +336,60 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-error {
+            color: var(--wrong-red);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Mật khẩu không đúng hoặc chưa nhập tên!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
     <div class="header">
         <div class="header-top">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-            <h2 class="header-title">Bài tập Tiếng Anh: Tổng hợp (60 Câu)</h2>
+            <h2 class="header-title">Bài tâp từ vựng - Unit 1</h2>
         </div>
         <div class="progress-container">
             <div id="progress-bar"></div>
@@ -397,551 +444,1333 @@
 
     <script>
         const quizData = [
-            {
-                q: "Angkor Wat in Cambodia is a temple ____, the largest religious monument in the world. ",
-                qVi: "Angkor Wat ở Campuchia là một ____ đền thờ, di tích tôn giáo lớn nhất thế giới.",
-                key: ["temple", "largest religious monument"],
-                opts: ["station", "complex", "workshop", "market"],
-                optsVi: ["trạm/nhà ga", "khu phức hợp/quần thể", "xưởng", "chợ"],
-                correct: 1,
-                exp: "Cụm từ: temple <b>complex</b> (quần thể đền thờ) ."
-            },
-            {
-                q: "Dinh Bang Communal House in Bac Ninh Province is a national ____ site. ",
-                qVi: "Đình làng Đình Bảng ở tỉnh Bắc Ninh là một di tích ____ quốc gia.",
-                key: ["national", "site"],
-                opts: ["historical", "history", "historic", "historically"],
-                optsVi: ["thuộc về lịch sử (nói chung)", "lịch sử (n)", "mang tính lịch sử/có ý nghĩa lịch sử (adj)", "về mặt lịch sử (adv)"],
-                correct: 2,
-                exp: "Di tích mang ý nghĩa lịch sử quan trọng -> <b>historic</b> site ."
-            },
-            {
-                q: "Windsor Castle in England is the oldest and largest ____ castle in the world. ",
-                qVi: "Lâu đài Windsor ở Anh là lâu đài ____ lâu đời nhất và lớn nhất thế giới.",
-                key: ["oldest and largest", "castle"],
-                opts: ["used", "occupied", "filled", "stayed"],
-                optsVi: ["được sử dụng", "có người ở/được sử dụng", "được làm đầy", "ở lại"],
-                correct: 1,
-                exp: "Lâu đài vẫn đang được cư ngụ/có người sinh sống -> <b>occupied</b> castle ."
-            },
-            {
-                q: "We need to preserve our heritage for future ____ so they can know about the past. ",
-                qVi: "Chúng ta cần bảo tồn di sản của mình cho các ____ tương lai để họ có thể biết về quá khứ.",
-                key: ["future"],
-                opts: ["people", "students", "generations", "ancestors"],
-                optsVi: ["con người", "học sinh", "thế hệ", "tổ tiên"],
-                correct: 2,
-                exp: "Thế hệ mai sau -> future <b>generations</b> ."
-            },
-            {
-                q: "Thanks to preservation ____, we know a lot about our history and life in the past. ",
-                qVi: "Nhờ những ____ bảo tồn, chúng ta biết nhiều điều về lịch sử và cuộc sống trong quá khứ.",
-                key: ["preservation"],
-                opts: ["efforts", "works", "jobs", "activities"],
-                optsVi: ["nỗ lực", "công việc/tác phẩm", "nghề nghiệp", "hoạt động"],
-                correct: 0,
-                exp: "Cụm từ: preservation <b>efforts</b> (những nỗ lực bảo tồn) ."
-            },
-            {
-                q: "The best way to preserve our cultural ____ is to share it with others. ",
-                qVi: "Cách tốt nhất để bảo tồn ____ văn hóa của chúng ta là chia sẻ nó với những người khác.",
-                key: ["cultural"],
-                opts: ["tradition", "custom", "heritage", "relic"],
-                optsVi: ["truyền thống", "phong tục", "di sản", "di tích"],
-                correct: 2,
-                exp: "Cụm từ: cultural <b>heritage</b> (di sản văn hóa) ."
-            },
-            {
-                q: "Vietnamese people take great ____ in their culture which has been well preserved. ",
-                qVi: "Người dân Việt Nam vô cùng ____ về nền văn hóa của họ đã được bảo tồn tốt.",
-                key: ["take great", "in their culture"],
-                opts: ["proud", "pride", "value", "honor"],
-                optsVi: ["tự hào (adj)", "sự tự hào (n)", "giá trị", "danh dự"],
-                correct: 1,
-                exp: "Thành ngữ: take <b>pride</b> in something (tự hào về điều gì) ."
-            },
-            {
-                q: "Thanks to your kind ____, we were able to save the ancient monument. ",
-                qVi: "Nhờ vào sự ____ tốt bụng của bạn, chúng tôi đã có thể cứu được di tích cổ đại.",
-                key: ["kind", "able to save"],
-                opts: ["gift", "money", "contribution", "help"],
-                optsVi: ["món quà", "tiền", "sự đóng góp", "sự giúp đỡ"],
-                correct: 2,
-                exp: "Sự đóng góp giúp đỡ dự án/công việc -> kind <b>contribution</b> ."
-            },
-            {
-                q: "In Nam Dinh City, there is a complex of three temples where people ____ the Tran Dynasty's Kings. ",
-                qVi: "Tại thành phố Nam Định, có một quần thể gồm ba ngôi đền nơi mọi người ____ các vị Vua triều Trần.",
-                key: ["temples where people", "the Tran Dynasty's Kings"],
-                opts: ["watch", "celebrate", "worship", "remember"],
-                optsVi: ["xem", "ăn mừng", "thờ cúng", "nhớ"],
-                correct: 2,
-                exp: "Tôn kính, thờ cúng tại đền chùa -> <b>worship</b> ."
-            },
-            {
-                q: "Stonehenge in England is one of the oldest stone ____ in the world. ",
-                qVi: "Stonehenge ở Anh là một trong những ____ bằng đá lâu đời nhất trên thế giới.",
-                key: ["oldest stone"],
-                opts: ["structures", "houses", "buildings", "walls"],
-                optsVi: ["cấu trúc/công trình kiến trúc", "ngôi nhà", "tòa nhà", "bức tường"],
-                correct: 0,
-                exp: "Stonehenge là một cụm các khối đá được sắp xếp có chủ đích, gọi là các công trình kiến trúc cổ đại -> stone <b>structures</b> ."
-            },
-            {
-                q: "This monument is small but ____. It looks very beautiful and impressive. ",
-                qVi: "Đài tưởng niệm này nhỏ nhưng ____. Trông nó rất đẹp và ấn tượng.",
-                key: ["small but", "beautiful and impressive"],
-                opts: ["basic", "ancient", "magnificent", "deep-rooted"],
-                optsVi: ["cơ bản", "cổ đại", "nguy nga/tráng lệ", "lâu đời"],
-                correct: 2,
-                exp: "Tuy nhỏ nhưng vẫn mang vẻ đẹp ấn tượng, tráng lệ -> <b>magnificent</b> ."
-            },
-            {
-                q: "In 2006, Duong Lam became the first village that was ____ as a national historic and cultural relic. ",
-                qVi: "Năm 2006, Đường Lâm trở thành ngôi làng đầu tiên được ____ là di tích lịch sử văn hóa cấp quốc gia.",
-                key: ["was", "as a national historic and cultural relic"],
-                opts: ["promoted", "recognised", "protected", "occupied"],
-                optsVi: ["được thăng tiến/quảng bá", "được công nhận", "được bảo vệ", "được cư ngụ"],
-                correct: 1,
-                exp: "Được chính thức cấp danh hiệu, công nhận -> be <b>recognised</b> as ."
-            },
-            {
-                q: "The aim of the culture festival is the ____ of friendship and tourism. ",
-                qVi: "Mục đích của lễ hội văn hóa là sự ____ tình hữu nghị và du lịch.",
-                key: ["The aim of the culture festival"],
-                opts: ["protection", "recognition", "promotion", "preservation"],
-                optsVi: ["sự bảo vệ", "sự công nhận", "sự thúc đẩy/quảng bá", "sự bảo tồn"],
-                correct: 2,
-                exp: "Lễ hội dùng để quảng bá và thúc đẩy du lịch -> the <b>promotion</b> of tourism ."
-            },
-            {
-                q: "People in these mountainous areas still ____ their local customs and traditions. ",
-                qVi: "Người dân ở các khu vực miền núi này vẫn ____ các phong tục và truyền thống địa phương của họ.",
-                key: ["customs and traditions"],
-                opts: ["see", "look", "observe", "watch"],
-                optsVi: ["nhìn", "nhìn", "tuân theo/cử hành", "xem"],
-                correct: 2,
-                exp: "Tuân theo, duy trì và thực hành các phong tục -> <b>observe</b> customs ."
-            },
-            {
-                q: "It's our duty to keep our customs and traditions ____ for future generations. ",
-                qVi: "Nhiệm vụ của chúng ta là giữ cho các phong tục và truyền thống của chúng ta được ____ cho các thế hệ tương lai.",
-                key: ["keep our customs and traditions"],
-                opts: ["live", "alive", "living", "lively"],
-                optsVi: ["sống (v)", "tồn tại/sống sót (adj)", "đang sống", "sống động (adj)"],
-                correct: 1,
-                exp: "Cấu trúc: keep something <b>alive</b> (giữ cho cái gì đó tiếp tục tồn tại) ."
-            },
-            {
-                q: "Many beautiful old castles are no longer ____. No one lives in them anymore. ",
-                qVi: "Nhiều lâu đài cổ xinh đẹp không còn ____ nữa. Không còn ai sống trong đó nữa.",
-                key: ["No one lives in them anymore"],
-                opts: ["occupied", "preserved", "magnificent", "ancient"],
-                optsVi: ["có người ở", "được bảo tồn", "nguy nga", "cổ đại"],
-                correct: 0,
-                exp: "Không có người sống ở đó -> no longer <b>occupied</b> ."
-            },
-            {
-                q: "The invention of the seat belt made a good ____ to road safety. ",
-                qVi: "Việc phát minh ra dây an toàn đã mang lại một ____ tốt cho an toàn đường bộ.",
-                key: ["made a good", "to road safety"],
-                opts: ["contribution", "protection", "recognition", "preservation"],
-                optsVi: ["sự đóng góp", "sự bảo vệ", "sự công nhận", "sự bảo tồn"],
-                correct: 0,
-                exp: "Cụm từ cố định: make a <b>contribution</b> to (đóng góp vào cái gì) ."
-            },
-            {
-                q: "We believe that ____ of these old structures will benefit the community. ",
-                qVi: "Chúng tôi tin rằng việc ____ các công trình kiến trúc cũ này sẽ mang lại lợi ích cho cộng đồng.",
-                key: ["of these old structures"],
-                opts: ["promoting", "recognition", "preservation", "occupying"],
-                optsVi: ["quảng bá (V-ing)", "sự công nhận (n)", "sự bảo tồn (n)", "chiếm giữ (V-ing)"],
-                correct: 2,
-                exp: "Bảo vệ và gìn giữ các công trình cổ -> <b>preservation</b> ."
-            },
-            {
-                q: "A country's cultural heritage is a ____ resource that we must protect. ",
-                qVi: "Di sản văn hóa của một quốc gia là một nguồn tài nguyên ____ mà chúng ta phải bảo vệ.",
-                key: ["resource that we must protect"],
-                opts: ["expensive", "basic", "valuable", "deep-rooted"],
-                optsVi: ["đắt tiền", "cơ bản", "có giá trị", "lâu đời"],
-                correct: 2,
-                exp: "Tài nguyên quan trọng cần được bảo vệ -> <b>valuable</b> resource (tài nguyên có giá trị/quý giá) ."
-            },
-            {
-                q: "They have decided to ____ the pagoda which was damaged in the natural disaster. ",
-                qVi: "Họ đã quyết định ____ ngôi chùa bị hư hại trong trận thiên tai.",
-                key: ["damaged in the natural disaster"],
-                opts: ["rebuild", "preserve", "protect", "promote"],
-                optsVi: ["xây dựng lại", "bảo tồn", "bảo vệ", "quảng bá"],
-                correct: 0,
-                exp: "Ngôi chùa bị phá hủy (damaged) nên cần được <b>rebuild</b> (xây dựng lại) ."
-            },
-            {
-                q: "English cuisine is among the ____ traditions that English people are proud to keep alive. ",
-                qVi: "Ẩm thực Anh là một trong những truyền thống ____ mà người dân Anh tự hào gìn giữ.",
-                key: ["traditions"],
-                opts: ["basic", "deep-rooted", "ancient", "cultural"],
-                optsVi: ["cơ bản", "lâu đời/ăn sâu bám rễ", "cổ đại", "thuộc về văn hóa"],
-                correct: 1,
-                exp: "Truyền thống đã có từ rất lâu và ăn sâu vào đời sống -> <b>deep-rooted</b> traditions ."
-            },
-            {
-                q: "People have considered fish and chips to be England's ____ dish. ",
-                qVi: "Mọi người đã coi cá và khoai tây chiên là món ăn ____ của nước Anh.",
-                key: ["England's", "dish"],
-                opts: ["regional", "local", "national", "traditional"],
-                optsVi: ["thuộc về khu vực", "địa phương", "quốc gia", "truyền thống"],
-                correct: 2,
-                exp: "Món ăn đại diện cho cả một đất nước -> <b>national</b> dish (món ăn quốc gia) ."
-            },
-            {
-                q: "The basic ____ of the dish \"fish and chips\" are fried fish served with chips. ",
-                qVi: "Các ____ cơ bản của món \"cá và khoai tây chiên\" là cá chiên ăn kèm với khoai tây chiên.",
-                key: ["of the dish", "fried fish served with chips"],
-                opts: ["things", "ingredients", "parts", "foods"],
-                optsVi: ["đồ vật", "nguyên liệu/thành phần", "bộ phận", "thức ăn"],
-                correct: 1,
-                exp: "Các thành phần cấu tạo nên một món ăn -> <b>ingredients</b> ."
-            },
-            {
-                q: "Preserving and promoting fish and chips is the way English people keep themselves ____ with the past. ",
-                qVi: "Bảo tồn và quảng bá món cá và khoai tây chiên là cách người Anh giữ cho mình được ____ với quá khứ.",
-                key: ["keep themselves", "with the past"],
-                opts: ["associated", "linked", "talked", "stayed"],
-                optsVi: ["liên quan", "kết nối/liên kết", "nói chuyện", "ở lại"],
-                correct: 1,
-                exp: "Kết nối, duy trì sự gắn kết với quá khứ -> keep <b>linked</b> with ."
-            },
-            {
-                q: "In keeping with ____, we cook five-colour sticky rice on the first day of a lunar month. ",
-                qVi: "Theo ____, chúng tôi nấu xôi ngũ sắc vào ngày đầu tiên của tháng âm lịch.",
-                key: ["In keeping with", "cook five-colour sticky rice on the first day"],
-                opts: ["habit", "ritual", "tradition", "practice"],
-                optsVi: ["thói quen", "nghi lễ", "truyền thống", "tập tục/thực hành"],
-                correct: 2,
-                exp: "Thành ngữ: In keeping with <b>tradition</b> (Theo truyền thống) ."
-            },
-            {
-                q: "Vietnamese families worship their ____ and celebrate their death anniversaries every year. ",
-                qVi: "Các gia đình Việt Nam thờ cúng ____ của họ và tổ chức ngày giỗ hàng năm.",
-                key: ["worship their", "celebrate their death anniversaries"],
-                opts: ["parents", "ancestors", "generations", "elders"],
-                optsVi: ["cha mẹ", "tổ tiên", "thế hệ", "người lớn tuổi"],
-                correct: 1,
-                exp: "Thờ cúng ông bà tổ tiên -> worship <b>ancestors</b> ."
-            },
-            {
-                q: "By celebrating anniversaries, they show their ____ to their ancestors. ",
-                qVi: "Bằng cách tổ chức các ngày giỗ, họ thể hiện sự ____ của mình đối với tổ tiên.",
-                key: ["show their", "to their ancestors"],
-                opts: ["love", "pride", "gratitude", "respect"],
-                optsVi: ["tình yêu", "sự tự hào", "lòng biết ơn", "sự tôn trọng"],
-                correct: 2,
-                exp: "Việc thờ cúng tổ tiên nhằm thể hiện lòng biết ơn công lao sinh thành -> show <b>gratitude</b> . (respect cũng đúng nhưng gratitude là đáp án phổ biến nhất cho ngữ cảnh này)."
-            },
-            {
-                q: "They take part in national and ____ festivals like the Mid-Autumn Festival. ",
-                qVi: "Họ tham gia các lễ hội cấp quốc gia và cấp ____ như Tết Trung thu.",
-                key: ["national and", "festivals"],
-                opts: ["regional", "world", "city", "village"],
-                optsVi: ["khu vực", "thế giới", "thành phố", "làng"],
-                correct: 0,
-                exp: "Lễ hội mang quy mô toàn quốc hoặc theo từng vùng miền -> <b>regional</b> festivals ."
-            },
-            {
-                q: "Families pass their traditions ____ to the next generation to keep them alive. ",
-                qVi: "Các gia đình truyền lại truyền thống của họ ____ cho thế hệ tiếp theo để giữ cho chúng tiếp tục tồn tại.",
-                key: ["pass their traditions", "to the next generation"],
-                opts: ["up", "down", "away", "off"],
-                optsVi: ["...", "...", "...", "..."],
-                correct: 1,
-                exp: "Cụm động từ: <b>pass down</b> (truyền lại cho đời sau) ."
-            },
-            {
-                q: "Tea rituals in Vietnam represent ____, respect for the elderly, and peaceful nature. ",
-                qVi: "Nghi thức trà đạo ở Việt Nam tượng trưng cho ____, sự tôn trọng người cao tuổi và thiên nhiên thanh bình.",
-                key: ["represent", "respect for the elderly"],
-                opts: ["friendship", "hospitality", "kindness", "tradition"],
-                optsVi: ["tình bạn", "lòng hiếu khách", "sự tử tế", "truyền thống"],
-                correct: 1,
-                exp: "Mời trà là một nét đẹp thể hiện sự hiếu khách -> <b>hospitality</b> ."
-            },
-            {
-                q: "Drinking tea is considered a daily ____ of the elderly in households and in society. ",
-                qVi: "Uống trà được coi là một ____ hàng ngày của người già trong các gia đình và ngoài xã hội.",
-                key: ["a daily"],
-                opts: ["work", "habit", "job", "duty"],
-                optsVi: ["công việc", "thói quen", "công việc", "nhiệm vụ"],
-                correct: 1,
-                exp: "Một thói quen diễn ra mỗi ngày -> daily <b>habit</b> ."
-            },
-            {
-                q: "In the morning, people start a new day with cups of tea to ____ their minds. ",
-                qVi: "Vào buổi sáng, mọi người bắt đầu một ngày mới với những tách trà để ____ tinh thần của họ.",
-                key: ["cups of tea to", "their minds"],
-                opts: ["refresh", "relax", "change", "open"],
-                optsVi: ["làm sảng khoái/tỉnh táo", "thư giãn", "thay đổi", "mở"],
-                correct: 0,
-                exp: "Uống trà buổi sáng giúp làm tỉnh táo, sảng khoái đầu óc -> <b>refresh</b> their minds ."
-            },
-            {
-                q: "Tea served with ice and lemon has become a modern trend of Vietnamese ____ culture. ",
-                qVi: "Trà đá với chanh đã trở thành một xu hướng hiện đại của văn hóa ____ Việt Nam.",
-                key: ["modern trend", "culture"],
-                opts: ["village", "home", "street", "house"],
-                optsVi: ["làng", "nhà", "đường phố", "nhà"],
-                correct: 2,
-                exp: "Trà đá vỉa hè là một nét đặc trưng của văn hóa đường phố -> <b>street</b> culture ."
-            },
-            {
-                q: "Respect for elders is a ____ value in our culture. ",
-                qVi: "Tôn trọng người lớn tuổi là một giá trị ____ trong văn hóa của chúng ta.",
-                key: ["value in our culture"],
-                opts: ["deep-rooted", "popular", "basic", "magnificent"],
-                optsVi: ["lâu đời/ăn sâu bám rễ", "phổ biến", "cơ bản", "nguy nga"],
-                correct: 0,
-                exp: "Một giá trị văn hóa lâu đời, bám rễ sâu vào nhận thức -> <b>deep-rooted</b> value ."
-            },
-            {
-                q: "Each generation passes down stories and ____ to the next. ",
-                qVi: "Mỗi thế hệ truyền lại những câu chuyện và ____ cho thế hệ tiếp theo.",
-                key: ["passes down stories and"],
-                opts: ["works", "lessons", "traditions", "habits"],
-                optsVi: ["công việc/tác phẩm", "bài học", "truyền thống", "thói quen"],
-                correct: 2,
-                exp: "Ông bà thường truyền lại các câu chuyện và truyền thống văn hóa -> <b>traditions</b> ."
-            },
-            {
-                q: "The ceremony involved ____ at the ancestral altar. ",
-                qVi: "Buổi lễ bao gồm việc ____ tại bàn thờ tổ tiên.",
-                key: ["at the ancestral altar"],
-                opts: ["praying", "worshipping", "looking", "singing"],
-                optsVi: ["cầu nguyện", "thờ cúng", "nhìn", "hát"],
-                correct: 1,
-                exp: "Đứng trước bàn thờ tổ tiên thực hiện nghi thức thờ cúng -> <b>worshipping</b> ."
-            },
-            {
-                q: "Grandma's kitchen was filled with delicious ____ and the warmth of family. ",
-                qVi: "Nhà bếp của bà tràn ngập những ____ thơm ngon và sự ấm áp của gia đình.",
-                key: ["kitchen was filled with delicious"],
-                opts: ["ingredients", "dishes", "meat", "drinks"],
-                optsVi: ["nguyên liệu", "món ăn", "thịt", "đồ uống"],
-                correct: 1,
-                exp: "Nhà bếp đầy ắp các món ăn ngon -> delicious <b>dishes</b> ."
-            },
-            {
-                q: "The aroma of food from the ____ reminded me of my childhood. ",
-                qVi: "Hương thơm của thức ăn từ những ____ khiến tôi nhớ lại tuổi thơ của mình.",
-                key: ["aroma of food from the"],
-                opts: ["street vendors", "shoppers", "doctors", "workers"],
-                optsVi: ["người bán hàng rong", "người mua sắm", "bác sĩ", "công nhân"],
-                correct: 0,
-                exp: "Đồ ăn tỏa hương thơm trên phố thường đến từ những người bán hàng rong -> <b>street vendors</b> ."
-            },
-            {
-                q: "Vietnamese people give each other ____ money in red envelopes during Tet. ",
-                qVi: "Người Việt Nam tặng nhau tiền ____ trong những phong bao màu đỏ vào dịp Tết.",
-                key: ["money in red envelopes during Tet"],
-                opts: ["lucky", "happy", "new", "good"],
-                optsVi: ["may mắn", "hạnh phúc", "mới", "tốt"],
-                correct: 0,
-                exp: "Tiền lì xì ngày Tết -> <b>lucky</b> money ."
-            },
-            {
-                q: "People clean their houses to get ____ of bad luck from the old year. ",
-                qVi: "Mọi người dọn dẹp nhà cửa để tống ____ những xui xẻo của năm cũ.",
-                key: ["get", "of bad luck"],
-                opts: ["out", "rid", "away", "off"],
-                optsVi: ["...", "...", "...", "..."],
-                correct: 1,
-                exp: "Cụm từ: get <b>rid</b> of (loại bỏ, tống khứ đi) ."
-            },
-            {
-                q: "In the past, many children went to school ____ because they didn't have shoes. ",
-                qVi: "Ngày xưa, nhiều trẻ em đi học ____ vì chúng không có giày.",
-                key: ["went to school", "didn't have shoes"],
-                opts: ["on foot", "by bus", "barefoot", "by bicycle"],
-                optsVi: ["đi bộ", "bằng xe buýt", "chân đất", "bằng xe đạp"],
-                correct: 2,
-                exp: "Không có giày dép để mang -> đi <b>barefoot</b> (chân trần/chân đất) ."
-            },
-            {
-                q: "Students in the past played ____ games like hide-and-seek during break time. ",
-                qVi: "Học sinh ngày xưa chơi các trò chơi ____ như trốn tìm trong giờ ra chơi.",
-                key: ["games like hide-and-seek"],
-                opts: ["computer", "mobile", "traditional", "modern"],
-                optsVi: ["máy tính", "di động", "truyền thống", "hiện đại"],
-                correct: 2,
-                exp: "Trốn tìm (hide-and-seek) là một trò chơi dân gian/truyền thống -> <b>traditional</b> games ."
-            },
-            {
-                q: "Nowadays, children chat on phones instead of talking ____ as people did in the past. ",
-                qVi: "Ngày nay, trẻ em trò chuyện trên điện thoại thay vì nói chuyện ____ như mọi người đã làm trong quá khứ.",
-                key: ["instead of talking"],
-                opts: ["face to face", "on foot", "by hand", "online"],
-                optsVi: ["trực tiếp/mặt đối mặt", "đi bộ", "bằng tay", "trực tuyến"],
-                correct: 0,
-                exp: "Nói chuyện điện thoại thay vì nói chuyện trực tiếp -> <b>face to face</b> ."
-            },
-            {
-                q: "In the past, people used ____ communication to transfer knowledge and news. ",
-                qVi: "Trong quá khứ, mọi người đã sử dụng giao tiếp ____ để truyền đạt kiến thức và tin tức.",
-                key: ["communication", "In the past"],
-                opts: ["mobile", "oral", "computer", "internet"],
-                optsVi: ["di động", "bằng lời nói/truyền miệng", "máy tính", "internet"],
-                correct: 1,
-                exp: "Ngày xưa thông tin chủ yếu được truyền miệng -> <b>oral</b> communication ."
-            },
-            {
-                q: "Years ago, people used to travel ____ foot or by riding animals for long distances. ",
-                qVi: "Nhiều năm trước, mọi người thường đi bộ (bằng chân) hoặc cưỡi động vật để đi những quãng đường dài.",
-                key: ["travel", "foot"],
-                opts: ["by", "on", "with", "in"],
-                optsVi: ["bằng", "trên", "với", "trong"],
-                correct: 1,
-                exp: "Cụm từ cố định: travel <b>on</b> foot (đi bộ) ."
-            },
-            {
-                q: "In ____ regions, the air is pure and the crops are free of insecticides. ",
-                qVi: "Ở các vùng ____, không khí trong lành và cây trồng không có thuốc trừ sâu.",
-                key: ["regions", "air is pure and the crops are free of insecticides"],
-                opts: ["city", "remote", "near", "large"],
-                optsVi: ["thành phố", "hẻo lánh/xa xôi", "gần", "lớn"],
-                correct: 1,
-                exp: "Nơi có không khí trong lành, không bị ô nhiễm thường là các vùng sâu vùng xa -> <b>remote</b> regions ."
-            },
-            {
-                q: "In the past, many women were ____ because they were not allowed to go to school. ",
-                qVi: "Trong quá khứ, nhiều phụ nữ bị ____ vì họ không được phép đến trường.",
-                key: ["not allowed to go to school"],
-                opts: ["wealthy", "illiterate", "busy", "active"],
-                optsVi: ["giàu có", "mù chữ", "bận rộn", "năng động"],
-                correct: 1,
-                exp: "Không được đi học nên không biết chữ -> <b>illiterate</b> (mù chữ) ."
-            },
-            {
-                q: "At 5.30 a.m. every day, the ____ outside wakes me up with the morning radio programs. ",
-                qVi: "Vào lúc 5:30 sáng mỗi ngày, chiếc ____ bên ngoài đánh thức tôi bằng các chương trình phát thanh buổi sáng.",
-                key: ["outside wakes me up", "morning radio programs"],
-                opts: ["radio", "television", "loudspeaker", "computer"],
-                optsVi: ["đài phát thanh", "tivi", "loa phát thanh", "máy tính"],
-                correct: 2,
-                exp: "Phát thanh các chương trình trên đường phố/phường xã bằng loa -> <b>loudspeaker</b> ."
-            },
-            {
-                q: "My grandmother used to collect ____ to treat illnesses in the family. ",
-                qVi: "Bà tôi thường thu thập ____ để chữa bệnh trong gia đình.",
-                key: ["collect", "treat illnesses"],
-                opts: ["flowers", "herbs", "leaves", "trees"],
-                optsVi: ["hoa", "thảo mộc/thảo dược", "lá cây", "cây cối"],
-                correct: 1,
-                exp: "Hái các loại cây thuốc để chữa bệnh -> <b>herbs</b> (thảo mộc) ."
-            },
-            {
-                q: "The ancient temple stood as a ____ of a bygone era. ",
-                qVi: "Ngôi đền cổ đứng như một ____ về một thời kỳ đã qua.",
-                key: ["stood as a", "of a bygone era"],
-                opts: ["structure", "reminder", "house", "ceremony"],
-                optsVi: ["cấu trúc", "sự gợi nhớ", "ngôi nhà", "buổi lễ"],
-                correct: 1,
-                exp: "Di tích lịch sử có tác dụng gợi nhắc lại quá khứ -> a <b>reminder</b> ."
-            },
-            {
-                q: "The majestic ____ overlooked the town, steeped in history. ",
-                qVi: "Tòa ____ uy nghi nhìn xuống thị trấn, thấm đẫm bề dày lịch sử.",
-                key: ["majestic", "overlooked the town"],
-                opts: ["castle", "building", "complex", "monument"],
-                optsVi: ["lâu đài", "tòa nhà", "khu phức hợp", "đài kỷ niệm"],
-                correct: 0,
-                exp: "Công trình tráng lệ, thường nằm trên cao nhìn xuống thị trấn là <b>castle</b> (lâu đài) ."
-            },
-            {
-                q: "Streets in Ha Noi's Old Quarter still have names describing their original ____. ",
-                qVi: "Các con phố trong Khu Phố Cổ Hà Nội vẫn có những cái tên mô tả ____ ban đầu của chúng.",
-                key: ["names describing their original"],
-                opts: ["people", "craft", "history", "house"],
-                optsVi: ["con người", "nghề thủ công", "lịch sử", "ngôi nhà"],
-                correct: 1,
-                exp: "Các phố cổ Hà Nội mang tên mặt hàng/nghề thủ công truyền thống (Hàng Mắm, Hàng Bạc...) -> original <b>craft</b> ."
-            },
-            {
-                q: "The architecture and lifestyle of the local people ____ typical characteristics of old Ha Noi. ",
-                qVi: "Kiến trúc và lối sống của người dân địa phương ____ những đặc điểm tiêu biểu của Hà Nội xưa.",
-                key: ["typical characteristics"],
-                opts: ["show", "reflect", "see", "look"],
-                optsVi: ["chỉ ra", "phản ánh", "nhìn thấy", "nhìn"],
-                correct: 1,
-                exp: "Phản ánh những nét đặc trưng văn hóa -> <b>reflect</b> ."
-            },
-            {
-                q: "Most Vietnamese families have an ancestral ____ at a prominent place of the house. ",
-                qVi: "Hầu hết các gia đình Việt Nam đều có một ____ tổ tiên ở một vị trí nổi bật trong nhà.",
-                key: ["an ancestral", "prominent place of the house"],
-                opts: ["altar", "table", "room", "bed"],
-                optsVi: ["bàn thờ", "cái bàn", "căn phòng", "cái giường"],
-                correct: 0,
-                exp: "Nơi đặt tại vị trí trang trọng trong nhà để thờ cúng -> ancestral <b>altar</b> (bàn thờ tổ tiên) ."
-            },
-            {
-                q: "The ancestral altar is set with ancestral ____ and pictures of deceased family members. ",
-                qVi: "Bàn thờ tổ tiên được thiết lập với ____ tổ tiên và hình ảnh của các thành viên gia đình đã qua đời.",
-                key: ["set with ancestral", "and pictures of deceased"],
-                opts: ["books", "tablets", "papers", "notes"],
-                optsVi: ["sách", "bài vị", "giấy tờ", "ghi chú"],
-                correct: 1,
-                exp: "Từ vựng: ancestral <b>tablets</b> (bài vị tổ tiên) ."
-            },
-            {
-                q: "A branch of peach blossoms is used to ____ away evil spirits and bad luck. ",
-                qVi: "Một cành hoa đào được sử dụng để ____ tà ma và xui xẻo.",
-                key: ["away evil spirits"],
-                opts: ["take", "drive", "go", "run"],
-                optsVi: ["lấy đi", "xua đuổi", "đi", "chạy"],
-                correct: 1,
-                exp: "Cụm động từ: <b>drive</b> away (xua đuổi) ."
-            },
-            {
-                q: "My brother was just sitting while I was looking around the ____ workshop. ",
-                qVi: "Anh trai tôi chỉ ngồi trong khi tôi nhìn quanh xưởng ____.",
-                key: ["looking around the", "workshop"],
-                opts: ["weaving", "cooking", "playing", "talking"],
-                optsVi: ["dệt vải", "nấu ăn", "chơi", "nói chuyện"],
-                correct: 0,
-                exp: "Một loại xưởng làm nghề thủ công -> <b>weaving</b> workshop (xưởng dệt) ."
-            },
-            {
-                q: "Sam remembers a lot of historical ____ and dates from his history lessons. ",
-                qVi: "Sam nhớ rất nhiều ____ và ngày tháng lịch sử từ các bài học lịch sử của mình.",
-                key: ["historical", "and dates"],
-                opts: ["stories", "events", "traditions", "customs"],
-                optsVi: ["câu chuyện", "sự kiện", "truyền thống", "phong tục"],
-                correct: 1,
-                exp: "Đi kèm với 'dates' (ngày tháng) trong môn lịch sử là các 'sự kiện' -> historical <b>events</b> ."
-            },
-            {
-                q: "Ancestor worship reminds people of their ____ and where they came from. ",
-                qVi: "Thờ cúng tổ tiên nhắc nhở mọi người về ____ của họ và nơi họ xuất phát.",
-                key: ["reminds people of their", "and where they came from"],
-                opts: ["roots", "houses", "names", "jobs"],
-                optsVi: ["cội nguồn/rễ", "ngôi nhà", "tên", "công việc"],
-                correct: 0,
-                exp: "Nhắc nhở con người về nguồn gốc tổ tiên -> their <b>roots</b> (cội nguồn) ."
-            },
-            {
-                q: "The communal house has a ____ meaning in the community's life. ",
-                qVi: "Ngôi đình có một ý nghĩa ____ trong đời sống của cộng đồng.",
-                key: ["a", "meaning"],
-                opts: ["basic", "magnificent", "significant", "ancient"],
-                optsVi: ["cơ bản", "nguy nga", "quan trọng/đáng kể", "cổ đại"],
-                correct: 2,
-                exp: "Đình làng đóng vai trò vô cùng quan trọng đối với dân làng -> <b>significant</b> meaning (ý nghĩa quan trọng) ."
-            }
-        ];
+  {
+    "q": "Angkor Wat in Cambodia is a temple ____, the largest religious monument in the world.[cite: 5]",
+    "qVi": "Angkor Wat ở Campuchia là một ____ đền đài, là công trình tôn giáo lớn nhất trên thế giới.",
+    "key": [
+      "temple",
+      "largest religious monument"
+    ],
+    "opts": [
+      "station",
+      "complex",
+      "workshop",
+      "market"
+    ],
+    "optsVi": [
+      "nhà ga",
+      "quần thể / khu phức hợp",
+      "xưởng",
+      "chợ"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ <b>temple complex</b> mang nghĩa là 'quần thể đền đài'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Dinh Bang Communal House in Bac Ninh Province is a national ____ site.[cite: 5]",
+    "qVi": "Đình làng Đình Bảng ở tỉnh Bắc Ninh là một di tích ____ cấp quốc gia.",
+    "key": [
+      "national",
+      "site"
+    ],
+    "opts": [
+      "historical",
+      "history",
+      "historic",
+      "historically"
+    ],
+    "optsVi": [
+      "thuộc về lịch sử",
+      "lịch sử (danh từ)",
+      "có tính lịch sử / mang dấu ấn lịch sử",
+      "một cách lịch sử"
+    ],
+    "correct": 2,
+    "exp": "Tính từ <b>historic</b> đi với 'site' hoặc 'building' mang nghĩa là 'di tích lịch sử (quan trọng, có ý nghĩa lịch sử)'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Từ loại / Collocation]"
+  },
+  {
+    "q": "Windsor Castle in England is the oldest and largest ____ castle in the world.[cite: 5]",
+    "qVi": "Lâu đài Windsor ở Anh là lâu đài ____ lớn nhất và lâu đời nhất trên thế giới.",
+    "key": [
+      "oldest and largest",
+      "castle"
+    ],
+    "opts": [
+      "used",
+      "occupied",
+      "filled",
+      "stayed"
+    ],
+    "optsVi": [
+      "được sử dụng",
+      "có người ở / đang được sử dụng",
+      "được làm đầy",
+      "được ở lại"
+    ],
+    "correct": 1,
+    "exp": "Tính từ <b>occupied</b> mang nghĩa là 'đang có người sinh sống, sử dụng' (lâu đài vẫn đang có Hoàng gia Anh sinh sống).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+  },
+  {
+    "q": "We need to preserve our heritage for future ____ so they can know about the past.[cite: 5]",
+    "qVi": "Chúng ta cần bảo tồn di sản của mình cho các ____ tương lai để họ có thể biết về quá khứ.",
+    "key": [
+      "preserve our heritage",
+      "future"
+    ],
+    "opts": [
+      "people",
+      "students",
+      "generations",
+      "ancestors"
+    ],
+    "optsVi": [
+      "con người",
+      "học sinh",
+      "thế hệ",
+      "tổ tiên"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ cố định <b>future generations</b> có nghĩa là 'các thế hệ tương lai / mai sau'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Thanks to preservation ____, we know a lot about our history and life in the past.[cite: 5]",
+    "qVi": "Nhờ có các ____ bảo tồn, chúng ta biết rất nhiều về lịch sử và cuộc sống trong quá khứ.",
+    "key": [
+      "Thanks to preservation"
+    ],
+    "opts": [
+      "efforts",
+      "works",
+      "jobs",
+      "activities"
+    ],
+    "optsVi": [
+      "nỗ lực",
+      "công việc / tác phẩm",
+      "nghề nghiệp",
+      "hoạt động"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ <b>preservation efforts</b> có nghĩa là 'những nỗ lực bảo tồn'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "The best way to preserve our cultural ____ is to share it with others.[cite: 5]",
+    "qVi": "Cách tốt nhất để bảo tồn ____ văn hóa của chúng ta là chia sẻ nó với người khác.",
+    "key": [
+      "preserve our cultural"
+    ],
+    "opts": [
+      "tradition",
+      "custom",
+      "heritage",
+      "relic"
+    ],
+    "optsVi": [
+      "truyền thống",
+      "phong tục",
+      "di sản",
+      "di tích"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ <b>cultural heritage</b> mang nghĩa là 'di sản văn hóa'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Vietnamese people take great ____ in their culture which has been well preserved.[cite: 5]",
+    "qVi": "Người Việt Nam rất ____ về nền văn hóa đã được bảo tồn tốt của mình.",
+    "key": [
+      "take great",
+      "in their culture"
+    ],
+    "opts": [
+      "proud",
+      "pride",
+      "value",
+      "honor"
+    ],
+    "optsVi": [
+      "tự hào (tính từ)",
+      "sự tự hào (danh từ)",
+      "giá trị",
+      "vinh dự"
+    ],
+    "correct": 1,
+    "exp": "Cấu trúc cố định <b>take pride in something</b> = be proud of something (tự hào về điều gì). Sau 'great' cần danh từ 'pride'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Thanks to your kind ____, we were able to save the ancient monument.[cite: 5]",
+    "qVi": "Nhờ có sự ____ tốt bụng của bạn, chúng tôi đã có thể cứu được di tích cổ.",
+    "key": [
+      "Thanks to your kind",
+      "save the ancient monument"
+    ],
+    "opts": [
+      "gift",
+      "money",
+      "contribution",
+      "help"
+    ],
+    "optsVi": [
+      "món quà",
+      "tiền bạc",
+      "sự đóng góp / góp sức",
+      "sự giúp đỡ"
+    ],
+    "correct": 2,
+    "exp": "Từ vựng trang trọng và phù hợp nhất trong bối cảnh chung tay bảo tồn di tích là <b>contribution</b> (sự đóng góp).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "In Nam Dinh City, there is a complex of three temples where people ____ the Tran Dynasty's Kings.[cite: 5]",
+    "qVi": "Ở thành phố Nam Định, có một quần thể ba ngôi đền nơi người dân ____ các vua nhà Trần.",
+    "key": [
+      "temples where people",
+      "Tran Dynasty's Kings"
+    ],
+    "opts": [
+      "watch",
+      "celebrate",
+      "worship",
+      "remember"
+    ],
+    "optsVi": [
+      "xem",
+      "ăn mừng / kỷ niệm",
+      "thờ cúng / tôn kính",
+      "nhớ lại"
+    ],
+    "correct": 2,
+    "exp": "Tại các đền đài (temples), hành động đối với các vị vua/tổ tiên là <b>worship</b> (thờ cúng, phụng thờ).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+  },
+  {
+    "q": "Stonehenge in England is one of the oldest stone ____ in the world.[cite: 5]",
+    "qVi": "Stonehenge ở Anh là một trong những ____ bằng đá lâu đời nhất trên thế giới.",
+    "key": [
+      "oldest stone"
+    ],
+    "opts": [
+      "structures",
+      "houses",
+      "buildings",
+      "walls"
+    ],
+    "optsVi": [
+      "cấu trúc / công trình",
+      "ngôi nhà",
+      "tòa nhà",
+      "bức tường"
+    ],
+    "correct": 0,
+    "exp": "Stonehenge là các cột đá xếp vòng tròn, được gọi chung là các <b>stone structures</b> (công trình/cấu trúc đá).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "This monument is small but ____. It looks very beautiful and impressive.[cite: 5]",
+    "qVi": "Tượng đài này nhỏ nhưng ____. Nó trông rất đẹp và ấn tượng.",
+    "key": [
+      "small but",
+      "beautiful and impressive"
+    ],
+    "opts": [
+      "basic",
+      "ancient",
+      "magnificent",
+      "deep-rooted"
+    ],
+    "optsVi": [
+      "cơ bản",
+      "cổ kính",
+      "tráng lệ / lộng lẫy",
+      "bám rễ sâu / lâu đời"
+    ],
+    "correct": 2,
+    "exp": "Từ đồng nghĩa với 'beautiful and impressive' (đẹp và ấn tượng) là <b>magnificent</b> (lộng lẫy, tráng lệ).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ miêu tả]"
+  },
+  {
+    "q": "In 2006, Duong Lam became the first village that was ____ as a national historic and cultural relic.[cite: 5]",
+    "qVi": "Năm 2006, Đường Lâm trở thành ngôi làng đầu tiên được ____ là di tích lịch sử và văn hóa quốc gia.",
+    "key": [
+      "was",
+      "as a national historic and cultural relic"
+    ],
+    "opts": [
+      "promoted",
+      "recognised",
+      "protected",
+      "occupied"
+    ],
+    "optsVi": [
+      "quảng bá / thúc đẩy",
+      "công nhận",
+      "bảo vệ",
+      "chiếm giữ / sinh sống"
+    ],
+    "correct": 1,
+    "exp": "Cấu trúc <b>be recognised as</b> có nghĩa là 'được công nhận là (một danh hiệu/di tích)'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation / Bị động]"
+  },
+  {
+    "q": "The aim of the culture festival is the ____ of friendship and tourism.[cite: 5]",
+    "qVi": "Mục đích của lễ hội văn hóa là ____ tình hữu nghị và du lịch.",
+    "key": [
+      "aim of the culture festival",
+      "friendship and tourism"
+    ],
+    "opts": [
+      "protection",
+      "recognition",
+      "promotion",
+      "preservation"
+    ],
+    "optsVi": [
+      "sự bảo vệ",
+      "sự công nhận",
+      "sự thúc đẩy / quảng bá",
+      "sự bảo tồn"
+    ],
+    "correct": 2,
+    "exp": "Đối với 'friendship and tourism' (tình hữu nghị và du lịch), mục đích của lễ hội là <b>promotion</b> (thúc đẩy, quảng bá).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "People in these mountainous areas still ____ their local customs and traditions.[cite: 5]",
+    "qVi": "Người dân ở những vùng miền núi này vẫn ____ phong tục và truyền thống địa phương của họ.",
+    "key": [
+      "local customs and traditions"
+    ],
+    "opts": [
+      "see",
+      "look",
+      "observe",
+      "watch"
+    ],
+    "optsVi": [
+      "nhìn thấy",
+      "nhìn",
+      "tuân theo / duy trì / quan sát",
+      "xem"
+    ],
+    "correct": 2,
+    "exp": "Động từ <b>observe</b> đi với 'customs/traditions' mang nghĩa là 'tuân theo, duy trì, thực hiện (phong tục)'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "It's our duty to keep our customs and traditions ____ for future generations.[cite: 5]",
+    "qVi": "Nhiệm vụ của chúng ta là giữ cho các phong tục và truyền thống ____ cho các thế hệ tương lai.",
+    "key": [
+      "keep our customs and traditions"
+    ],
+    "opts": [
+      "live",
+      "alive",
+      "living",
+      "lively"
+    ],
+    "optsVi": [
+      "sống (động từ)",
+      "còn sống / tồn tại",
+      "đang sống",
+      "sống động / vui vẻ"
+    ],
+    "correct": 1,
+    "exp": "Cấu trúc <b>keep something alive</b> có nghĩa là 'duy trì sự tồn tại, giữ cho điều gì (truyền thống) tiếp tục được lưu truyền'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Many beautiful old castles are no longer ____. No one lives in them anymore.[cite: 5]",
+    "qVi": "Nhiều lâu đài cổ kính xinh đẹp không còn được ____ nữa. Không còn ai sống trong đó nữa.",
+    "key": [
+      "no longer",
+      "No one lives in them anymore"
+    ],
+    "opts": [
+      "occupied",
+      "preserved",
+      "magnificent",
+      "ancient"
+    ],
+    "optsVi": [
+      "có người sinh sống",
+      "được bảo tồn",
+      "lộng lẫy",
+      "cổ kính"
+    ],
+    "correct": 0,
+    "exp": "'No one lives in them anymore' (không ai sống ở đó nữa) giải thích cho từ <b>occupied</b> (có người ở/sinh sống).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+  },
+  {
+    "q": "The invention of the seat belt made a good ____ to road safety.[cite: 5]",
+    "qVi": "Việc phát minh ra dây an toàn đã có một ____ tốt cho an toàn giao thông đường bộ.",
+    "key": [
+      "made a good",
+      "to road safety"
+    ],
+    "opts": [
+      "contribution",
+      "protection",
+      "recognition",
+      "preservation"
+    ],
+    "optsVi": [
+      "sự đóng góp",
+      "sự bảo vệ",
+      "sự công nhận",
+      "sự bảo tồn"
+    ],
+    "correct": 0,
+    "exp": "Cấu trúc cố định <b>make a contribution to something</b> mang nghĩa là 'đóng góp vào việc gì'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "We believe that ____ of these old structures will benefit the community.[cite: 5]",
+    "qVi": "Chúng tôi tin rằng việc ____ những công trình kiến trúc cổ này sẽ có lợi cho cộng đồng.",
+    "key": [
+      "of these old structures will benefit the community"
+    ],
+    "opts": [
+      "promoting",
+      "recognition",
+      "preservation",
+      "occupying"
+    ],
+    "optsVi": [
+      "quảng bá (V-ing)",
+      "sự công nhận",
+      "sự bảo tồn",
+      "chiếm giữ (V-ing)"
+    ],
+    "correct": 2,
+    "exp": "Đối với các công trình cổ (old structures), việc làm mang lại lợi ích lâu dài cho cộng đồng là <b>preservation</b> (sự bảo tồn).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "A country's cultural heritage is a ____ resource that we must protect.[cite: 5]",
+    "qVi": "Di sản văn hóa của một quốc gia là một tài nguyên ____ mà chúng ta phải bảo vệ.",
+    "key": [
+      "resource that we must protect"
+    ],
+    "opts": [
+      "expensive",
+      "basic",
+      "valuable",
+      "deep-rooted"
+    ],
+    "optsVi": [
+      "đắt đỏ",
+      "cơ bản",
+      "quý giá / có giá trị cao",
+      "bám rễ sâu"
+    ],
+    "correct": 2,
+    "exp": "Di sản văn hóa là một tài nguyên <b>valuable</b> (vô cùng quý giá) cần được bảo vệ.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+  },
+  {
+    "q": "They have decided to ____ the pagoda which was damaged in the natural disaster.[cite: 5]",
+    "qVi": "Họ đã quyết định ____ ngôi chùa bị hư hại trong trận thiên tai.",
+    "key": [
+      "the pagoda which was damaged"
+    ],
+    "opts": [
+      "rebuild",
+      "preserve",
+      "protect",
+      "promote"
+    ],
+    "optsVi": [
+      "xây dựng lại / trùng tu",
+      "bảo tồn",
+      "bảo vệ",
+      "quảng bá"
+    ],
+    "correct": 0,
+    "exp": "Ngôi chùa bị hư hại/tàn phá (was damaged) thì cần được <b>rebuild</b> (xây dựng lại, trùng tu).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+  },
+  {
+    "q": "English cuisine is among the ____ traditions that English people are proud to keep alive.[cite: 5]",
+    "qVi": "Ẩm thực Anh nằm trong số những truyền thống ____ mà người Anh tự hào gìn giữ.",
+    "key": [
+      "traditions that English people are proud to keep alive"
+    ],
+    "opts": [
+      "basic",
+      "deep-rooted",
+      "ancient",
+      "cultural"
+    ],
+    "optsVi": [
+      "cơ bản",
+      "lâu đời / ăn sâu bám rễ",
+      "cổ xưa",
+      "văn hóa"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ <b>deep-rooted traditions</b> mang nghĩa là 'những truyền thống lâu đời, đã ăn sâu vào tiềm thức'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "People have considered fish and chips to be England's ____ dish.[cite: 5]",
+    "qVi": "Mọi người coi cá và khoai tây chiên là món ăn ____ của nước Anh.",
+    "key": [
+      "England's",
+      "dish"
+    ],
+    "opts": [
+      "regional",
+      "local",
+      "national",
+      "traditional"
+    ],
+    "optsVi": [
+      "thuộc vùng miền",
+      "địa phương",
+      "quốc gia / quốc hồn quốc túy",
+      "truyền thống"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ <b>national dish</b> mang nghĩa là 'món ăn quốc gia, món ăn đặc trưng đại diện cho một nước'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "The basic ____ of the dish \"fish and chips\" are fried fish served with chips.[cite: 5]",
+    "qVi": "Các ____ cơ bản của món \"cá và khoai tây chiên\" là cá chiên phục vụ cùng khoai tây chiên.",
+    "key": [
+      "basic",
+      "of the dish"
+    ],
+    "opts": [
+      "things",
+      "ingredients",
+      "parts",
+      "foods"
+    ],
+    "optsVi": [
+      "thứ",
+      "thành phần / nguyên liệu",
+      "bộ phận",
+      "thực phẩm"
+    ],
+    "correct": 1,
+    "exp": "Thành phần cấu tạo nên một món ăn được gọi là <b>ingredients</b> (nguyên liệu, thành phần).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Ẩm thực]"
+  },
+  {
+    "q": "Preserving and promoting fish and chips is the way English people keep themselves ____ with the past.[cite: 5]",
+    "qVi": "Bảo tồn và quảng bá món cá và khoai tây chiên là cách người Anh giữ cho mình ____ với quá khứ.",
+    "key": [
+      "keep themselves",
+      "with the past"
+    ],
+    "opts": [
+      "associated",
+      "linked",
+      "talked",
+      "stayed"
+    ],
+    "optsVi": [
+      "gắn kết / liên kết",
+      "liên kết (thường đi với to)",
+      "nói chuyện",
+      "ở lại"
+    ],
+    "correct": 0,
+    "exp": "Cấu trúc <b>be associated with</b> = keep someone associated with: gắn kết, liên hệ với (quá khứ).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "In keeping with ____, we cook five-colour sticky rice on the first day of a lunar month.[cite: 5]",
+    "qVi": "Theo ____, chúng tôi nấu xôi ngũ sắc vào ngày đầu tiên của tháng âm lịch.",
+    "key": [
+      "In keeping with",
+      "cook five-colour sticky rice on the first day"
+    ],
+    "opts": [
+      "habit",
+      "ritual",
+      "tradition",
+      "practice"
+    ],
+    "optsVi": [
+      "thói quen (cá nhân)",
+      "nghi lễ",
+      "truyền thống",
+      "thông lệ / thực tiễn"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ <b>in keeping with tradition</b> mang nghĩa là 'theo đúng truyền thống, theo phong tục'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Vietnamese families worship their ____ and celebrate their death anniversaries every year.[cite: 5]",
+    "qVi": "Các gia đình Việt Nam thờ cúng ____ của họ và làm giỗ hằng năm.",
+    "key": [
+      "worship their",
+      "celebrate their death anniversaries"
+    ],
+    "opts": [
+      "parents",
+      "ancestors",
+      "generations",
+      "elders"
+    ],
+    "optsVi": [
+      "cha mẹ",
+      "tổ tiên",
+      "thế hệ",
+      "người lớn tuổi"
+    ],
+    "correct": 1,
+    "exp": "Thờ cúng và làm giỗ (death anniversaries) là dành cho <b>ancestors</b> (tổ tiên).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa gia đình]"
+  },
+  {
+    "q": "By celebrating anniversaries, they show their ____ to their ancestors.[cite: 5]",
+    "qVi": "Bằng cách tổ chức ngày giỗ, họ thể hiện ____ của mình đối với tổ tiên.",
+    "key": [
+      "show their",
+      "to their ancestors"
+    ],
+    "opts": [
+      "love",
+      "pride",
+      "gratitude",
+      "respect"
+    ],
+    "optsVi": [
+      "tình yêu",
+      "sự tự hào",
+      "lòng biết ơn",
+      "sự tôn trọng (thường đi với for)"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ <b>show gratitude to someone</b> mang nghĩa là 'thể hiện lòng biết ơn đối với ai'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "They take part in national and ____ festivals like the Mid-Autumn Festival.[cite: 5]",
+    "qVi": "Họ tham gia vào các lễ hội quốc gia và ____ như Tết Trung thu.",
+    "key": [
+      "national and",
+      "festivals like the Mid-Autumn Festival"
+    ],
+    "opts": [
+      "regional",
+      "world",
+      "city",
+      "village"
+    ],
+    "optsVi": [
+      "vùng miền / địa phương",
+      "thế giới",
+      "thành phố",
+      "làng quê"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ đi song hành phổ biến: <b>national and regional festivals</b> (các lễ hội cấp quốc gia và vùng miền).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa]"
+  },
+  {
+    "q": "Families pass their traditions ____ to the next generation to keep them alive.[cite: 5]",
+    "qVi": "Các gia đình truyền truyền thống của họ ____ cho thế hệ tiếp theo để giữ chúng sống mãi.",
+    "key": [
+      "pass their traditions",
+      "to the next generation"
+    ],
+    "opts": [
+      "up",
+      "down",
+      "away",
+      "off"
+    ],
+    "optsVi": [
+      "lên",
+      "lại / xuống",
+      "đi",
+      "tắt / khỏi"
+    ],
+    "correct": 1,
+    "exp": "Cụm động từ <b>pass down (to someone)</b> có nghĩa là 'truyền lại cho thế hệ sau'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+  },
+  {
+    "q": "Tea rituals in Vietnam represent ____, respect for the elderly, and peaceful nature.[cite: 5]",
+    "qVi": "Nghi thức trà đạo ở Việt Nam tượng trưng cho ____, sự tôn trọng người già và bản chất hòa bình.",
+    "key": [
+      "represent",
+      "respect for the elderly"
+    ],
+    "opts": [
+      "friendship",
+      "hospitality",
+      "kindness",
+      "tradition"
+    ],
+    "optsVi": [
+      "tình bạn",
+      "sự hiếu khách",
+      "lòng tốt",
+      "truyền thống"
+    ],
+    "correct": 1,
+    "exp": "Mời trà trong văn hóa Việt Nam thể hiện sự <b>hospitality</b> (lòng hiếu khách, sự mến khách).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "Drinking tea is considered a daily ____ of the elderly in households and in society.[cite: 5]",
+    "qVi": "Uống trà được coi là một ____ hàng ngày của người cao tuổi trong gia đình và ngoài xã hội.",
+    "key": [
+      "daily",
+      "of the elderly"
+    ],
+    "opts": [
+      "work",
+      "habit",
+      "job",
+      "duty"
+    ],
+    "optsVi": [
+      "công việc (không đếm được)",
+      "thói quen",
+      "nghề nghiệp / việc làm",
+      "bổn phận / nhiệm vụ"
+    ],
+    "correct": 1,
+    "exp": "Uống trà diễn ra lặp đi lặp lại hằng ngày được coi là một <b>daily habit</b> (thói quen hằng ngày).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "In the morning, people start a new day with cups of tea to ____ their minds.[cite: 5]",
+    "qVi": "Vào buổi sáng, mọi người bắt đầu ngày mới bằng những tách trà để ____ tâm trí của họ.",
+    "key": [
+      "start a new day with cups of tea to",
+      "their minds"
+    ],
+    "opts": [
+      "refresh",
+      "relax",
+      "change",
+      "open"
+    ],
+    "optsVi": [
+      "làm mới / làm tỉnh táo",
+      "thư giãn",
+      "thay đổi",
+      "mở rộng"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ <b>refresh one's mind</b> mang nghĩa là 'làm sảng khoái, tỉnh táo tinh thần/tâm trí'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Tea served with ice and lemon has become a modern trend of Vietnamese ____ culture.[cite: 5]",
+    "qVi": "Trà đá với chanh (trà chanh) đã trở thành một xu hướng hiện đại của văn hóa ____ Việt Nam.",
+    "key": [
+      "Tea served with ice and lemon",
+      "modern trend of Vietnamese",
+      "culture"
+    ],
+    "opts": [
+      "village",
+      "home",
+      "street",
+      "house"
+    ],
+    "optsVi": [
+      "làng quê",
+      "gia đình",
+      "đường phố",
+      "ngôi nhà"
+    ],
+    "correct": 2,
+    "exp": "Trà chanh, trà đá là nét đặc trưng của <b>street culture</b> (văn hóa đường phố, văn hóa vỉa hè).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa]"
+  },
+  {
+    "q": "Respect for elders is a ____ value in our culture.[cite: 5]",
+    "qVi": "Kính trọng người lớn tuổi là một giá trị ____ trong văn hóa của chúng tôi.",
+    "key": [
+      "Respect for elders is a",
+      "value"
+    ],
+    "opts": [
+      "deep-rooted",
+      "popular",
+      "basic",
+      "magnificent"
+    ],
+    "optsVi": [
+      "ăn sâu bám rễ / lâu đời",
+      "phổ biến",
+      "cơ bản",
+      "tráng lệ"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ <b>deep-rooted value</b> mang nghĩa là 'giá trị lâu đời, đã ăn sâu vào văn hóa/nhận thức'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Each generation passes down stories and ____ to the next.[cite: 5]",
+    "qVi": "Mỗi thế hệ truyền lại những câu chuyện và ____ cho thế hệ tiếp theo.",
+    "key": [
+      "passes down stories and",
+      "to the next"
+    ],
+    "opts": [
+      "works",
+      "lessons",
+      "traditions",
+      "habits"
+    ],
+    "optsVi": [
+      "tác phẩm / công việc",
+      "bài học",
+      "truyền thống",
+      "thói quen"
+    ],
+    "correct": 2,
+    "exp": "Song hành với 'stories' (câu chuyện) truyền qua các thế hệ là <b>traditions</b> (truyền thống).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa]"
+  },
+  {
+    "q": "The ceremony involved ____ at the ancestral altar.[cite: 5]",
+    "qVi": "Buổi lễ bao gồm việc ____ trước bàn thờ tổ tiên.",
+    "key": [
+      "at the ancestral altar"
+    ],
+    "opts": [
+      "praying",
+      "worshipping",
+      "looking",
+      "singing"
+    ],
+    "optsVi": [
+      "cầu nguyện / khấn vái",
+      "thờ cúng (nói chung)",
+      "nhìn",
+      "hát"
+    ],
+    "correct": 0,
+    "exp": "Tại bàn thờ tổ tiên trong một buổi lễ cụ thể, hành động diễn ra trực tiếp là <b>praying</b> (khấn vái, cầu nguyện).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa tâm linh]"
+  },
+  {
+    "q": "Grandma's kitchen was filled with delicious ____ and the warmth of family.[cite: 5]",
+    "qVi": "Căn bếp của bà ngập tràn những ____ thơm ngon và sự ấm áp của gia đình.",
+    "key": [
+      "kitchen was filled with delicious"
+    ],
+    "opts": [
+      "ingredients",
+      "dishes",
+      "meat",
+      "drinks"
+    ],
+    "optsVi": [
+      "nguyên liệu",
+      "món ăn",
+      "thịt",
+      "đồ uống"
+    ],
+    "correct": 1,
+    "exp": "Trong nhà bếp, thành quả nấu nướng thơm ngon là các <b>dishes</b> (món ăn).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Ẩm thực]"
+  },
+  {
+    "q": "The aroma of food from the ____ reminded me of my childhood.[cite: 5]",
+    "qVi": "Mùi thơm của thức ăn từ những ____ làm tôi nhớ về tuổi thơ của mình.",
+    "key": [
+      "aroma of food from the"
+    ],
+    "opts": [
+      "street vendors",
+      "shoppers",
+      "doctors",
+      "workers"
+    ],
+    "optsVi": [
+      "người bán hàng rong",
+      "người mua sắm",
+      "bác sĩ",
+      "công nhân"
+    ],
+    "correct": 0,
+    "exp": "Thức ăn đường phố gắn liền với tuổi thơ thường đến từ các <b>street vendors</b> (người bán hàng rong vỉa hè).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ chỉ người]"
+  },
+  {
+    "q": "Vietnamese people give each other ____ money in red envelopes during Tet.[cite: 5]",
+    "qVi": "Người Việt Nam tặng nhau tiền ____ trong những bao lì xì đỏ vào dịp Tết.",
+    "key": [
+      "money in red envelopes during Tet"
+    ],
+    "opts": [
+      "lucky",
+      "happy",
+      "new",
+      "good"
+    ],
+    "optsVi": [
+      "may mắn",
+      "hạnh phúc",
+      "mới",
+      "tốt"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ cố định <b>lucky money</b> mang nghĩa là 'tiền lì xì, tiền mừng tuổi'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "People clean their houses to get ____ of bad luck from the old year.[cite: 5]",
+    "qVi": "Mọi người dọn dẹp nhà cửa để ____ những điều không may mắn của năm cũ.",
+    "key": [
+      "get",
+      "of bad luck"
+    ],
+    "opts": [
+      "out",
+      "rid",
+      "away",
+      "off"
+    ],
+    "optsVi": [
+      "ra ngoài",
+      "loại bỏ / tống khứ",
+      "xa",
+      "tắt / khỏi"
+    ],
+    "correct": 1,
+    "exp": "Cụm động từ <b>get rid of</b> có nghĩa là 'loại bỏ, xua tan, tống khứ'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+  },
+  {
+    "q": "In the past, many children went to school ____ because they didn't have shoes.[cite: 5]",
+    "qVi": "Trong quá khứ, nhiều trẻ em đi học ____ vì chúng không có giày.",
+    "key": [
+      "went to school",
+      "because they didn't have shoes"
+    ],
+    "opts": [
+      "on foot",
+      "by bus",
+      "barefoot",
+      "by bicycle"
+    ],
+    "optsVi": [
+      "đi bộ",
+      "bằng xe buýt",
+      "chân đất / chân trần",
+      "bằng xe đạp"
+    ],
+    "correct": 2,
+    "exp": "Vì không có giày (didn't have shoes) nên trẻ em phải đi học <b>barefoot</b> (chân đất, chân trần).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Trạng từ/Tính từ]"
+  },
+  {
+    "q": "Students in the past played ____ games like hide-and-seek during break time.[cite: 5]",
+    "qVi": "Học sinh thời xưa chơi các trò chơi ____ như trốn tìm trong giờ nghỉ giải lao.",
+    "key": [
+      "In the past played",
+      "games like hide-and-seek"
+    ],
+    "opts": [
+      "computer",
+      "mobile",
+      "traditional",
+      "modern"
+    ],
+    "optsVi": [
+      "máy tính",
+      "di động",
+      "truyền thống / dân gian",
+      "hiện đại"
+    ],
+    "correct": 2,
+    "exp": "Trốn tìm (hide-and-seek) là một ví dụ điển hình của <b>traditional games</b> (trò chơi dân gian/truyền thống).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Nowadays, children chat on phones instead of talking ____ as people did in the past.[cite: 5]",
+    "qVi": "Ngày nay, trẻ em trò chuyện qua điện thoại thay vì nói chuyện ____ như mọi người đã làm trong quá khứ.",
+    "key": [
+      "instead of talking",
+      "as people did in the past"
+    ],
+    "opts": [
+      "face to face",
+      "on foot",
+      "by hand",
+      "online"
+    ],
+    "optsVi": [
+      "trực tiếp / mặt đối mặt",
+      "đi bộ",
+      "bằng tay",
+      "trực tuyến"
+    ],
+    "correct": 0,
+    "exp": "Đối lập với trò chuyện qua điện thoại (chat on phones) là nói chuyện <b>face to face</b> (trực tiếp mặt đối mặt).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Thành ngữ / Cụm từ]"
+  },
+  {
+    "q": "In the past, people used ____ communication to transfer knowledge and news.[cite: 5]",
+    "qVi": "Trong quá khứ, mọi người sử dụng giao tiếp ____ để truyền tải kiến thức và tin tức.",
+    "key": [
+      "In the past",
+      "used",
+      "communication to transfer knowledge"
+    ],
+    "opts": [
+      "mobile",
+      "oral",
+      "computer",
+      "internet"
+    ],
+    "optsVi": [
+      "di động",
+      "bằng lời nói / truyền miệng",
+      "máy tính",
+      "internet"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ <b>oral communication</b> mang nghĩa là 'giao tiếp bằng lời nói, truyền miệng'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Years ago, people used to travel ____ foot or by riding animals for long distances.[cite: 5]",
+    "qVi": "Nhiều năm trước, mọi người thường đi ____ bộ hoặc cưỡi động vật đi những quãng đường dài.",
+    "key": [
+      "travel",
+      "foot"
+    ],
+    "opts": [
+      "by",
+      "on",
+      "with",
+      "in"
+    ],
+    "optsVi": [
+      "bằng (đi với phương tiện)",
+      "trên (on foot: đi bộ)",
+      "với",
+      "trong"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ cố định chỉ phương thức đi bộ là <b>on foot</b>.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Giới từ]"
+  },
+  {
+    "q": "In ____ regions, the air is pure and the crops are free of insecticides.[cite: 5]",
+    "qVi": "Ở những vùng ____, không khí trong lành và cây trồng không bị phun thuốc trừ sâu.",
+    "key": [
+      "regions, the air is pure and the crops are free of insecticides"
+    ],
+    "opts": [
+      "city",
+      "remote",
+      "near",
+      "large"
+    ],
+    "optsVi": [
+      "thành phố",
+      "xa xôi hẻo lánh",
+      "gần",
+      "lớn"
+    ],
+    "correct": 1,
+    "exp": "Nơi có không khí trong lành, tự nhiên, không hóa chất thường là ở các <b>remote regions</b> (vùng sâu vùng xa, hẻo lánh).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+  },
+  {
+    "q": "In the past, many women were ____ because they were not allowed to go to school.[cite: 5]",
+    "qVi": "Trong quá khứ, nhiều phụ nữ bị ____ vì họ không được phép đi học.",
+    "key": [
+      "were not allowed to go to school"
+    ],
+    "opts": [
+      "wealthy",
+      "illiterate",
+      "busy",
+      "active"
+    ],
+    "optsVi": [
+      "giàu có",
+      "mù chữ / thất học",
+      "bận rộn",
+      "năng động"
+    ],
+    "correct": 1,
+    "exp": "Việc không được đi học (not allowed to go to school) dẫn đến tình trạng <b>illiterate</b> (mù chữ, không biết đọc viết).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Tính từ]"
+  },
+  {
+    "q": "At 5.30 a.m. every day, the ____ outside wakes me up with the morning radio programs.[cite: 5]",
+    "qVi": "Vào lúc 5:30 sáng mỗi ngày, chiếc ____ bên ngoài đánh thức tôi dậy bằng các chương trình phát thanh buổi sáng.",
+    "key": [
+      "outside wakes me up with the morning radio programs"
+    ],
+    "opts": [
+      "radio",
+      "television",
+      "loudspeaker",
+      "computer"
+    ],
+    "optsVi": [
+      "máy đài",
+      "ti vi",
+      "loa phát thanh / loa phường",
+      "máy tính"
+    ],
+    "correct": 2,
+    "exp": "Thiết bị phát thanh công cộng treo ngoài trời (outside) phát chương trình buổi sáng là <b>loudspeaker</b> (loa phóng thanh/loa phường).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "My grandmother used to collect ____ to treat illnesses in the family.[cite: 5]",
+    "qVi": "Bà tôi thường thu hái ____ để chữa bệnh trong gia đình.",
+    "key": [
+      "collect",
+      "to treat illnesses"
+    ],
+    "opts": [
+      "flowers",
+      "herbs",
+      "leaves",
+      "trees"
+    ],
+    "optsVi": [
+      "hoa",
+      "thảo dược / cây thuốc",
+      "lá cây",
+      "cây cối"
+    ],
+    "correct": 1,
+    "exp": "Thực vật dùng để chữa bệnh (treat illnesses) trong dân gian được gọi là <b>herbs</b> (thảo dược, cây thuốc).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Y học dân gian]"
+  },
+  {
+    "q": "The ancient temple stood as a ____ of a bygone era.[cite: 5]",
+    "qVi": "Ngôi đền cổ đứng đó như một ____ về một thời đại đã qua.",
+    "key": [
+      "stood as a",
+      "of a bygone era"
+    ],
+    "opts": [
+      "structure",
+      "reminder",
+      "house",
+      "ceremony"
+    ],
+    "optsVi": [
+      "cấu trúc",
+      "lời nhắc nhở / dấu tích gợi nhớ",
+      "ngôi nhà",
+      "buổi lễ"
+    ],
+    "correct": 1,
+    "exp": "Cấu trúc <b>stand as a reminder of something</b> mang nghĩa là 'đứng đó như một chứng tích gợi nhắc về điều gì'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "The majestic ____ overlooked the town, steeped in history.[cite: 5]",
+    "qVi": "Tòa ____ uy nghi nhìn xuống thị trấn, thấm đượm bề dày lịch sử.",
+    "key": [
+      "majestic",
+      "overlooked the town"
+    ],
+    "opts": [
+      "castle",
+      "building",
+      "complex",
+      "monument"
+    ],
+    "optsVi": [
+      "lâu đài",
+      "tòa nhà",
+      "khu phức hợp",
+      "tượng đài"
+    ],
+    "correct": 0,
+    "exp": "Công trình đồ sộ, uy nghi thường nằm trên đồi cao nhìn xuống thị trấn (overlooked the town) là <b>castle</b> (lâu đài).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Kiến trúc]"
+  },
+  {
+    "q": "Streets in Ha Noi's Old Quarter still have names describing their original ____.[cite: 5]",
+    "qVi": "Các con phố trong Phố cổ Hà Nội vẫn giữ những cái tên mô tả ____ truyền thống ban đầu của chúng.",
+    "key": [
+      "Ha Noi's Old Quarter",
+      "names describing their original"
+    ],
+    "opts": [
+      "people",
+      "craft",
+      "history",
+      "house"
+    ],
+    "optsVi": [
+      "con người",
+      "nghề thủ công / mặt hàng buôn bán",
+      "lịch sử",
+      "ngôi nhà"
+    ],
+    "correct": 1,
+    "exp": "Tên các phố cổ Hà Nội (Hàng Bạc, Hàng Đào...) đặt theo nghề thủ công hoặc mặt hàng kinh doanh truyền thống: <b>craft</b>.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa lịch sử]"
+  },
+  {
+    "q": "The architecture and lifestyle of the local people ____ typical characteristics of old Ha Noi.[cite: 5]",
+    "qVi": "Kiến trúc và lối sống của người dân địa phương ____ những nét đặc trưng tiêu biểu của Hà Nội xưa.",
+    "key": [
+      "typical characteristics of old Ha Noi"
+    ],
+    "opts": [
+      "show",
+      "reflect",
+      "see",
+      "look"
+    ],
+    "optsVi": [
+      "cho thấy",
+      "phản ánh",
+      "nhìn thấy",
+      "nhìn"
+    ],
+    "correct": 1,
+    "exp": "Động từ mang sắc thái trang trọng, miêu tả việc kiến trúc và lối sống 'phản ánh' nét văn hóa là <b>reflect</b>.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Động từ]"
+  },
+  {
+    "q": "Most Vietnamese families have an ancestral ____ at a prominent place of the house.[cite: 5]",
+    "qVi": "Hầu hết các gia đình Việt Nam đều có một ____ tổ tiên ở một vị trí trang trọng trong nhà.",
+    "key": [
+      "ancestral",
+      "at a prominent place"
+    ],
+    "opts": [
+      "altar",
+      "table",
+      "room",
+      "bed"
+    ],
+    "optsVi": [
+      "bàn thờ",
+      "cái bàn",
+      "căn phòng",
+      "giường"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ <b>ancestral altar</b> mang nghĩa là 'bàn thờ tổ tiên'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "The ancestral altar is set with ancestral ____ and pictures of deceased family members.[cite: 5]",
+    "qVi": "Bàn thờ tổ tiên được bài trí với ____ tổ tiên và ảnh của những người trong gia đình đã khuất.",
+    "key": [
+      "ancestral",
+      "and pictures of deceased family members"
+    ],
+    "opts": [
+      "books",
+      "tablets",
+      "papers",
+      "notes"
+    ],
+    "optsVi": [
+      "sách",
+      "bài vị / mộc bài",
+      "giấy tờ",
+      "ghi chú"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ <b>ancestral tablets</b> có nghĩa là 'bài vị tổ tiên' (thường đi cùng với ảnh thờ trên bàn thờ).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Văn hóa tâm linh]"
+  },
+  {
+    "q": "A branch of peach blossoms is used to ____ away evil spirits and bad luck.[cite: 5]",
+    "qVi": "Một cành đào được sử dụng để ____ tà ma và những điều xui xẻo.",
+    "key": [
+      "away evil spirits and bad luck"
+    ],
+    "opts": [
+      "take",
+      "drive",
+      "go",
+      "run"
+    ],
+    "optsVi": [
+      "lấy đi",
+      "xua đuổi",
+      "đi",
+      "chạy"
+    ],
+    "correct": 1,
+    "exp": "Cụm động từ <b>drive away</b> có nghĩa là 'xua đuổi (tà ma, xui xẻo)'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Phrasal verbs]"
+  },
+  {
+    "q": "My brother was just sitting while I was looking around the ____ workshop.[cite: 5]",
+    "qVi": "Anh trai tôi chỉ ngồi trong khi tôi đang đi ngắm nghía xung quanh xưởng ____.",
+    "key": [
+      "workshop"
+    ],
+    "opts": [
+      "weaving",
+      "cooking",
+      "playing",
+      "talking"
+    ],
+    "optsVi": [
+      "dệt vải / đan lát",
+      "nấu ăn",
+      "vui chơi",
+      "nói chuyện"
+    ],
+    "correct": 0,
+    "exp": "Cụm từ <b>weaving workshop</b> mang nghĩa là 'xưởng dệt / xưởng đan lát thủ công'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Sam remembers a lot of historical ____ and dates from his history lessons.[cite: 5]",
+    "qVi": "Sam nhớ rất nhiều ____ lịch sử và ngày tháng từ các bài học lịch sử của cậu ấy.",
+    "key": [
+      "historical",
+      "and dates"
+    ],
+    "opts": [
+      "stories",
+      "events",
+      "traditions",
+      "customs"
+    ],
+    "optsVi": [
+      "câu chuyện",
+      "sự kiện",
+      "truyền thống",
+      "phong tục"
+    ],
+    "correct": 1,
+    "exp": "Cụm từ đi song hành trong môn lịch sử là <b>historical events and dates</b> (các sự kiện và mốc thời gian lịch sử).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  },
+  {
+    "q": "Ancestor worship reminds people of their ____ and where they came from.[cite: 5]",
+    "qVi": "Thờ cúng tổ tiên nhắc nhở con người về ____ của họ và nơi họ sinh ra.",
+    "key": [
+      "reminds people of their",
+      "and where they came from"
+    ],
+    "opts": [
+      "roots",
+      "houses",
+      "names",
+      "jobs"
+    ],
+    "optsVi": [
+      "cội nguồn / gốc rễ",
+      "ngôi nhà",
+      "tên gọi",
+      "công việc"
+    ],
+    "correct": 0,
+    "exp": "Từ vựng đồng nghĩa bổ trợ cho 'where they came from' (nơi họ sinh ra/gốc gác) là <b>roots</b> (cội nguồn, gốc rễ).<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Danh từ]"
+  },
+  {
+    "q": "The communal house has a ____ meaning in the community's life.[cite: 5]",
+    "qVi": "Đình làng có một ý nghĩa ____ trong đời sống của cộng đồng.",
+    "key": [
+      "has a",
+      "meaning in the community's life"
+    ],
+    "opts": [
+      "basic",
+      "magnificent",
+      "significant",
+      "ancient"
+    ],
+    "optsVi": [
+      "cơ bản",
+      "tráng lệ",
+      "quan trọng / to lớn",
+      "cổ kính"
+    ],
+    "correct": 2,
+    "exp": "Cụm từ <b>have a significant meaning</b> có nghĩa là 'có ý nghĩa vô cùng quan trọng, to lớn'.<br><b>Kiến thức trọng tâm:</b> [Từ vựng - Collocation]"
+  }
+];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9004"; // Thay đổi mật khẩu tại đây
+        const LESSON_NAME = "Unit 4 Vocab"; // Đổi tên cho từng bài khác nhau
+        let currentUser = "";
 
         let answeredSet = new Set();
         let correctCount = 0;
         const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser}`;
+            }
+        }
 
         function initQuiz() {
             const container = document.getElementById('quiz-container');
@@ -985,7 +1814,6 @@
                 `;
                 container.appendChild(card);
 
-                // Sidebar nav item
                 const qNum = document.createElement('div');
                 qNum.className = 'q-num';
                 qNum.id = `nav-${index}`;
@@ -998,7 +1826,6 @@
             });
         }
 
-        // --- Mobile Sidebar Toggle ---
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -1047,7 +1874,6 @@
             const transBtn = document.getElementById(`btn-trans-${qIndex}`);
             const navNum = document.getElementById(`nav-${qIndex}`);
 
-            // Enable Translate button
             if (transBtn.hasAttribute('disabled')) {
                 transBtn.removeAttribute('disabled');
                 transBtn.innerHTML = '🌐 Dịch nghĩa';
@@ -1065,7 +1891,6 @@
 
             updateStats();
             buttons.forEach(b => b.classList.add('disabled'));
-
             const percent = (answeredSet.size / quizData.length) * 100;
             document.getElementById('progress-bar').style.width = percent + '%';
 
@@ -1075,7 +1900,6 @@
 
         function submitQuiz() {
             if (window.innerWidth <= 768) toggleSidebar();
-            
             if (answeredSet.size < totalCount) {
                 const confirmSubmit = confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`);
                 if (!confirmSubmit) return;
@@ -1089,6 +1913,49 @@
             else if(score >= 5) rank = "Trung bình (Average)";
             else rank = "Cần cố gắng thêm (Poor)";
 
+            let wrongAnswers = [];
+            for (let i = 0; i < totalCount; i++) {
+                const navNum = document.getElementById(`nav-${i}`);
+                if (!navNum.classList.contains('done-correct')) {
+                    wrongAnswers.push(i + 1);
+                }
+            }
+            const wrongListString = wrongAnswers.length > 0 ? wrongAnswers.join(', ') : "Không sai câu nào";
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjiTHdrvfoBKoacJ82YholKR2DfATpjp5Manr2Qu2O6-sh4PipGemq7rzrHnURMW6P/exec';
+            
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Đang gửi kết quả...";
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'name': currentUser,
+                    'lesson': LESSON_NAME,
+                    'correct': correctCount,
+                    'score': score,
+                    'wrong_list': wrongListString
+                })
+            }).then(() => {
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }).catch(error => {
+                console.error('Lỗi!', error);
+                alert('Đã lưu bài thi nhưng có lỗi mạng khi gửi kết quả.');
+                showResultModal(score, rank);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, rank) {
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-correct').innerText = correctCount;
             document.getElementById('final-rank').innerText = rank;
