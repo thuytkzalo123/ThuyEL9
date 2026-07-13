@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title> Bài tập từ vựng - Unit 4 </title>
+    <title>Hệ thống Đánh giá Từ vựng & Ngữ pháp - Global Success</title>
     <style>
         :root {
             --primary-blue: #e8f0fe;
@@ -106,7 +106,7 @@
         .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
         .trans-text { display: none; color: var(--trans-color); font-style: italic; font-size: 0.95em; margin-top: 5px; font-weight: normal; border-top: 1px dashed #eee; padding-top: 4px; }
         .trans-text.show { display: block; animation: fadeIn 0.3s; }
-        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 6px; background-color: #fffde7; border-left: 4px solid #fbc02d; display: none; font-size: 0.95em; }
+        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 6px; background-color: #fffde7; border-left: 4px solid #fbc02d; display: none; font-size: 0.95em; line-height: 1.5; }
 
         /* === MODAL & EVALUATION === */
         .modal-overlay {
@@ -122,6 +122,7 @@
         .eval-section { margin-bottom: 15px; padding: 15px; border-radius: 8px; background: #f8f9fa; }
         .eval-section h4 { margin-top: 0; margin-bottom: 8px; color: #333; }
         .eval-ul { margin: 0; padding-left: 20px; font-size: 0.95em; color: #444; line-height: 1.5; }
+        .eval-ul li { margin-bottom: 6px; }
         .modal-btn { padding: 12px; background: var(--dark-blue); color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; margin-top: 15px; font-weight:bold; }
 
         /* === RESPONSIVE === */
@@ -164,7 +165,7 @@
     <div class="header">
         <div class="header-top">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-            <h2 class="header-title">Bài tập từ vựng - Unit 4</h2>
+            <h2 class="header-title">Bài tập tự luyện - Global Success</h2>
         </div>
         <div class="progress-container">
             <div id="progress-bar"></div>
@@ -183,7 +184,7 @@
             <div class="stats-box">
                 <div class="stat-item">
                     <span>Số câu đúng:</span>
-                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">0</span></span>
                 </div>
                 <div class="stat-item">
                     <span>Điểm số:</span>
@@ -207,7 +208,7 @@
             <div class="modal-header-score">
                 <div>
                     <h2 style="margin: 0; color: #333;">Kết quả bài làm</h2>
-                    <p style="margin: 5px 0 0 0; color: #666;">Số câu đúng: <b id="final-correct">0</b>/<span id="final-total">60</span></p>
+                    <p style="margin: 5px 0 0 0; color: #666;">Số câu đúng: <b id="final-correct">0</b>/<span id="final-total">0</span></p>
                 </div>
                 <div class="modal-score" id="final-score">0.0</div>
             </div>
@@ -238,614 +239,591 @@
     </div>
 
     <script>
-        // Dữ liệu 60 câu hỏi có tích hợp tag để phân tích
-        const quizData = [
-            {
-                "q": "Angkor Wat in Cambodia is a temple ____, the largest religious monument in the world.[cite: 6]",
-                "qVi": "Angkor Wat ở Campuchia là một ____ đền đài, là công trình tôn giáo lớn nhất trên thế giới.",
-                "key": ["temple", "largest religious monument"],
-                "opts": ["station", "complex", "workshop", "market"],
-                "optsVi": ["nhà ga", "quần thể / khu phức hợp", "xưởng", "chợ"],
-                "correct": 1,
-                "exp": "Cụm từ <b>temple complex</b> mang nghĩa là 'quần thể đền đài'.",
-                "tag": "collocations"
+        // === TỪ ĐIỂN CHẨN ĐOÁN SƯ PHẠM (MASTER FEEDBACK CONFIG) ===
+        const feedbackConfig = {
+            // Nhóm Chủ đề (Topics)
+            "topic_family": {
+                title: "Chủ đề Gia đình (Family Life)",
+                strength: "Nắm rất vững từ vựng và ngữ cảnh giao tiếp về chủ đề Gia đình.",
+                weak: "Chưa nhớ kỹ từ vựng và các tình huống giao tiếp về chủ đề Gia đình.",
+                action: "Ôn lại sơ đồ tư duy (Mindmap) từ vựng về các mối quan hệ gia đình và công việc nhà trong SGK."
             },
-            {
-                "q": "Dinh Bang Communal House in Bac Ninh Province is a national ____ site.[cite: 6]",
-                "qVi": "Đình làng Đình Bảng ở tỉnh Bắc Ninh là một di tích ____ cấp quốc gia.",
-                "key": ["national", "site"],
-                "opts": ["historical", "history", "historic", "historically"],
-                "optsVi": ["thuộc về lịch sử", "lịch sử (danh từ)", "có tính lịch sử / mang dấu ấn lịch sử", "một cách lịch sử"],
-                "correct": 2,
-                "exp": "Tính từ <b>historic</b> đi với 'site' hoặc 'building' mang nghĩa là 'di tích lịch sử (quan trọng, có ý nghĩa lịch sử)'.",
-                "tag": "wordForm"
+            "topic_nature": {
+                title: "Chủ đề Tự nhiên & Kỳ quan (Nature & Wonders)",
+                strength: "Vốn từ vựng phong phú khi miêu tả cảnh quan tự nhiên và các kỳ quan.",
+                weak: "Thiếu từ vựng miêu tả địa hình, thiên nhiên và các kỳ quan thế giới.",
+                action: "Lập danh sách các tính từ miêu tả cảnh đẹp (breathtaking, magnificent...) và tập đặt câu với địa danh thực tế."
             },
-            {
-                "q": "Windsor Castle in England is the oldest and largest ____ castle in the world.[cite: 6]",
-                "qVi": "Lâu đài Windsor ở Anh là lâu đài ____ lớn nhất và lâu đời nhất trên thế giới.",
-                "key": ["oldest and largest", "castle"],
-                "opts": ["used", "occupied", "filled", "stayed"],
-                "optsVi": ["được sử dụng", "có người ở / đang được sử dụng", "được làm đầy", "được ở lại"],
-                "correct": 1,
-                "exp": "Tính từ <b>occupied</b> mang nghĩa là 'đang có người sinh sống, sử dụng' (lâu đài vẫn đang có Hoàng gia Anh sinh sống).",
-                "tag": "vocab"
+            "topic_env": {
+                title: "Chủ đề Môi trường (The Environment)",
+                strength: "Hiểu sâu các thuật ngữ chuyên môn về bảo vệ môi trường và hệ sinh thái.",
+                weak: "Hổng từ vựng chuyên ngành về môi trường, ô nhiễm và năng lượng xanh.",
+                action: "Đọc lại các bài đọc hiểu (Reading) chủ đề Environment, chú ý các cụm từ chỉ nguyên nhân - kết quả."
             },
-            {
-                "q": "We need to preserve our heritage for future ____ so they can know about the past.[cite: 6]",
-                "qVi": "Chúng ta cần bảo tồn di sản của mình cho các ____ tương lai để họ có thể biết về quá khứ.",
-                "key": ["preserve our heritage", "future"],
-                "opts": ["people", "students", "generations", "ancestors"],
-                "optsVi": ["con người", "học sinh", "thế hệ", "tổ tiên"],
-                "correct": 2,
-                "exp": "Cụm từ cố định <b>future generations</b> có nghĩa là 'các thế hệ tương lai / mai sau'.",
-                "tag": "collocations"
+            "topic_tech": {
+                title: "Chủ đề Công nghệ & Khoa học (Science & Technology)",
+                strength: "Sử dụng chính xác các từ vựng hiện đại về công nghệ, thiết bị số và AI.",
+                weak: "Gặp khó khăn với các từ vựng chuyên ngành Khoa học - Công nghệ.",
+                action: "Học từ mới thông qua việc xem các video khoa học ngắn bằng tiếng Anh (chú ý bật phụ đề)."
             },
-            {
-                "q": "Thanks to preservation ____, we know a lot about our history and life in the past.[cite: 6]",
-                "qVi": "Nhờ có các ____ bảo tồn, chúng ta biết rất nhiều về lịch sử và cuộc sống trong quá khứ.",
-                "key": ["Thanks to preservation"],
-                "opts": ["efforts", "works", "jobs", "activities"],
-                "optsVi": ["nỗ lực", "công việc / tác phẩm", "nghề nghiệp", "hoạt động"],
-                "correct": 0,
-                "exp": "Cụm từ <b>preservation efforts</b> có nghĩa là 'những nỗ lực bảo tồn'.",
-                "tag": "collocations"
+            "topic_culture": {
+                title: "Chủ đề Văn hoá & Di sản (Culture & Heritage)",
+                strength: "Am hiểu từ vựng về truyền thống, phong tục và bảo tồn di sản văn hóa.",
+                weak: "Chưa nắm vững cách diễn đạt về văn hóa truyền thống và bảo tồn di sản.",
+                action: "Tổng hợp các danh từ chỉ di tích (pagoda, temple, structure) và động từ bảo tồn (preserve, restore)."
             },
-            {
-                "q": "The best way to preserve our cultural ____ is to share it with others.[cite: 6]",
-                "qVi": "Cách tốt nhất để bảo tồn ____ văn hóa của chúng ta là chia sẻ nó với người khác.",
-                "key": ["preserve our cultural"],
-                "opts": ["tradition", "custom", "heritage", "relic"],
-                "optsVi": ["truyền thống", "phong tục", "di sản", "di tích"],
-                "correct": 2,
-                "exp": "Cụm từ <b>cultural heritage</b> mang nghĩa là 'di sản văn hóa'.",
-                "tag": "collocations"
+            "topic_travel": {
+                title: "Chủ đề Du lịch & Khám phá (Travel & Tourism)",
+                strength: "Tự tin sử dụng từ vựng về đặt phòng, hỏi đường và trải nghiệm du lịch.",
+                weak: "Yếu từ vựng về các phương tiện di chuyển, địa điểm du lịch và thủ tục.",
+                action: "Thực hành viết một đoạn văn ngắn (khoảng 80 từ) lên kế hoạch cho một chuyến du lịch bằng tiếng Anh."
             },
-            {
-                "q": "Vietnamese people take great ____ in their culture which has been well preserved.[cite: 6]",
-                "qVi": "Người Việt Nam rất ____ về nền văn hóa đã được bảo tồn tốt của mình.",
-                "key": ["take great", "in their culture"],
-                "opts": ["proud", "pride", "value", "honor"],
-                "optsVi": ["tự hào (tính từ)", "sự tự hào (danh từ)", "giá trị", "vinh dự"],
-                "correct": 1,
-                "exp": "Cấu trúc cố định <b>take pride in something</b> = be proud of something (tự hào về điều gì). Sau 'great' cần danh từ 'pride'.",
-                "tag": "wordForm"
+            "topic_career": {
+                title: "Chủ đề Nghề nghiệp & Tương lai (Careers & The Future)",
+                strength: "Nắm vững yêu cầu công việc và từ vựng định hướng nghề nghiệp.",
+                weak: "Thiếu từ vựng chỉ nghề nghiệp mới và các kỹ năng làm việc trong tương lai.",
+                action: "Học thuộc các cụm từ chỉ kỹ năng (soft skills, teamwork) và áp dụng vào bài tập điền từ."
             },
-            {
-                "q": "Thanks to your kind ____, we were able to save the ancient monument.[cite: 6]",
-                "qVi": "Nhờ có sự ____ tốt bụng của bạn, chúng tôi đã có thể cứu được di tích cổ.",
-                "key": ["Thanks to your kind", "save the ancient monument"],
-                "opts": ["gift", "money", "contribution", "help"],
-                "optsVi": ["món quà", "tiền bạc", "sự đóng góp / góp sức", "sự giúp đỡ"],
-                "correct": 2,
-                "exp": "Từ vựng trang trọng và phù hợp nhất trong bối cảnh chung tay bảo tồn di tích là <b>contribution</b> (sự đóng góp).",
-                "tag": "vocab"
+            "topic_living": {
+                title: "Chủ đề Đời sống Nông thôn - Thành thị (Country & City Life)",
+                strength: "Phân biệt và miêu tả rất tốt đặc điểm đời sống nông thôn và đô thị.",
+                weak: "Chưa nhớ các tính từ so sánh nhịp sống giữa thành thị và nông thôn.",
+                action: "Vẽ bảng đối chiếu Bảng từ vựng City vs. Countryside (VD: bustling vs. tranquil) để ghi nhớ."
             },
-            {
-                "q": "In Nam Dinh City, there is a complex of three temples where people ____ the Tran Dynasty's Kings.[cite: 6]",
-                "qVi": "Ở thành phố Nam Định, có một quần thể ba ngôi đền nơi người dân ____ các vua nhà Trần.",
-                "key": ["temples where people", "Tran Dynasty's Kings"],
-                "opts": ["watch", "celebrate", "worship", "remember"],
-                "optsVi": ["xem", "ăn mừng / kỷ niệm", "thờ cúng / tôn kính", "nhớ lại"],
-                "correct": 2,
-                "exp": "Tại các đền đài (temples), hành động đối với các vị vua/tổ tiên là <b>worship</b> (thờ cúng, phụng thờ).",
-                "tag": "vocab"
+            "topic_health": {
+                title: "Chủ đề Sức khỏe & Lối sống (Health & Healthy Living)",
+                strength: "Am hiểu từ vựng về chế độ dinh dưỡng, tập luyện và lối sống lành mạnh.",
+                weak: "Gặp khó khăn khi gọi tên các triệu chứng bệnh và lời khuyên sức khỏe.",
+                action: "Ôn lại cấu trúc đưa ra lời khuyên (should / ought to / had better) kết hợp từ vựng về sức khỏe."
             },
-            {
-                "q": "Stonehenge in England is one of the oldest stone ____ in the world.[cite: 6]",
-                "qVi": "Stonehenge ở Anh là một trong những ____ bằng đá lâu đời nhất trên thế giới.",
-                "key": ["oldest stone"],
-                "opts": ["structures", "houses", "buildings", "walls"],
-                "optsVi": ["cấu trúc / công trình", "ngôi nhà", "tòa nhà", "bức tường"],
-                "correct": 0,
-                "exp": "Stonehenge là các cột đá xếp vòng tròn, được gọi chung là các <b>stone structures</b> (công trình/cấu trúc đá).",
-                "tag": "vocab"
+            "topic_community": {
+                title: "Chủ đề Cộng đồng địa phương (Local Community)",
+                strength: "Hiểu rõ từ vựng về làng nghề truyền thống và hoạt động cộng đồng.",
+                weak: "Chưa nhớ tên các làng nghề truyền thống, sản phẩm thủ công và dịch vụ công cộng.",
+                action: "Học theo cụm danh từ chỉ nghề thủ công (pottery making, artisan, lacquerware) trong SGK."
             },
-            {
-                "q": "This monument is small but ____. It looks very beautiful and impressive.[cite: 6]",
-                "qVi": "Tượng đài này nhỏ nhưng ____. Nó trông rất đẹp và ấn tượng.",
-                "key": ["small but", "beautiful and impressive"],
-                "opts": ["basic", "ancient", "magnificent", "deep-rooted"],
-                "optsVi": ["cơ bản", "cổ kính", "tráng lệ / lộng lẫy", "bám rễ sâu / lâu đời"],
-                "correct": 2,
-                "exp": "Từ đồng nghĩa với 'beautiful and impressive' (đẹp và ấn tượng) là <b>magnificent</b> (lộng lẫy, tráng lệ).",
-                "tag": "vocab"
+            "topic_edu": {
+                title: "Chủ đề Học tập & Tiếng Anh (Education & English Learning)",
+                strength: "Nắm vững thuật ngữ về phương pháp học tập và kỹ năng ngôn ngữ.",
+                weak: "Thiếu từ vựng về trường lớp, thi cử và việc rèn luyện ngoại ngữ.",
+                action: "Ghi chép lại các phương pháp học từ vựng hiệu quả bằng tiếng Anh và tự áp dụng hàng ngày."
             },
-            {
-                "q": "In 2006, Duong Lam became the first village that was ____ as a national historic and cultural relic.[cite: 6]",
-                "qVi": "Năm 2006, Đường Lâm trở thành ngôi làng đầu tiên được ____ là di tích lịch sử và văn hóa quốc gia.",
-                "key": ["was", "as a national historic and cultural relic"],
-                "opts": ["promoted", "recognised", "protected", "occupied"],
-                "optsVi": ["quảng bá / thúc đẩy", "công nhận", "bảo vệ", "chiếm giữ / sinh sống"],
-                "correct": 1,
-                "exp": "Cấu trúc <b>be recognised as</b> có nghĩa là 'được công nhận là (một danh hiệu/di tích)'.",
-                "tag": "collocations"
+            "topic_hobbies": {
+                title: "Chủ đề Giải trí & Sở thích (Leisure & Hobbies)",
+                strength: "Sử dụng linh hoạt từ vựng miêu tả sở thích và thời gian rảnh rỗi.",
+                weak: "Chưa thành thạo các động từ chỉ sự yêu thích đi kèm V-ing / to V.",
+                action: "Học thuộc lòng bảng động từ chỉ sở thích (fancy, adore, detest + V-ing) qua việc tự đặt câu về bản thân."
             },
-            {
-                "q": "The aim of the culture festival is the ____ of friendship and tourism.[cite: 6]",
-                "qVi": "Mục đích của lễ hội văn hóa là ____ tình hữu nghị và du lịch.",
-                "key": ["aim of the culture festival", "friendship and tourism"],
-                "opts": ["protection", "recognition", "promotion", "preservation"],
-                "optsVi": ["sự bảo vệ", "sự công nhận", "sự thúc đẩy / quảng bá", "sự bảo tồn"],
-                "correct": 2,
-                "exp": "Đối với 'friendship and tourism' (tình hữu nghị và du lịch), mục đích của lễ hội là <b>promotion</b> (thúc đẩy, quảng bá).",
-                "tag": "wordForm"
+
+            // Nhóm Từ vựng (Vocabulary Skills)
+            "skill_vocab_core": {
+                title: "Từ vựng nền tảng (Core Vocabulary)",
+                strength: "Nắm rất vững nghĩa và cách dùng của các từ vựng cốt lõi trong bài.",
+                weak: "Thiếu vốn từ vựng cơ bản, gặp khó khăn khi hiểu nghĩa của câu hỏi.",
+                action: "Dừng việc dịch word-by-word. Học lại bảng từ vựng SGK, chú ý phát âm và nghĩa trong ngữ cảnh."
             },
-            {
-                "q": "People in these mountainous areas still ____ their local customs and traditions.[cite: 6]",
-                "qVi": "Người dân ở những vùng miền núi này vẫn ____ phong tục và truyền thống địa phương của họ.",
-                "key": ["local customs and traditions"],
-                "opts": ["see", "look", "observe", "watch"],
-                "optsVi": ["nhìn thấy", "nhìn", "tuân theo / duy trì / quan sát", "xem"],
-                "correct": 2,
-                "exp": "Động từ <b>observe</b> đi với 'customs/traditions' mang nghĩa là 'tuân theo, duy trì, thực hiện (phong tục)'.",
-                "tag": "collocations"
+            "skill_vocab_colloc": {
+                title: "Cụm từ cố định (Collocations)",
+                strength: "Sử dụng thành thạo các cụm từ cố định tự nhiên như người bản xứ.",
+                weak: "Hổng mảng Cụm từ cố định, thường ghép từ tùy tiện theo tư duy tiếng Việt.",
+                action: "Chấm dứt học từ đơn lẻ. Khi gặp từ mới, bắt buộc phải học cả cụm (VD: học 'take pride in' thay vì chỉ học 'pride')."
             },
-            {
-                "q": "It's our duty to keep our customs and traditions ____ for future generations.[cite: 6]",
-                "qVi": "Nhiệm vụ của chúng ta là giữ cho các phong tục và truyền thống ____ cho các thế hệ tương lai.",
-                "key": ["keep our customs and traditions"],
-                "opts": ["live", "alive", "living", "lively"],
-                "optsVi": ["sống (động từ)", "còn sống / tồn tại", "đang sống", "sống động / vui vẻ"],
-                "correct": 1,
-                "exp": "Cấu trúc <b>keep something alive</b> có nghĩa là 'duy trì sự tồn tại, giữ cho điều gì (truyền thống) tiếp tục được lưu truyền'.",
-                "tag": "collocations"
+            "skill_vocab_phrasal": {
+                title: "Cụm động từ (Phrasal Verbs)",
+                strength: "Phản xạ rất tốt với các cụm động từ và giới từ đi kèm.",
+                weak: "Yếu mảng Cụm động từ, thường nhầm lẫn nghĩa khi thay đổi giới từ.",
+                action: "Lập sổ tay chuyên đề Phrasal Verbs, vẽ hình ảnh minh họa cho các giới từ (up, down, off, over) để nhớ nghĩa chuyển."
             },
-            {
-                "q": "Many beautiful old castles are no longer ____. No one lives in them anymore.[cite: 6]",
-                "qVi": "Nhiều lâu đài cổ kính xinh đẹp không còn được ____ nữa. Không còn ai sống trong đó nữa.",
-                "key": ["no longer", "No one lives in them anymore"],
-                "opts": ["occupied", "preserved", "magnificent", "ancient"],
-                "optsVi": ["có người sinh sống", "được bảo tồn", "lộng lẫy", "cổ kính"],
-                "correct": 0,
-                "exp": "'No one lives in them anymore' (không ai sống ở đó nữa) giải thích cho từ <b>occupied</b> (có người ở/sinh sống).",
-                "tag": "vocab"
+            "skill_vocab_wordform": {
+                title: "Biến đổi từ loại (Word Form)",
+                strength: "Phân tích cấu trúc câu tốt, nhận diện chính xác Danh - Động - Tính - Trạng.",
+                weak: "Hay nhầm lẫn giữa các từ loại hoặc từ có vỏ chữ giống nhau.",
+                action: "Rèn tính cẩn thận. Học thuộc các hậu tố từ loại (VD: -tion là danh từ, -ive là tính từ) và xác định từ loại trước khi chọn đáp án."
             },
-            {
-                "q": "The invention of the seat belt made a good ____ to road safety.[cite: 6]",
-                "qVi": "Việc phát minh ra dây an toàn đã có một ____ tốt cho an toàn giao thông đường bộ.",
-                "key": ["made a good", "to road safety"],
-                "opts": ["contribution", "protection", "recognition", "preservation"],
-                "optsVi": ["sự đóng góp", "sự bảo vệ", "sự công nhận", "sự bảo tồn"],
-                "correct": 0,
-                "exp": "Cấu trúc cố định <b>make a contribution to something</b> mang nghĩa là 'đóng góp vào việc gì'.",
-                "tag": "collocations"
+
+            // Nhóm Ngữ pháp (Grammar Skills)
+            "skill_gram_tense": {
+                title: "Các thì trong Tiếng Anh (Tenses)",
+                strength: "Chia thì chính xác, nhận diện tốt dấu hiệu thời gian trong câu.",
+                weak: "Chưa nắm vững công thức và cách dùng của các thì căn bản.",
+                action: "Vẽ trục thời gian (Timeline) cho các thì, học thuộc lòng các trạng từ nhận biết (yesterday, since, tomorrow...)."
             },
-            {
-                "q": "We believe that ____ of these old structures will benefit the community.[cite: 6]",
-                "qVi": "Chúng tôi tin rằng việc ____ những công trình kiến trúc cổ này sẽ có lợi cho cộng đồng.",
-                "key": ["of these old structures will benefit the community"],
-                "opts": ["promoting", "recognition", "preservation", "occupying"],
-                "optsVi": ["quảng bá (V-ing)", "sự công nhận", "sự bảo tồn", "chiếm giữ (V-ing)"],
-                "correct": 2,
-                "exp": "Đối với các công trình cổ (old structures), việc làm mang lại lợi ích lâu dài cho cộng đồng là <b>preservation</b> (sự bảo tồn).",
-                "tag": "vocab"
+            "skill_gram_passive": {
+                title: "Câu bị động (Passive Voice)",
+                strength: "Chuyển đổi thành thạo cấu trúc chủ động sang bị động ở các thì.",
+                weak: "Thường quên cấu trúc 'To be + V3/ed' hoặc chia sai động từ To be.",
+                action: "Luyện tập chuyên đề Câu bị động. Luôn xác định tân ngữ (Object) và thì của câu chủ động trước khi làm bài."
             },
-            {
-                "q": "A country's cultural heritage is a ____ resource that we must protect.[cite: 6]",
-                "qVi": "Di sản văn hóa của một quốc gia là một tài nguyên ____ mà chúng ta phải bảo vệ.",
-                "key": ["resource that we must protect"],
-                "opts": ["expensive", "basic", "valuable", "deep-rooted"],
-                "optsVi": ["đắt đỏ", "cơ bản", "quý giá / có giá trị cao", "bám rễ sâu"],
-                "correct": 2,
-                "exp": "Di sản văn hóa là một tài nguyên <b>valuable</b> (vô cùng quý giá) cần được bảo vệ.",
-                "tag": "vocab"
+            "skill_gram_reported": {
+                title: "Câu tường thuật (Reported Speech)",
+                strength: "Nắm vững quy tắc lùi thì và đổi ngôi trong câu tường thuật.",
+                weak: "Hay quên 'lùi thì' hoặc chưa đổi trạng từ chỉ thời gian/nơi chốn.",
+                action: "Học thuộc bảng chuyển đổi trạng từ (now -> then, tomorrow -> the next day) và quy tắc lùi 1 thì về quá khứ."
             },
-            {
-                "q": "They have decided to ____ the pagoda which was damaged in the natural disaster.[cite: 6]",
-                "qVi": "Họ đã quyết định ____ ngôi chùa bị hư hại trong trận thiên tai.",
-                "key": ["the pagoda which was damaged"],
-                "opts": ["rebuild", "preserve", "protect", "promote"],
-                "optsVi": ["xây dựng lại / trùng tu", "bảo tồn", "bảo vệ", "quảng bá"],
-                "correct": 0,
-                "exp": "Ngôi chùa bị hư hại/tàn phá (was damaged) thì cần được <b>rebuild</b> (xây dựng lại, trùng tu).",
-                "tag": "vocab"
+            "skill_gram_relative": {
+                title: "Mệnh đề quan hệ (Relative Clauses)",
+                strength: "Sử dụng chính xác các đại từ quan hệ (who, which, that, where, whose).",
+                weak: "Nhầm lẫn chức năng của các đại từ quan hệ hoặc dùng sai dấu phẩy.",
+                action: "Làm bài tập nối 2 câu thành 1 câu dùng mệnh đề quan hệ. Nhớ quy tắc: 'who' cho người, 'which' cho vật, 'whose' chỉ sở hữu."
             },
-            {
-                "q": "English cuisine is among the ____ traditions that English people are proud to keep alive.[cite: 6]",
-                "qVi": "Ẩm thực Anh nằm trong số những truyền thống ____ mà người Anh tự hào gìn giữ.",
-                "key": ["traditions that English people are proud to keep alive"],
-                "opts": ["basic", "deep-rooted", "ancient", "cultural"],
-                "optsVi": ["cơ bản", "lâu đời / ăn sâu bám rễ", "cổ xưa", "văn hóa"],
-                "correct": 1,
-                "exp": "Cụm từ <b>deep-rooted traditions</b> mang nghĩa là 'những truyền thống lâu đời, đã ăn sâu vào tiềm thức'.",
-                "tag": "collocations"
+            "skill_gram_conditional": {
+                title: "Câu điều kiện (Conditionals)",
+                strength: "Phân biệt và áp dụng rất tốt câu điều kiện loại 1, 2 và 3.",
+                weak: "Nhầm lẫn công thức giữa các loại câu điều kiện, đặc biệt là loại 2.",
+                action: "Ghi nhớ công thức lùi thì: Loại 1 (Có thể xảy ra -> HTĐ + TlĐ), Loại 2 (Không có thật ở hiện tại -> QKĐ + Would + V)."
             },
-            {
-                "q": "People have considered fish and chips to be England's ____ dish.[cite: 6]",
-                "qVi": "Mọi người coi cá và khoai tây chiên là món ăn ____ của nước Anh.",
-                "key": ["England's", "dish"],
-                "opts": ["regional", "local", "national", "traditional"],
-                "optsVi": ["thuộc vùng miền", "địa phương", "quốc gia / quốc hồn quốc túy", "truyền thống"],
-                "correct": 2,
-                "exp": "Cụm từ <b>national dish</b> mang nghĩa là 'món ăn quốc gia, món ăn đặc trưng đại diện cho một nước'.",
-                "tag": "collocations"
+            "skill_gram_wish": {
+                title: "Cấu trúc Câu ước (Wish / If only)",
+                strength: "Thành thạo cấu trúc giả định với Wish ở hiện tại và tương lai.",
+                weak: "Quên quy tắc lùi thì sau động từ Wish.",
+                action: "Nhớ thần chú 'Ước là phải lùi thì': Ước cho hiện tại dùng Quá khứ đơn (Be -> were cho mọi ngôi)."
             },
-            {
-                "q": "The basic ____ of the dish \"fish and chips\" are fried fish served with chips.[cite: 6]",
-                "qVi": "Các ____ cơ bản của món \"cá và khoai tây chiên\" là cá chiên phục vụ cùng khoai tây chiên.",
-                "key": ["basic", "of the dish"],
-                "opts": ["things", "ingredients", "parts", "foods"],
-                "optsVi": ["thứ", "thành phần / nguyên liệu", "bộ phận", "thực phẩm"],
-                "correct": 1,
-                "exp": "Thành phần cấu tạo nên một món ăn được gọi là <b>ingredients</b> (nguyên liệu, thành phần).",
-                "tag": "vocab"
+            "skill_gram_adverbial": {
+                title: "Mệnh đề trạng ngữ (Adverbial Clauses)",
+                strength: "Kết nối câu logic bằng các mệnh đề chỉ nguyên nhân, kết quả, thời gian.",
+                weak: "Chưa hiểu nghĩa của các liên từ nối mệnh đề (although, because, when...).",
+                action: "Phân loại liên từ theo nhóm ý nghĩa: Nhượng bộ (Although/Even though), Nguyên nhân (Because/As/Since)."
             },
-            {
-                "q": "Preserving and promoting fish and chips is the way English people keep themselves ____ with the past.[cite: 6]",
-                "qVi": "Bảo tồn và quảng bá món cá và khoai tây chiên là cách người Anh giữ cho mình ____ với quá khứ.",
-                "key": ["keep themselves", "with the past"],
-                "opts": ["associated", "linked", "talked", "stayed"],
-                "optsVi": ["gắn kết / liên kết", "liên kết (thường đi với to)", "nói chuyện", "ở lại"],
-                "correct": 0,
-                "exp": "Cấu trúc <b>be associated with</b> = keep someone associated with: gắn kết, liên hệ với (quá khứ).",
-                "tag": "collocations"
+            "skill_gram_comparison": {
+                title: "Cấu trúc So sánh (Comparisons)",
+                strength: "Vận dụng tốt so sánh hơn, so sánh nhất và so sánh kép (The more... the more).",
+                weak: "Chia sai tính từ ngắn/dài hoặc nhầm lẫn giữa so sánh hơn và so sánh nhất.",
+                action: "Học thuộc bảng tính từ bất quy tắc (good -> better -> best) và nhận diện từ khóa 'than' (so sánh hơn), 'the' (so sánh nhất)."
             },
-            {
-                "q": "In keeping with ____, we cook five-colour sticky rice on the first day of a lunar month.[cite: 6]",
-                "qVi": "Theo ____, chúng tôi nấu xôi ngũ sắc vào ngày đầu tiên của tháng âm lịch.",
-                "key": ["In keeping with", "cook five-colour sticky rice on the first day"],
-                "opts": ["habit", "ritual", "tradition", "practice"],
-                "optsVi": ["thói quen (cá nhân)", "nghi lễ", "truyền thống", "thông lệ / thực tiễn"],
-                "correct": 2,
-                "exp": "Cụm từ <b>in keeping with tradition</b> mang nghĩa là 'theo đúng truyền thống, theo phong tục'.",
-                "tag": "collocations"
+            "skill_gram_modal": {
+                title: "Động từ khuyết thiếu (Modal Verbs)",
+                strength: "Hiểu sắc thái biểu cảm của can, must, should, have to, might...",
+                weak: "Dùng sai động từ khuyết thiếu trong các tình huống đưa lời khuyên, bắt buộc.",
+                action: "Ghi nhớ sau Modal Verb luôn là Động từ nguyên thể (V-inf). Phân biệt 'must' (tự bắt buộc) và 'have to' (ngoại cảnh bắt buộc)."
             },
-            {
-                "q": "Vietnamese families worship their ____ and celebrate their death anniversaries every year.[cite: 6]",
-                "qVi": "Các gia đình Việt Nam thờ cúng ____ của họ và làm giỗ hằng năm.",
-                "key": ["worship their", "celebrate their death anniversaries"],
-                "opts": ["parents", "ancestors", "generations", "elders"],
-                "optsVi": ["cha mẹ", "tổ tiên", "thế hệ", "người lớn tuổi"],
-                "correct": 1,
-                "exp": "Thờ cúng và làm giỗ (death anniversaries) là dành cho <b>ancestors</b> (tổ tiên).",
-                "tag": "vocab"
+            "skill_gram_article": {
+                title: "Mạo từ (Articles: A / An / The / Zero)",
+                strength: "Sử dụng mạo từ chuẩn xác theo danh từ xác định và chưa xác định.",
+                weak: "Thường bỏ quên mạo từ hoặc dùng 'the' trước danh từ chung chưa xác định.",
+                action: "Nhớ quy tắc: 'A/An' dùng cho lần đầu nhắc đến (số ít), 'The' dùng cho vật duy nhất hoặc cả người nói và nghe đều đã biết."
             },
-            {
-                "q": "By celebrating anniversaries, they show their ____ to their ancestors.[cite: 6]",
-                "qVi": "Bằng cách tổ chức ngày giỗ, họ thể hiện ____ của mình đối với tổ tiên.",
-                "key": ["show their", "to their ancestors"],
-                "opts": ["love", "pride", "gratitude", "respect"],
-                "optsVi": ["tình yêu", "sự tự hào", "lòng biết ơn", "sự tôn trọng (thường đi với for)"],
-                "correct": 2,
-                "exp": "Cụm từ <b>show gratitude to someone</b> mang nghĩa là 'thể hiện lòng biết ơn đối với ai'.",
-                "tag": "collocations"
+            "skill_gram_quantifier": {
+                title: "Lượng từ (Quantifiers)",
+                strength: "Phân biệt chính xác much/many, a few/a little, some/any.",
+                weak: "Nhầm lẫn giữa danh từ đếm được và không đếm được khi đi với lượng từ.",
+                action: "Lập 2 cột danh từ Đếm được (Many, A few) và Không đếm được (Much, A little) để tự sắp xếp từ vựng."
             },
-            {
-                "q": "They take part in national and ____ festivals like the Mid-Autumn Festival.[cite: 6]",
-                "qVi": "Họ tham gia vào các lễ hội quốc gia và ____ như Tết Trung thu.",
-                "key": ["national and", "festivals like the Mid-Autumn Festival"],
-                "opts": ["regional", "world", "city", "village"],
-                "optsVi": ["vùng miền / địa phương", "thế giới", "thành phố", "làng quê"],
-                "correct": 0,
-                "exp": "Cụm từ đi song hành phổ biến: <b>national and regional festivals</b> (các lễ hội cấp quốc gia và vùng miền).",
-                "tag": "collocations"
-            },
-            {
-                "q": "Families pass their traditions ____ to the next generation to keep them alive.[cite: 6]",
-                "qVi": "Các gia đình truyền truyền thống của họ ____ cho thế hệ tiếp theo để giữ chúng sống mãi.",
-                "key": ["pass their traditions", "to the next generation"],
-                "opts": ["up", "down", "away", "off"],
-                "optsVi": ["lên", "lại / xuống", "đi", "tắt / khỏi"],
-                "correct": 1,
-                "exp": "Cụm động từ <b>pass down (to someone)</b> có nghĩa là 'truyền lại cho thế hệ sau'.",
-                "tag": "phrasalVerbs"
-            },
-            {
-                "q": "Tea rituals in Vietnam represent ____, respect for the elderly, and peaceful nature.[cite: 6]",
-                "qVi": "Nghi thức trà đạo ở Việt Nam tượng trưng cho ____, sự tôn trọng người già và bản chất hòa bình.",
-                "key": ["represent", "respect for the elderly"],
-                "opts": ["friendship", "hospitality", "kindness", "tradition"],
-                "optsVi": ["tình bạn", "sự hiếu khách", "lòng tốt", "truyền thống"],
-                "correct": 1,
-                "exp": "Mời trà trong văn hóa Việt Nam thể hiện sự <b>hospitality</b> (lòng hiếu khách, sự mến khách).",
-                "tag": "vocab"
-            },
-            {
-                "q": "Drinking tea is considered a daily ____ of the elderly in households and in society.[cite: 6]",
-                "qVi": "Uống trà được coi là một ____ hàng ngày của người cao tuổi trong gia đình và ngoài xã hội.",
-                "key": ["daily", "of the elderly"],
-                "opts": ["work", "habit", "job", "duty"],
-                "optsVi": ["công việc (không đếm được)", "thói quen", "nghề nghiệp / việc làm", "bổn phận / nhiệm vụ"],
-                "correct": 1,
-                "exp": "Uống trà diễn ra lặp đi lặp lại hằng ngày được coi là một <b>daily habit</b> (thói quen hằng ngày).",
-                "tag": "collocations"
-            },
-            {
-                "q": "In the morning, people start a new day with cups of tea to ____ their minds.[cite: 6]",
-                "qVi": "Vào buổi sáng, mọi người bắt đầu ngày mới bằng những tách trà để ____ tâm trí của họ.",
-                "key": ["start a new day with cups of tea to", "their minds"],
-                "opts": ["refresh", "relax", "change", "open"],
-                "optsVi": ["làm mới / làm tỉnh táo", "thư giãn", "thay đổi", "mở rộng"],
-                "correct": 0,
-                "exp": "Cụm từ <b>refresh one's mind</b> mang nghĩa là 'làm sảng khoái, tỉnh táo tinh thần/tâm trí'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "Tea served with ice and lemon has become a modern trend of Vietnamese ____ culture.[cite: 6]",
-                "qVi": "Trà đá với chanh (trà chanh) đã trở thành một xu hướng hiện đại của văn hóa ____ Việt Nam.",
-                "key": ["Tea served with ice and lemon", "modern trend of Vietnamese", "culture"],
-                "opts": ["village", "home", "street", "house"],
-                "optsVi": ["làng quê", "gia đình", "đường phố", "ngôi nhà"],
-                "correct": 2,
-                "exp": "Trà chanh, trà đá là nét đặc trưng của <b>street culture</b> (văn hóa đường phố, văn hóa vỉa hè).",
-                "tag": "collocations"
-            },
-            {
-                "q": "Respect for elders is a ____ value in our culture.[cite: 6]",
-                "qVi": "Kính trọng người lớn tuổi là một giá trị ____ trong văn hóa của chúng tôi.",
-                "key": ["Respect for elders is a", "value"],
-                "opts": ["deep-rooted", "popular", "basic", "magnificent"],
-                "optsVi": ["ăn sâu bám rễ / lâu đời", "phổ biến", "cơ bản", "tráng lệ"],
-                "correct": 0,
-                "exp": "Cụm từ <b>deep-rooted value</b> mang nghĩa là 'giá trị lâu đời, đã ăn sâu vào văn hóa/nhận thức'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "Each generation passes down stories and ____ to the next.[cite: 6]",
-                "qVi": "Mỗi thế hệ truyền lại những câu chuyện và ____ cho thế hệ tiếp theo.",
-                "key": ["passes down stories and", "to the next"],
-                "opts": ["works", "lessons", "traditions", "habits"],
-                "optsVi": ["tác phẩm / công việc", "bài học", "truyền thống", "thói quen"],
-                "correct": 2,
-                "exp": "Song hành với 'stories' (câu chuyện) truyền qua các thế hệ là <b>traditions</b> (truyền thống).",
-                "tag": "vocab"
-            },
-            {
-                "q": "The ceremony involved ____ at the ancestral altar.[cite: 6]",
-                "qVi": "Buổi lễ bao gồm việc ____ trước bàn thờ tổ tiên.",
-                "key": ["at the ancestral altar"],
-                "opts": ["praying", "worshipping", "looking", "singing"],
-                "optsVi": ["cầu nguyện / khấn vái", "thờ cúng (nói chung)", "nhìn", "hát"],
-                "correct": 0,
-                "exp": "Tại bàn thờ tổ tiên trong một buổi lễ cụ thể, hành động diễn ra trực tiếp là <b>praying</b> (khấn vái, cầu nguyện).",
-                "tag": "vocab"
-            },
-            {
-                "q": "Grandma's kitchen was filled with delicious ____ and the warmth of family.[cite: 6]",
-                "qVi": "Căn bếp của bà ngập tràn những ____ thơm ngon và sự ấm áp của gia đình.",
-                "key": ["kitchen was filled with delicious"],
-                "opts": ["ingredients", "dishes", "meat", "drinks"],
-                "optsVi": ["nguyên liệu", "món ăn", "thịt", "đồ uống"],
-                "correct": 1,
-                "exp": "Trong nhà bếp, thành quả nấu nướng thơm ngon là các <b>dishes</b> (món ăn).",
-                "tag": "vocab"
-            },
-            {
-                "q": "The aroma of food from the ____ reminded me of my childhood.[cite: 6]",
-                "qVi": "Mùi thơm của thức ăn từ những ____ làm tôi nhớ về tuổi thơ của mình.",
-                "key": ["aroma of food from the"],
-                "opts": ["street vendors", "shoppers", "doctors", "workers"],
-                "optsVi": ["người bán hàng rong", "người mua sắm", "bác sĩ", "công nhân"],
-                "correct": 0,
-                "exp": "Thức ăn đường phố gắn liền với tuổi thơ thường đến từ các <b>street vendors</b> (người bán hàng rong vỉa hè).",
-                "tag": "vocab"
-            },
-            {
-                "q": "Vietnamese people give each other ____ money in red envelopes during Tet.[cite: 6]",
-                "qVi": "Người Việt Nam tặng nhau tiền ____ trong những bao lì xì đỏ vào dịp Tết.",
-                "key": ["money in red envelopes during Tet"],
-                "opts": ["lucky", "happy", "new", "good"],
-                "optsVi": ["may mắn", "hạnh phúc", "mới", "tốt"],
-                "correct": 0,
-                "exp": "Cụm từ cố định <b>lucky money</b> mang nghĩa là 'tiền lì xì, tiền mừng tuổi'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "People clean their houses to get ____ of bad luck from the old year.[cite: 6]",
-                "qVi": "Mọi người dọn dẹp nhà cửa để ____ những điều không may mắn của năm cũ.",
-                "key": ["get", "of bad luck"],
-                "opts": ["out", "rid", "away", "off"],
-                "optsVi": ["ra ngoài", "loại bỏ / tống khứ", "xa", "tắt / khỏi"],
-                "correct": 1,
-                "exp": "Cụm động từ <b>get rid of</b> có nghĩa là 'loại bỏ, xua tan, tống khứ'.",
-                "tag": "phrasalVerbs"
-            },
-            {
-                "q": "In the past, many children went to school ____ because they didn't have shoes.[cite: 6]",
-                "qVi": "Trong quá khứ, nhiều trẻ em đi học ____ vì chúng không có giày.",
-                "key": ["went to school", "because they didn't have shoes"],
-                "opts": ["on foot", "by bus", "barefoot", "by bicycle"],
-                "optsVi": ["đi bộ", "bằng xe buýt", "chân đất / chân trần", "bằng xe đạp"],
-                "correct": 2,
-                "exp": "Vì không có giày (didn't have shoes) nên trẻ em phải đi học <b>barefoot</b> (chân đất, chân trần).",
-                "tag": "vocab"
-            },
-            {
-                "q": "Students in the past played ____ games like hide-and-seek during break time.[cite: 6]",
-                "qVi": "Học sinh thời xưa chơi các trò chơi ____ như trốn tìm trong giờ nghỉ giải lao.",
-                "key": ["In the past played", "games like hide-and-seek"],
-                "opts": ["computer", "mobile", "traditional", "modern"],
-                "optsVi": ["máy tính", "di động", "truyền thống / dân gian", "hiện đại"],
-                "correct": 2,
-                "exp": "Trốn tìm (hide-and-seek) là một ví dụ điển hình của <b>traditional games</b> (trò chơi dân gian/truyền thống).",
-                "tag": "collocations"
-            },
-            {
-                "q": "Nowadays, children chat on phones instead of talking ____ as people did in the past.[cite: 6]",
-                "qVi": "Ngày nay, trẻ em trò chuyện qua điện thoại thay vì nói chuyện ____ như mọi người đã làm trong quá khứ.",
-                "key": ["instead of talking", "as people did in the past"],
-                "opts": ["face to face", "on foot", "by hand", "online"],
-                "optsVi": ["trực tiếp / mặt đối mặt", "đi bộ", "bằng tay", "trực tuyến"],
-                "correct": 0,
-                "exp": "Đối lập với trò chuyện qua điện thoại (chat on phones) là nói chuyện <b>face to face</b> (trực tiếp mặt đối mặt).",
-                "tag": "collocations"
-            },
-            {
-                "q": "In the past, people used ____ communication to transfer knowledge and news.[cite: 6]",
-                "qVi": "Trong quá khứ, mọi người sử dụng giao tiếp ____ để truyền tải kiến thức và tin tức.",
-                "key": ["In the past", "used", "communication to transfer knowledge"],
-                "opts": ["mobile", "oral", "computer", "internet"],
-                "optsVi": ["di động", "bằng lời nói / truyền miệng", "máy tính", "internet"],
-                "correct": 1,
-                "exp": "Cụm từ <b>oral communication</b> mang nghĩa là 'giao tiếp bằng lời nói, truyền miệng'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "Years ago, people used to travel ____ foot or by riding animals for long distances.[cite: 6]",
-                "qVi": "Nhiều năm trước, mọi người thường đi ____ bộ hoặc cưỡi động vật đi những quãng đường dài.",
-                "key": ["travel", "foot"],
-                "opts": ["by", "on", "with", "in"],
-                "optsVi": ["bằng (đi với phương tiện)", "trên (on foot: đi bộ)", "với", "trong"],
-                "correct": 1,
-                "exp": "Cụm từ cố định chỉ phương thức đi bộ là <b>on foot</b>.",
-                "tag": "phrasalVerbs"
-            },
-            {
-                "q": "In ____ regions, the air is pure and the crops are free of insecticides.[cite: 6]",
-                "qVi": "Ở những vùng ____, không khí trong lành và cây trồng không bị phun thuốc trừ sâu.",
-                "key": ["regions, the air is pure and the crops are free of insecticides"],
-                "opts": ["city", "remote", "near", "large"],
-                "optsVi": ["thành phố", "xa xôi hẻo lánh", "gần", "lớn"],
-                "correct": 1,
-                "exp": "Nơi có không khí trong lành, tự nhiên, không hóa chất thường là ở các <b>remote regions</b> (vùng sâu vùng xa, hẻo lánh).",
-                "tag": "vocab"
-            },
-            {
-                "q": "In the past, many women were ____ because they were not allowed to go to school.[cite: 6]",
-                "qVi": "Trong quá khứ, nhiều phụ nữ bị ____ vì họ không được phép đi học.",
-                "key": ["were not allowed to go to school"],
-                "opts": ["wealthy", "illiterate", "busy", "active"],
-                "optsVi": ["giàu có", "mù chữ / thất học", "bận rộn", "năng động"],
-                "correct": 1,
-                "exp": "Việc không được đi học (not allowed to go to school) dẫn đến tình trạng <b>illiterate</b> (mù chữ, không biết đọc viết).",
-                "tag": "vocab"
-            },
-            {
-                "q": "At 5.30 a.m. every day, the ____ outside wakes me up with the morning radio programs.[cite: 6]",
-                "qVi": "Vào lúc 5:30 sáng mỗi ngày, chiếc ____ bên ngoài đánh thức tôi dậy bằng các chương trình phát thanh buổi sáng.",
-                "key": ["outside wakes me up with the morning radio programs"],
-                "opts": ["radio", "television", "loudspeaker", "computer"],
-                "optsVi": ["máy đài", "ti vi", "loa phát thanh / loa phường", "máy tính"],
-                "correct": 2,
-                "exp": "Thiết bị phát thanh công cộng treo ngoài trời (outside) phát chương trình buổi sáng là <b>loudspeaker</b> (loa phóng thanh/loa phường).",
-                "tag": "vocab"
-            },
-            {
-                "q": "My grandmother used to collect ____ to treat illnesses in the family.[cite: 6]",
-                "qVi": "Bà tôi thường thu hái ____ để chữa bệnh trong gia đình.",
-                "key": ["collect", "to treat illnesses"],
-                "opts": ["flowers", "herbs", "leaves", "trees"],
-                "optsVi": ["hoa", "thảo dược / cây thuốc", "lá cây", "cây cối"],
-                "correct": 1,
-                "exp": "Thực vật dùng để chữa bệnh (treat illnesses) trong dân gian được gọi là <b>herbs</b> (thảo dược, cây thuốc).",
-                "tag": "vocab"
-            },
-            {
-                "q": "The ancient temple stood as a ____ of a bygone era.[cite: 6]",
-                "qVi": "Ngôi đền cổ đứng đó như một ____ về một thời đại đã qua.",
-                "key": ["stood as a", "of a bygone era"],
-                "opts": ["structure", "reminder", "house", "ceremony"],
-                "optsVi": ["cấu trúc", "lời nhắc nhở / dấu tích gợi nhớ", "ngôi nhà", "buổi lễ"],
-                "correct": 1,
-                "exp": "Cấu trúc <b>stand as a reminder of something</b> mang nghĩa là 'đứng đó như một chứng tích gợi nhắc về điều gì'.",
-                "tag": "vocab"
-            },
-            {
-                "q": "The majestic ____ overlooked the town, steeped in history.[cite: 6]",
-                "qVi": "Tòa ____ uy nghi nhìn xuống thị trấn, thấm đượm bề dày lịch sử.",
-                "key": ["majestic", "overlooked the town"],
-                "opts": ["castle", "building", "complex", "monument"],
-                "optsVi": ["lâu đài", "tòa nhà", "khu phức hợp", "tượng đài"],
-                "correct": 0,
-                "exp": "Công trình đồ sộ, uy nghi thường nằm trên đồi cao nhìn xuống thị trấn (overlooked the town) là <b>castle</b> (lâu đài).",
-                "tag": "vocab"
-            },
-            {
-                "q": "Streets in Ha Noi's Old Quarter still have names describing their original ____.[cite: 6]",
-                "qVi": "Các con phố trong Phố cổ Hà Nội vẫn giữ những cái tên mô tả ____ truyền thống ban đầu của chúng.",
-                "key": ["Ha Noi's Old Quarter", "names describing their original"],
-                "opts": ["people", "craft", "history", "house"],
-                "optsVi": ["con người", "nghề thủ công / mặt hàng buôn bán", "lịch sử", "ngôi nhà"],
-                "correct": 1,
-                "exp": "Tên các phố cổ Hà Nội (Hàng Bạc, Hàng Đào...) đặt theo nghề thủ công hoặc mặt hàng kinh doanh truyền thống: <b>craft</b>.",
-                "tag": "vocab"
-            },
-            {
-                "q": "The architecture and lifestyle of the local people ____ typical characteristics of old Ha Noi.[cite: 6]",
-                "qVi": "Kiến trúc và lối sống của người dân địa phương ____ những nét đặc trưng tiêu biểu của Hà Nội xưa.",
-                "key": ["typical characteristics of old Ha Noi"],
-                "opts": ["show", "reflect", "see", "look"],
-                "optsVi": ["cho thấy", "phản ánh", "nhìn thấy", "nhìn"],
-                "correct": 1,
-                "exp": "Động từ mang sắc thái trang trọng, miêu tả việc kiến trúc và lối sống 'phản ánh' nét văn hóa là <b>reflect</b>.",
-                "tag": "vocab"
-            },
-            {
-                "q": "Most Vietnamese families have an ancestral ____ at a prominent place of the house.[cite: 6]",
-                "qVi": "Hầu hết các gia đình Việt Nam đều có một ____ tổ tiên ở một vị trí trang trọng trong nhà.",
-                "key": ["ancestral", "at a prominent place"],
-                "opts": ["altar", "table", "room", "bed"],
-                "optsVi": ["bàn thờ", "cái bàn", "căn phòng", "giường"],
-                "correct": 0,
-                "exp": "Cụm từ <b>ancestral altar</b> mang nghĩa là 'bàn thờ tổ tiên'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "The ancestral altar is set with ancestral ____ and pictures of deceased family members.[cite: 6]",
-                "qVi": "Bàn thờ tổ tiên được bài trí với ____ tổ tiên và ảnh của những người trong gia đình đã khuất.",
-                "key": ["ancestral", "and pictures of deceased family members"],
-                "opts": ["books", "tablets", "papers", "notes"],
-                "optsVi": ["sách", "bài vị / mộc bài", "giấy tờ", "ghi chú"],
-                "correct": 1,
-                "exp": "Cụm từ <b>ancestral tablets</b> có nghĩa là 'bài vị tổ tiên' (thường đi cùng với ảnh thờ trên bàn thờ).",
-                "tag": "collocations"
-            },
-            {
-                "q": "A branch of peach blossoms is used to ____ away evil spirits and bad luck.[cite: 6]",
-                "qVi": "Một cành đào được sử dụng để ____ tà ma và những điều xui xẻo.",
-                "key": ["away evil spirits and bad luck"],
-                "opts": ["take", "drive", "go", "run"],
-                "optsVi": ["lấy đi", "xua đuổi", "đi", "chạy"],
-                "correct": 1,
-                "exp": "Cụm động từ <b>drive away</b> có nghĩa là 'xua đuổi (tà ma, xui xẻo)'.",
-                "tag": "phrasalVerbs"
-            },
-            {
-                "q": "My brother was just sitting while I was looking around the ____ workshop.[cite: 6]",
-                "qVi": "Anh trai tôi chỉ ngồi trong khi tôi đang đi ngắm nghía xung quanh xưởng ____.",
-                "key": ["workshop"],
-                "opts": ["weaving", "cooking", "playing", "talking"],
-                "optsVi": ["dệt vải / đan lát", "nấu ăn", "vui chơi", "nói chuyện"],
-                "correct": 0,
-                "exp": "Cụm từ <b>weaving workshop</b> mang nghĩa là 'xưởng dệt / xưởng đan lát thủ công'.",
-                "tag": "collocations"
-            },
-            {
-                "q": "Sam remembers a lot of historical ____ and dates from his history lessons.[cite: 6]",
-                "qVi": "Sam nhớ rất nhiều ____ lịch sử và ngày tháng từ các bài học lịch sử của cậu ấy.",
-                "key": ["historical", "and dates"],
-                "opts": ["stories", "events", "traditions", "customs"],
-                "optsVi": ["câu chuyện", "sự kiện", "truyền thống", "phong tục"],
-                "correct": 1,
-                "exp": "Cụm từ đi song hành trong môn lịch sử là <b>historical events and dates</b> (các sự kiện và mốc thời gian lịch sử).",
-                "tag": "collocations"
-            },
-            {
-                "q": "Ancestor worship reminds people of their ____ and where they came from.[cite: 6]",
-                "qVi": "Thờ cúng tổ tiên nhắc nhở con người về ____ của họ và nơi họ sinh ra.",
-                "key": ["reminds people of their", "and where they came from"],
-                "opts": ["roots", "houses", "names", "jobs"],
-                "optsVi": ["cội nguồn / gốc rễ", "ngôi nhà", "tên gọi", "công việc"],
-                "correct": 0,
-                "exp": "Từ vựng đồng nghĩa bổ trợ cho 'where they came from' (nơi họ sinh ra/gốc gác) là <b>roots</b> (cội nguồn, gốc rễ).",
-                "tag": "vocab"
-            },
-            {
-                "q": "The communal house has a ____ meaning in the community's life.[cite: 6]",
-                "qVi": "Đình làng có một ý nghĩa ____ trong đời sống của cộng đồng.",
-                "key": ["has a", "meaning in the community's life"],
-                "opts": ["basic", "magnificent", "significant", "ancient"],
-                "optsVi": ["cơ bản", "tráng lệ", "quan trọng / to lớn", "cổ kính"],
-                "correct": 2,
-                "exp": "Cụm từ <b>have a significant meaning</b> có nghĩa là 'có ý nghĩa vô cùng quan trọng, to lớn'.",
-                "tag": "collocations"
+            "skill_gram_connector": {
+                title: "Từ nối & Liên từ (Connectors & Conjunctions)",
+                strength: "Tạo sự mạch lạc cho câu bằng từ nối (however, therefore, moreover...).",
+                weak: "Dùng sai từ nối chỉ sự tương phản hoặc kết quả, đặt sai vị trí dấu câu.",
+                action: "Chú ý dấu câu: 'However, Therefore' thường đứng sau dấu chấm và trước dấu phẩy. Luyện tập chọn từ nối theo ngữ cảnh logic."
             }
-        ];
+        };
+
+        // === DỮ LIỆU CAU HỎI (TÍCH HỢP DUAL-TAGS & 3S EXPLANATION) ===
+        const quizData = [
+  {
+    "q": "I live in a ________. And you? - I live in a country house.[cite: 4]",
+    "qVi": "Tôi sống trong một ________. Còn bạn? - Tôi sống trong một ngôi nhà ở nông thôn.",
+    "key": ["live in a", "country house"],
+    "opts": ["town house", "cupboard", "sink", "fridge"],
+    "optsVi": ["nhà phố", "tủ bếp", "bồn rửa", "tủ lạnh"],
+    "correct": 0,
+    "exp": "<b>town house</b> (nhà phố) là từ vựng chỉ loại hình nhà ở, tương ứng với 'country house' (nhà nông thôn) ở vế sau[cite: 4]. Các đáp án còn lại là đồ gia dụng trong nhà[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "I live in a town house. Who do you live with? - I live in a ________.[cite: 4]",
+    "qVi": "Tôi sống trong một nhà phố. Bạn sống với ai? - Tôi sống trong một ________.",
+    "key": ["live in a"],
+    "opts": ["wardrobe", "country house", "dishwasher", "chopstick"],
+    "optsVi": ["tủ quần áo", "nhà ở nông thôn", "máy rửa bát", "đũa"],
+    "correct": 1,
+    "exp": "Động từ 'live in a...' (sống trong một...) cần đi kèm với danh từ chỉ nơi ở[cite: 4]. <b>country house</b> (ngôi nhà nông thôn) là đáp án hợp lý duy nhất[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "My parents and younger brother. We're moving to a ________ next month![cite: 4]",
+    "qVi": "Bố mẹ và em trai tôi. Chúng tôi sẽ chuyển đến một ________ vào tháng tới!",
+    "key": ["moving to a"],
+    "opts": ["clock", "flat", "desk", "microwave"],
+    "optsVi": ["đồng hồ", "căn hộ", "bàn học", "lò vi sóng"],
+    "correct": 1,
+    "exp": "Cụm từ 'move to a...' (chuyển đến một...) cần một danh từ chỉ nơi ở[cite: 4]. <b>flat</b> (căn hộ) là loại hình nhà ở duy nhất trong các lựa chọn[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Are there many ________ in your new flat? - Yes, there are.[cite: 4]",
+    "qVi": "Có nhiều ________ trong căn hộ mới của bạn không? - Có, có nhiều.",
+    "key": ["many", "in your new flat"],
+    "opts": ["rooms", "beds", "sofas", "pillows"],
+    "optsVi": ["căn phòng", "giường", "ghế sofa", "gối"],
+    "correct": 0,
+    "exp": "Căn hộ (flat) được chia thành nhiều không gian lớn gọi là <b>rooms</b> (các căn phòng)[cite: 4]. Đây là từ vựng bao quát và tự nhiên nhất khi hỏi tổng thể về một căn hộ mới[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There's a living room, three ________, a kitchen and two bathrooms.[cite: 4]",
+    "qVi": "Có một phòng khách, ba ________, một nhà bếp và hai phòng tắm.",
+    "key": ["living room", "kitchen", "bathrooms"],
+    "opts": ["pillows", "bedrooms", "bowls", "chopsticks"],
+    "optsVi": ["gối", "phòng ngủ", "bát", "đũa"],
+    "correct": 1,
+    "exp": "Trong cấu trúc liệt kê các phòng chức năng của ngôi nhà (phòng khách, bếp, phòng tắm), đáp án phù hợp nhất là <b>bedrooms</b> (phòng ngủ)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There's a living room, three bedrooms, a ________ and two bathrooms.[cite: 4]",
+    "qVi": "Có một phòng khách, ba phòng ngủ, một ________ và hai phòng tắm.",
+    "key": ["living room", "bedrooms", "bathrooms"],
+    "opts": ["kitchen", "picture", "lamp", "television"],
+    "optsVi": ["nhà bếp", "bức tranh", "đèn", "ti vi"],
+    "correct": 0,
+    "exp": "Câu đang liệt kê các khu vực chức năng trong nhà, vì vậy cần chọn một từ chỉ căn phòng là <b>kitchen</b> (nhà bếp)[cite: 4]. Các đáp án khác chỉ là đồ vật[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "My grandparents live in a ________ in Nam Dinh.[cite: 4]",
+    "qVi": "Ông bà tôi sống trong một ________ ở Nam Định.",
+    "key": ["live in a", "in Nam Dinh"],
+    "opts": ["country house", "shelf", "chest of drawers", "toilet"],
+    "optsVi": ["ngôi nhà nông thôn", "kệ", "tủ ngăn kéo", "nhà vệ sinh"],
+    "correct": 0,
+    "exp": "Cụm từ 'live in a...' chỉ nơi sinh sống, đáp án chính xác là <b>country house</b> (nhà ở nông thôn)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There are four ________ in the house and a big garden.[cite: 4]",
+    "qVi": "Có bốn ________ trong nhà và một khu vườn lớn.",
+    "key": ["four", "in the house", "garden"],
+    "opts": ["sinks", "rooms", "cookers", "fridges"],
+    "optsVi": ["bồn rửa", "căn phòng", "bếp nấu", "tủ lạnh"],
+    "correct": 1,
+    "exp": "Khi miêu tả tổng quan về quy mô ngôi nhà đi kèm với sân vườn (garden), người ta thường nói về số lượng <b>rooms</b> (căn phòng)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "I like the ________. There is a big window in this room.[cite: 4]",
+    "qVi": "Tôi thích ________. Có một cái cửa sổ lớn trong căn phòng này.",
+    "key": ["in this room", "big window"],
+    "opts": ["living room", "chopstick", "microwave", "dishwasher"],
+    "optsVi": ["phòng khách", "đũa", "lò vi sóng", "máy rửa bát"],
+    "correct": 0,
+    "exp": "Câu sau nhắc trực tiếp đến 'in this room' (trong căn phòng này), do đó từ cần điền phải là một căn phòng: <b>living room</b> (phòng khách)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "I'm in Da Lat with my parents. We're staying at the Crazy House Hotel. Wow! It really is ________.[cite: 4]",
+    "qVi": "Tôi đang ở Đà Lạt với bố mẹ. Chúng tôi đang ở khách sạn Crazy House. Chà! Nó thực sự rất ________.",
+    "key": ["Crazy House Hotel", "really is"],
+    "opts": ["messy", "crazy", "flat", "stilt house"],
+    "optsVi": ["lộn xộn", "điên rồ / kỳ dị", "bằng phẳng", "nhà sàn"],
+    "correct": 1,
+    "exp": "Khách sạn có tên là 'Crazy House', vì vậy tính từ <b>crazy</b> (kỳ dị, độc đáo) được lặp lại để nhấn mạnh đặc điểm kiến trúc của nơi này[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "There are ten ________ in the hotel. There's a Kangaroo Room, an Eagle Room, and even an Ant Room.[cite: 4]",
+    "qVi": "Có mười ________ trong khách sạn. Có phòng Kangaroo, phòng Đại bàng và thậm chí là phòng Kiến.",
+    "key": ["in the hotel", "Kangaroo Room", "Eagle Room"],
+    "opts": ["bowls", "rooms", "sofas", "cupboards"],
+    "optsVi": ["bát", "căn phòng", "ghế sofa", "tủ"],
+    "correct": 1,
+    "exp": "Câu sau liệt kê tên của các căn phòng (Kangaroo Room, Eagle Room...), do đó danh từ chung cần điền ở câu trước là <b>rooms</b> (phòng)[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "I'm staying in the Tiger ________. It's called the Tiger Room because there's a big tiger on the wall.[cite: 4]",
+    "qVi": "Tôi đang ở trong ________ Hổ. Nó được gọi là phòng Hổ vì có một con hổ lớn trên tường.",
+    "key": ["Tiger", "called the Tiger Room"],
+    "opts": ["Room", "Kitchen", "Attic", "Garage"],
+    "optsVi": ["Phòng", "Nhà bếp", "Gác mái", "Gara"],
+    "correct": 0,
+    "exp": "Vế sau giải thích tên gọi 'It's called the Tiger Room' (Nó được gọi là Phòng Hổ), vì vậy từ cần điền ở vế trước là <b>Room</b>[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "What's in your room? - A sofa and a television. Is it the ________? - Yes.[cite: 4]",
+    "qVi": "Có gì trong phòng của bạn? - Một cái sofa và một cái ti vi. Đó là ________ phải không? - Vâng.",
+    "key": ["sofa", "television"],
+    "opts": ["bathroom", "living room", "kitchen", "hall"],
+    "optsVi": ["phòng tắm", "phòng khách", "nhà bếp", "hành lang"],
+    "correct": 1,
+    "exp": "Ghế sofa và ti vi (sofa and television) là nội thất đặc trưng của <b>living room</b> (phòng khách)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Look at the house. Name the rooms in it. There is a ________, a kitchen, a bedroom, a bathroom, and a living room.[cite: 4]",
+    "qVi": "Nhìn vào ngôi nhà. Hãy gọi tên các căn phòng trong đó. Có một ________, nhà bếp, phòng ngủ, phòng tắm và phòng khách.",
+    "key": ["Name the rooms", "kitchen", "bedroom"],
+    "opts": ["hall", "fridge", "lamp", "cooker"],
+    "optsVi": ["sảnh / hành lang", "tủ lạnh", "đèn", "bếp nấu"],
+    "correct": 0,
+    "exp": "Đề bài yêu cầu kể tên các khu vực/phòng trong nhà (Name the rooms). <b>hall</b> (sảnh, lối vào, hành lang) là từ duy nhất chỉ không gian nhà ở, các từ còn lại là đồ dùng[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Mum, are you home? - Yes, honey. I'm in the ________. I've bought these new bowls and chopsticks.[cite: 4]",
+    "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ đang ở trong ________. Mẹ mới mua mấy cái bát và đũa này.",
+    "key": ["bowls and chopsticks"],
+    "opts": ["kitchen", "bedroom", "attic", "bathroom"],
+    "optsVi": ["nhà bếp", "phòng ngủ", "gác mái", "phòng tắm"],
+    "correct": 0,
+    "exp": "Bát và đũa (bowls and chopsticks) là dụng cụ ăn uống, vị trí hợp lý nhất để cất giữ và sử dụng chúng là <b>kitchen</b> (nhà bếp)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "My grandfather likes the ________ the best. The kitchen is my grandfather's favourite room.[cite: 4]",
+    "qVi": "Ông tôi thích ________ nhất. Nhà bếp là căn phòng yêu thích của ông tôi.",
+    "key": ["likes", "the best", "kitchen is", "favourite room"],
+    "opts": ["kitchen", "pillow", "bed", "clock"],
+    "optsVi": ["nhà bếp", "gối", "giường", "đồng hồ"],
+    "correct": 0,
+    "exp": "Câu sau khẳng định 'The kitchen is my grandfather's favourite room' (Nhà bếp là phòng yêu thích nhất của ông), tương đương với việc ông thích <b>kitchen</b> nhất[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Mai's house has seven ________. The living room is next to the kitchen.[cite: 4]",
+    "qVi": "Nhà của Mai có bảy ________. Phòng khách nằm cạnh nhà bếp.",
+    "key": ["house has seven", "living room", "kitchen"],
+    "opts": ["tables", "desks", "rooms", "shelves"],
+    "optsVi": ["bàn", "bàn học", "căn phòng", "kệ"],
+    "correct": 2,
+    "exp": "Khi giới thiệu tổng thể về một ngôi nhà và liệt kê vị trí các phòng (living room, kitchen), ta dùng danh từ <b>rooms</b> (căn phòng)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "She often listens to music in her ________.[cite: 4]",
+    "qVi": "Cô ấy thường nghe nhạc trong ________.",
+    "key": ["listens to music in her"],
+    "opts": ["bedroom", "sink", "dishwasher", "cooker"],
+    "optsVi": ["phòng ngủ", "bồn rửa", "máy rửa bát", "bếp nấu"],
+    "correct": 0,
+    "exp": "Giới từ 'in her...' cần đi với danh từ chỉ phòng/không gian riêng tư[cite: 4]. <b>bedroom</b> (phòng ngủ) là nơi thích hợp nhất để nghỉ ngơi và nghe nhạc[cite: 4].",
+    "tags": ["topic_hobbies", "skill_vocab_core"]
+  },
+  {
+    "q": "Where do you live? - I live in a ________.[cite: 4]",
+    "qVi": "Bạn sống ở đâu? - Tôi sống trong một ________.",
+    "key": ["Where do you live", "live in a"],
+    "opts": ["flat", "television", "cupboard", "chest of drawers"],
+    "optsVi": ["căn hộ", "ti vi", "tủ bếp", "tủ ngăn kéo"],
+    "correct": 0,
+    "exp": "Câu hỏi về nơi chốn sinh sống (Where do you live?), đáp án cần chọn là một loại hình nhà ở: <b>flat</b> (căn hộ)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "This is the Shark Room. There's a table and a sofa in the middle of the ________.[cite: 4]",
+    "qVi": "Đây là phòng Cá mập. Có một cái bàn và một cái ghế sofa ở giữa ________.",
+    "key": ["Shark Room", "in the middle of the"],
+    "opts": ["room", "picture", "clock", "lamp"],
+    "optsVi": ["căn phòng", "bức tranh", "đồng hồ", "đèn"],
+    "correct": 0,
+    "exp": "Cụm từ <b>in the middle of the room</b> (ở giữa căn phòng) chỉ vị trí đặt đồ nội thất (bàn, ghế sofa)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_colloc"]
+  },
+  {
+    "q": "My bedroom isn't nice. - How about putting a ________ on the wall?[cite: 4]",
+    "qVi": "Phòng ngủ của tôi không đẹp lắm. - Sao bạn không treo một ________ trên tường nhỉ?",
+    "key": ["putting", "on the wall"],
+    "opts": ["picture", "cooker", "fridge", "sink"],
+    "optsVi": ["bức tranh", "bếp nấu", "tủ lạnh", "bồn rửa"],
+    "correct": 0,
+    "exp": "Vật dụng trang trí thường được treo trên tường (on the wall) trong phòng ngủ là <b>picture</b> (bức tranh)[cite: 4]. Các đồ vật khác là thiết bị nhà bếp[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There's a lamp, a wardrobe and a ________. You should stay here when you visit Da Lat.[cite: 4]",
+    "qVi": "Có một cái đèn, một tủ quần áo và một ________. Bạn nên ở đây khi bạn đến thăm Đà Lạt.",
+    "key": ["lamp", "wardrobe", "and a"],
+    "opts": ["desk", "bathroom", "kitchen", "hall"],
+    "optsVi": ["bàn học / bàn làm việc", "phòng tắm", "nhà bếp", "hành lang"],
+    "correct": 0,
+    "exp": "Câu đang liệt kê các đồ nội thất trong phòng nghỉ (lamp, wardrobe), vì vậy từ cần điền cùng trường từ vựng là <b>desk</b> (bàn làm việc/bàn học)[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "I see. Is there a ________ behind you? - Yes, there is.[cite: 4]",
+    "qVi": "Tôi hiểu rồi. Có một cái ________ đằng sau bạn không? - Vâng, có.",
+    "key": ["behind you"],
+    "opts": ["TV", "town house", "villa", "country house"],
+    "optsVi": ["ti vi", "nhà phố", "biệt thự", "nhà nông thôn"],
+    "correct": 0,
+    "exp": "Giới từ vị trí 'behind you' (đằng sau bạn) dùng để chỉ một đồ vật cụ thể trong phòng như <b>TV</b> (ti vi), không thể đặt cả một ngôi nhà (town house, villa...) đằng sau một người trong phòng[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There are four ________ and a table in the middle of the room.[cite: 4]",
+    "qVi": "Có bốn ________ và một cái bàn ở giữa phòng.",
+    "key": ["four", "and a table", "middle of the room"],
+    "opts": ["chairs", "kitchens", "flats", "villas"],
+    "optsVi": ["cái ghế", "nhà bếp", "căn hộ", "biệt thự"],
+    "correct": 0,
+    "exp": "Bàn (table) luôn đi theo bộ cùng với ghế: <b>chairs</b> (những cái ghế) đặt ở giữa phòng[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "I like the living room. There is a big ________ in this room.[cite: 4]",
+    "qVi": "Tôi thích phòng khách. Có một cái ________ lớn trong căn phòng này.",
+    "key": ["living room", "big", "in this room"],
+    "opts": ["window", "chopstick", "microwave", "dishwasher"],
+    "optsVi": ["cửa sổ", "đũa", "lò vi sóng", "máy rửa bát"],
+    "correct": 0,
+    "exp": "Một bộ phận kiến trúc giúp phòng khách trở nên thoáng đãng là <b>window</b> (cửa sổ lớn)[cite: 4]. Các lựa chọn khác là dụng cụ/thiết bị nhà bếp[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There are two family ________ on the wall.[cite: 4]",
+    "qVi": "Có hai bức ________ gia đình ở trên tường.",
+    "key": ["two family", "on the wall"],
+    "opts": ["photos", "beds", "sinks", "fridges"],
+    "optsVi": ["ảnh", "giường", "bồn rửa", "tủ lạnh"],
+    "correct": 0,
+    "exp": "Cụm từ cố định <b>family photos</b> (ảnh gia đình) là vật dụng thường được treo trên tường (on the wall) để trang trí[cite: 4].",
+    "tags": ["topic_family", "skill_vocab_colloc"]
+  },
+  {
+    "q": "It's called the Tiger Room because there's a big tiger on the ________.[cite: 4]",
+    "qVi": "Nó được gọi là phòng Hổ vì có một con hổ lớn ở trên ________.",
+    "key": ["big tiger", "on the"],
+    "opts": ["wall", "floor", "garden", "attic"],
+    "optsVi": ["tường", "sàn nhà", "khu vườn", "gác mái"],
+    "correct": 0,
+    "exp": "Cụm từ chỉ vị trí quen thuộc: <b>on the wall</b> (trên tường)[cite: 4]. Hình vẽ hoặc tranh trang trí con hổ thường nằm ở vị trí này[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Look at the picture. The cap is under the ________.[cite: 4]",
+    "qVi": "Nhìn vào bức tranh. Cái mũ đang ở dưới ________.",
+    "key": ["cap is under the"],
+    "opts": ["pillow", "kitchen", "flat", "villa"],
+    "optsVi": ["gối", "nhà bếp", "căn hộ", "biệt thự"],
+    "correct": 0,
+    "exp": "Giới từ 'under' (ở dưới) chỉ vị trí của đồ vật nhỏ (cái mũ)[cite: 4]. Đáp án hợp lý duy nhất là <b>pillow</b> (cái gối)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "The bed is next to the window, but the ________ is a strange shape.[cite: 4]",
+    "qVi": "Cái giường nằm cạnh cửa sổ, nhưng cái ________ có hình thù kỳ lạ.",
+    "key": ["next to the window", "strange shape"],
+    "opts": ["window", "sink", "cooker", "fridge"],
+    "optsVi": ["cửa sổ", "bồn rửa", "bếp nấu", "tủ lạnh"],
+    "correct": 0,
+    "exp": "Vế trước vừa nhắc đến sự liên kết giữa giường và cửa sổ (window), vế sau lặp lại danh từ <b>window</b> để nhấn mạnh hình dáng đặc biệt của nó trong phòng ngủ[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "I put my bag under the ________.[cite: 4]",
+    "qVi": "Tôi để cặp sách dưới ________.",
+    "key": ["put my bag under the"],
+    "opts": ["bed", "flat", "villa", "stilt house"],
+    "optsVi": ["giường", "căn hộ", "biệt thự", "nhà sàn"],
+    "correct": 0,
+    "exp": "Giới từ vị trí 'under the...' (dưới gầm...) áp dụng cho đồ nội thất trong phòng là <b>bed</b> (giường)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There's a lamp, a ________ and a desk. You should stay here when you visit Da Lat.[cite: 4]",
+    "qVi": "Có một cái đèn, một ________ và một bàn học. Bạn nên ở đây khi bạn đến thăm Đà Lạt.",
+    "key": ["lamp", "and a desk"],
+    "opts": ["wardrobe", "kitchen", "bathroom", "hall"],
+    "optsVi": ["tủ quần áo", "nhà bếp", "phòng tắm", "hành lang"],
+    "correct": 0,
+    "exp": "Câu đang liệt kê đồ nội thất trong phòng ngủ khách sạn (đèn, bàn học), vì vậy đáp án cùng nhóm từ vựng là <b>wardrobe</b> (tủ quần áo)[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "There are four chairs and a ________ in the middle of the room.[cite: 4]",
+    "qVi": "Có bốn cái ghế và một ________ ở giữa phòng.",
+    "key": ["four chairs and a", "middle of the room"],
+    "opts": ["table", "bathroom", "hall", "kitchen"],
+    "optsVi": ["cái bàn", "phòng tắm", "hành lang", "nhà bếp"],
+    "correct": 0,
+    "exp": "Ghế (chairs) luôn đi chung bộ với <b>table</b> (cái bàn) và thường được đặt ở trung tâm căn phòng[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "What's in your room? - A ________ and a television.[cite: 4]",
+    "qVi": "Có gì trong phòng của bạn? - Một ________ và một cái ti vi.",
+    "key": ["What's in your room", "and a television"],
+    "opts": ["sofa", "bathroom", "hall", "kitchen"],
+    "optsVi": ["ghế sofa", "phòng tắm", "hành lang", "nhà bếp"],
+    "correct": 0,
+    "exp": "Đồ nội thất đi liền với ti vi trong phòng khách là <b>sofa</b> (ghế sofa)[cite: 4]. Các lựa chọn còn lại là tên các căn phòng[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Mum, are you home? - Yes, honey. I've bought these new ________ and chopsticks.[cite: 4]",
+    "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ mới mua mấy cái ________ và đũa này.",
+    "key": ["bought these new", "and chopsticks"],
+    "opts": ["bowls", "beds", "clocks", "pictures"],
+    "optsVi": ["bát", "giường", "đồng hồ", "tranh"],
+    "correct": 0,
+    "exp": "Cụm từ chỉ dụng cụ ăn uống luôn đi đôi với nhau: <b>bowls and chopsticks</b> (bát và đũa)[cite: 4].",
+    "tags": ["topic_family", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Mum, are you home? - Yes, honey. I've bought these new bowls and ________.[cite: 4]",
+    "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ mới mua mấy cái bát và ________ này.",
+    "key": ["bowls and"],
+    "opts": ["chopsticks", "wardrobes", "cupboards", "sofas"],
+    "optsVi": ["đũa", "tủ quần áo", "tủ bếp", "ghế sofa"],
+    "correct": 0,
+    "exp": "Bát (bowls) trong bữa ăn gia đình luôn kết hợp với đũa: <b>chopsticks</b>[cite: 4].",
+    "tags": ["topic_family", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Don't forget we need two ________ for my bedroom, Mum.[cite: 4]",
+    "qVi": "Đừng quên chúng ta cần hai cái ________ cho phòng ngủ của con nhé, mẹ.",
+    "key": ["need two", "for my bedroom"],
+    "opts": ["lamps", "cookers", "fridges", "sinks"],
+    "optsVi": ["đèn", "bếp nấu", "tủ lạnh", "bồn rửa"],
+    "correct": 0,
+    "exp": "Thiết bị chiếu sáng phù hợp để đặt trong phòng ngủ (bedroom) là <b>lamps</b> (đèn bàn/đèn ngủ)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "Elena has a big ________ in her bedroom.[cite: 4]",
+    "qVi": "Elena có một cái ________ lớn trong phòng ngủ của cô ấy.",
+    "key": ["in her bedroom"],
+    "opts": ["bookshelf", "dishwasher", "microwave", "air conditioner"],
+    "optsVi": ["giá sách", "máy rửa bát", "lò vi sóng", "điều hòa nhiệt độ"],
+    "correct": 0,
+    "exp": "Trong số các đồ vật đã cho, đồ nội thất thường được đặt trong phòng ngủ của một học sinh là <b>bookshelf</b> (giá sách)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "There's a big ________ next to the door.[cite: 4]",
+    "qVi": "Có một cái ________ lớn nằm cạnh cửa ra vào.",
+    "key": ["next to the door"],
+    "opts": ["bed", "kitchen", "bathroom", "hall"],
+    "optsVi": ["giường", "nhà bếp", "phòng tắm", "hành lang"],
+    "correct": 0,
+    "exp": "Cụm từ 'next to the door' (cạnh cửa ra vào) dùng để mô tả vị trí của một món đồ nội thất trong phòng như <b>bed</b> (cái giường)[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "In her bedroom, there's a ________ on the wall.[cite: 4]",
+    "qVi": "Trong phòng ngủ của cô ấy, có một cái ________ ở trên tường.",
+    "key": ["in her bedroom", "on the wall"],
+    "opts": ["clock", "sofa", "desk", "table"],
+    "optsVi": ["đồng hồ", "ghế sofa", "bàn học", "cái bàn"],
+    "correct": 0,
+    "exp": "Vật dụng thường được treo trên tường (on the wall) là <b>clock</b> (đồng hồ treo tường)[cite: 4]. Bàn và ghế sofa đặt trên sàn nhà[cite: 4].",
+    "tags": ["topic_living", "skill_vocab_colloc"]
+  },
+  {
+    "q": "This is the Shark Room. There's a big shark at the ________.[cite: 4]",
+    "qVi": "Đây là phòng Cá mập. Có một con cá mập lớn ở ________.",
+    "key": ["big shark at the"],
+    "opts": ["door", "pillow", "chopstick", "bowl"],
+    "optsVi": ["cửa ra vào", "gối", "đũa", "bát"],
+    "correct": 0,
+    "exp": "Cụm từ giới từ <b>at the door</b> (ở ngay cửa ra vào) chỉ vị trí đặt mô hình hoặc hình vẽ trang trí con cá mập lớn[cite: 4].",
+    "tags": ["topic_travel", "skill_vocab_colloc"]
+  }
+];
 
         // Cấu hình bài thi
         const QUIZ_PASSWORD = "9004";
-        const LESSON_NAME = "Unit 4: Heritage & Past";
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec'; // Link Google Apps Script
+        const LESSON_NAME = "Unit 4: Heritage & Past (Sample Test)";
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec';
 
         let currentUser = "";
         let currentClass = "";
@@ -892,7 +870,7 @@
                         💡 Gợi ý (Keywords)
                     </button>
                     <div class="hint-content" id="hint-box-${index}">
-                        <strong>Keywords:</strong> ${item.key ? item.key.join('; ') : ''}
+                        <strong>Keywords:</strong> ${item.key ? item.key.join('; ') : 'Không có gợi ý đặc biệt'}
                     </div>
 
                     <div class="options-list">
@@ -992,123 +970,130 @@
             const percent = (answeredSet.size / quizData.length) * 100;
             document.getElementById('progress-bar').style.width = percent + '%';
 
-            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong><br>${quizData[qIndex].exp}`;
             expBox.style.display = 'block';
         }
 
-        // THUẬT TOÁN ĐÁNH GIÁ SƯ PHẠM
+        // === THUẬT TOÁN ĐÁNH GIÁ SƯ PHẠM TỰ ĐỘNG (3A LOGIC) ===
         function generateFeedbackReport(scoresObj) {
             let totalPercentage = (correctCount / totalCount) * 100;
-            
             let report = { level: "", strengths: [], weaknesses: [], actionPlan: [] };
 
-            // Xác định Mức độ
-            if (totalPercentage >= 80 && scoresObj.collocations >= 60) {
-                report.level = "Khá / Giỏi (Tư duy ngôn ngữ tốt, hiểu sâu bản chất từ vựng và văn hóa truyền thống).";
-            } else if (totalPercentage >= 50 && scoresObj.collocations < 50) {
-                report.level = "Trung bình - Học lệch (Nắm tốt từ vựng đơn lẻ nhưng hổng mảng kết hợp từ và cụm động từ).";
+            // 1. Phân loại Mức độ nhận thức tổng quát
+            if (totalPercentage >= 85) {
+                report.level = "Xuất sắc (Nắm rất vững kiến thức nền tảng và am hiểu chuyên sâu các chủ đề).";
+            } else if (totalPercentage >= 65) {
+                report.level = "Khá / Giỏi (Tư duy ngôn ngữ tốt, tuy nhiên cần khắc phục một số lỗi ở trọng tâm bị hổng).";
             } else if (totalPercentage >= 50) {
-                report.level = "Trung bình (Nhận diện được dạng bài nhưng còn sai kiến thức nền tảng).";
+                report.level = "Trung bình (Nhận diện được cơ bản dạng bài nhưng còn thiếu chính xác ở cấu trúc khó).";
             } else {
-                report.level = "Cần cố gắng (Chưa vững kiến thức nền tảng; nhận diện dạng bài còn yếu).";
+                report.level = "Cần cố gắng (Chưa vững kiến thức nền tảng; cần ôn tập lại theo định hướng bên dưới).";
             }
 
-            // Điểm mạnh
-            if (scoresObj.vocab >= 70) report.strengths.push("Nắm rất vững vốn từ vựng nền tảng chủ đề bài học.");
-            if (scoresObj.collocations >= 70) report.strengths.push("Sử dụng thành thạo các cụm từ cố định nâng cao.");
-            if (scoresObj.phrasalVerbs >= 70) report.strengths.push("Phản xạ tốt với các cụm động từ và giới từ đi kèm.");
-            if (report.strengths.length === 0) report.strengths.push("Đã có cố gắng hoàn thành bài thi.");
+            // 2. Chẩn đoán tự động ánh xạ từ Từ điển feedbackConfig
+            for (let tag in scoresObj) {
+                let score = scoresObj[tag];
+                let config = feedbackConfig[tag];
+                
+                if (config) {
+                    if (score < 60) { // Điểm yếu (<60%)
+                        report.weaknesses.push(`<b>[${config.title}]</b>: ${config.weak}`);
+                        report.actionPlan.push(`👉 <b>Khắc phục ${config.title}</b>: ${config.action}`);
+                    } else if (score >= 80) { // Điểm mạnh (>=80%)
+                        report.strengths.push(`<b>[${config.title}]</b>: ${config.strength}`);
+                    }
+                }
+            }
 
-            // Điểm yếu & Lời khuyên
-            if (scoresObj.collocations < 60) {
-                report.weaknesses.push("Hổng mảng Cụm từ cố định (Collocations): Thường dịch theo kiểu word-by-word.");
-                report.actionPlan.push("Chấm dứt học từ vựng đơn lẻ: Phải học từ mới đi kèm với giới từ và cấu trúc nguyên cụm.");
-            }
-            if (scoresObj.phrasalVerbs < 60) {
-                report.weaknesses.push("Yếu mảng Cụm động từ (Phrasal verbs): Chưa thuộc hoặc nhầm lẫn giới từ.");
-                report.actionPlan.push("Lập sổ tay tổng hợp các Phrasal verbs đã sai và đặt câu thực tế để ghi nhớ.");
-            }
-            if (scoresObj.vocab < 50) {
-                report.weaknesses.push("Thiếu vốn từ vựng nền tảng cơ bản về chủ đề bài học.");
-                report.actionPlan.push("Học lại bảng từ vựng Sách giáo khoa, chú trọng học phát âm và dịch sát ngữ cảnh.");
-            }
-            if (scoresObj.wordForm < 50) {
-                report.weaknesses.push("Còn nhầm lẫn các từ loại (Danh/Động/Tính/Trạng) hoặc từ có vỏ chữ giống nhau.");
-                report.actionPlan.push("Rèn tính cẩn thận, học phân biệt rõ hậu tố từ loại và dấu hiệu nhận biết.");
-            }
+            // 3. Xử lý trường hợp dự phòng (Fallback)
             if (report.weaknesses.length === 0) {
-                report.weaknesses.push("Không có điểm yếu nghiêm trọng.");
-                report.actionPlan.push("Tiếp tục duy trì phong độ và làm thêm bài tập nâng cao.");
+                report.weaknesses.push("Không phát hiện lỗ hổng kiến thức nghiêm trọng trong bài làm này.");
+                report.actionPlan.push("🎯 <b>Mục tiêu tiếp theo</b>: Tiếp tục duy trì phong độ và thử thách với các đề nâng cao (Advance level).");
+            }
+            if (report.strengths.length === 0) {
+                report.strengths.push("Đã có tinh thần cố gắng hoàn thành bài thi.");
             }
 
             return report;
         }
 
-      function submitQuiz() {
-    if (window.innerWidth <= 768) toggleSidebar();
-    if (answeredSet.size < totalCount) {
-        if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
-    }
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
+            }
 
-    const submitBtn = document.querySelector('.sidebar .btn-submit');
-    submitBtn.innerText = "Đang gửi...";
-    submitBtn.disabled = true;
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            submitBtn.innerText = "Đang gửi...";
+            submitBtn.disabled = true;
 
-    // Tính toán dữ liệu
-    let stats = { vocab: { total: 0, correct: 0 }, collocations: { total: 0, correct: 0 }, phrasalVerbs: { total: 0, correct: 0 }, wordForm: { total: 0, correct: 0 } };
-    let correctList = [];
-    let wrongList = [];
+            // Tính toán thống kê động theo hệ thống Dual-Tags
+            let stats = {};
+            let correctList = [];
+            let wrongList = [];
 
-    for (let i = 0; i < totalCount; i++) {
-        let tag = quizData[i].tag || 'vocab';
-        if(!stats[tag]) stats[tag] = { total: 0, correct: 0 };
-        stats[tag].total++;
-        const navNum = document.getElementById(`nav-${i}`);
-        if (navNum.classList.contains('done-correct')) {
-            correctList.push(i + 1);
-            stats[tag].correct++;
-        } else {
-            wrongList.push(i + 1);
+            for (let i = 0; i < totalCount; i++) {
+                // Lấy mảng tags, hỗ trợ fallback nếu câu hỏi cũ chỉ dùng 1 chuỗi tag
+                let tagsList = quizData[i].tags || (quizData[i].tag ? [quizData[i].tag] : ['skill_vocab_core']);
+                
+                const navNum = document.getElementById(`nav-${i}`);
+                let isCorrect = navNum.classList.contains('done-correct');
+
+                if (isCorrect) {
+                    correctList.push(i + 1);
+                } else {
+                    wrongList.push(i + 1);
+                }
+
+                // Cộng dồn số liệu cho từng tag trong câu hỏi
+                tagsList.forEach(tag => {
+                    if (!stats[tag]) stats[tag] = { total: 0, correct: 0 };
+                    stats[tag].total++;
+                    if (isCorrect) {
+                        stats[tag].correct++;
+                    }
+                });
+            }
+
+            // Quy đổi sang tỉ lệ phần trăm cho từng tag
+            let scoresObj = {};
+            for (let tag in stats) {
+                scoresObj[tag] = stats[tag].total > 0 ? (stats[tag].correct / stats[tag].total) * 100 : 100;
+            }
+
+            let report = generateFeedbackReport(scoresObj);
+            const finalScore = (correctCount / totalCount * 10).toFixed(1);
+
+            // Chuẩn bị dữ liệu gửi đi (URLSearchParams đảm bảo không bị chặn bởi CORS)
+            let formData = new URLSearchParams();
+            formData.append('studentName', currentUser);
+            formData.append('className', currentClass);
+            formData.append('quizName', LESSON_NAME);
+            formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
+            formData.append('correctAnswers', correctList.join(', '));
+            formData.append('wrongAnswers', wrongList.join(', '));
+            formData.append('level', report.level);
+            // Gỡ bỏ thẻ HTML <b> khi gửi vào Google Sheets để báo cáo dạng text sạch
+            formData.append('strengths', report.strengths.map(s => s.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('weaknesses', report.weaknesses.map(w => w.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('actionPlan', report.actionPlan.map(a => a.replace(/<[^>]*>?/gm, '')).join('\n'));
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                showResultModal(finalScore, report);
+                submitBtn.innerText = "Nộp bài";
+                submitBtn.disabled = false;
+            }).catch(() => {
+                alert("Đã ghi nhận bài làm nhưng máy chủ phản hồi chậm. Hệ thống sẽ tiếp tục hiển thị bảng đánh giá!");
+                showResultModal(finalScore, report);
+                submitBtn.innerText = "Nộp bài";
+                submitBtn.disabled = false;
+            });
         }
-    }
 
-    let scoresObj = {
-        vocab: stats.vocab.total > 0 ? (stats.vocab.correct / stats.vocab.total) * 100 : 100,
-        collocations: stats.collocations.total > 0 ? (stats.collocations.correct / stats.collocations.total) * 100 : 100,
-        phrasalVerbs: stats.phrasalVerbs.total > 0 ? (stats.phrasalVerbs.correct / stats.phrasalVerbs.total) * 100 : 100,
-        wordForm: stats.wordForm.total > 0 ? (stats.wordForm.correct / stats.wordForm.total) * 100 : 100
-    };
-
-    let report = generateFeedbackReport(scoresObj);
-    const finalScore = (correctCount / totalCount * 10).toFixed(1);
-
-    // Chuẩn bị dữ liệu gửi (Dạng URLSearchParams)
-    let formData = new URLSearchParams();
-    formData.append('studentName', currentUser);
-    formData.append('className', currentClass);
-    formData.append('quizName', LESSON_NAME);
-    formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
-    formData.append('correctAnswers', correctList.join(', '));
-    formData.append('wrongAnswers', wrongList.join(', '));
-    formData.append('level', report.level);
-    formData.append('strengths', report.strengths.join('\n'));
-    formData.append('weaknesses', report.weaknesses.join('\n'));
-    formData.append('actionPlan', report.actionPlan.join('\n'));
-
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-    }).then(() => {
-        showResultModal(finalScore, report);
-        submitBtn.innerText = "Nộp bài";
-        submitBtn.disabled = false;
-    }).catch(() => {
-        alert("Lỗi mạng!");
-        submitBtn.innerText = "Nộp bài";
-        submitBtn.disabled = false;
-    });
-}
         function showResultModal(score, report) {
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-correct').innerText = correctCount;
