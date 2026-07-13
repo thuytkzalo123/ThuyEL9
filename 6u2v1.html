@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Bài tập từ vựng - Unit 4 </title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; background: none; border: none; font-size: 1.5em; cursor: pointer; color: #5f6368; padding: 5px; }
+        .header-title { margin: 0; font-size: 1.2em; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-container { width: 100%; height: 6px; background-color: #eee; border-radius: 4px; margin-top: 10px; }
+        #progress-bar { width: 0%; height: 100%; background-color: var(--dark-blue); border-radius: 4px; transition: width 0.4s ease; }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex; flex: 1; padding: 20px; gap: 25px;
+            max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px; background: white; padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column;
+            height: calc(100% - 40px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s ease; z-index: 1000;
+        }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        
+        .stats-box { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; color: #333; }
+        .stat-value { font-weight: bold; color: var(--dark-blue); }
+        .nav-container { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .q-num {
+            aspect-ratio: 1; border: 1px solid var(--border-color); border-radius: 5px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9em; background: #fff;
+        }
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%; padding: 12px; background-color: var(--dark-blue); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area { flex: 1; overflow-y: auto; padding-right: 5px; padding-bottom: 20px; }
+        .question-card {
+            background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);
+            margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #202124; }
+        .btn-hint-toggle {
+            align-self: flex-start; background-color: white; border: 1px solid #ffb74d; color: #f57f17;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 15px;
+        }
+        .hint-content { display: none; background-color: #fff3e0; border-left: 4px solid #ffb74d; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 0.95em; color: #e65100; }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .option-btn {
+            padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: white;
+            text-align: left; cursor: pointer; font-size: 1em; display: flex; flex-direction: column; line-height: 1.4; transition: background-color 0.2s;
+        }
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px; align-self: flex-start; background: #f1f3f4; border: none; padding: 8px 16px;
+            border-radius: 20px; font-size: 0.9em; color: #555; display: flex; align-items: center; gap: 6px; font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+        .trans-text { display: none; color: var(--trans-color); font-style: italic; font-size: 0.95em; margin-top: 5px; font-weight: normal; border-top: 1px dashed #eee; padding-top: 4px; }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 6px; background-color: #fffde7; border-left: 4px solid #fbc02d; display: none; font-size: 0.95em; }
+
+        /* === MODAL & EVALUATION === */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 650px;
+            max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: zoomIn 0.3s;
+        }
+        .modal-header-score { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-score { font-size: 3em; font-weight: bold; color: var(--dark-blue); }
+        .eval-section { margin-bottom: 15px; padding: 15px; border-radius: 8px; background: #f8f9fa; }
+        .eval-section h4 { margin-top: 0; margin-bottom: 8px; color: #333; }
+        .eval-ul { margin: 0; padding-left: 20px; font-size: 0.95em; color: #444; line-height: 1.5; }
+        .modal-btn { padding: 12px; background: var(--dark-blue); color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; margin-top: 15px; font-weight:bold; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        .login-error { color: var(--wrong-red); font-size: 0.9em; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="text" id="student-class" class="login-input" placeholder="Lớp của bạn (VD: 9A1)" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Vui lòng nhập đủ thông tin và đúng mật khẩu!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tập từ vựng - Unit 4</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">60</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-header-score">
+                <div>
+                    <h2 style="margin: 0; color: #333;">Kết quả bài làm</h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">Số câu đúng: <b id="final-correct">0</b>/<span id="final-total">60</span></p>
+                </div>
+                <div class="modal-score" id="final-score">0.0</div>
+            </div>
+            
+            <!-- Vùng Đánh Giá Sư Phạm -->
+            <div class="eval-section" style="background-color: #e3f2fd;">
+                <h4 style="color: #1565c0;">📊 Mức độ nhận thức</h4>
+                <div id="eval-level" style="font-weight: 500; color: #0d47a1;">---</div>
+            </div>
+            
+            <div class="eval-section" style="background-color: #e8f5e9; border-left: 4px solid #4caf50;">
+                <h4 style="color: #2e7d32;">✨ Điểm mạnh</h4>
+                <ul class="eval-ul" id="eval-strengths"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fce8e6; border-left: 4px solid #d32f2f;">
+                <h4 style="color: #c62828;">⚠️ Trọng tâm bị hổng (Điểm yếu)</h4>
+                <ul class="eval-ul" id="eval-weaknesses"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fff8e1; border-left: 4px solid #fbc02d;">
+                <h4 style="color: #f57f17;">🎯 Định hướng học tập</h4>
+                <ul class="eval-ul" id="eval-action"></ul>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Đóng & Xem lại chi tiết</button>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu 60 câu hỏi có tích hợp tag để phân tích
+        const quizData = [
+  {"q": "I live in a ________. And you? - I live in a country house.", "qVi": "Tôi sống trong một ________. Còn bạn? - Tôi sống trong một ngôi nhà nông thôn.", "key": ["live in a", "country house"], "opts": ["town house", "cupboard", "sink", "fridge"], "optsVi": ["nhà phố", "tủ bếp", "bồn rửa", "tủ lạnh"], "correct": 0, "exp": "Town house là loại hình nhà ở, các đáp án còn lại là đồ dùng.", "tag": "house_types"},
+  {"q": "I live in a town house. Who do you live with? - I live in a ________.", "qVi": "Tôi sống trong một nhà phố. Bạn sống với ai? - Tôi sống trong một ________.", "key": ["live in a", "town house"], "opts": ["wardrobe", "country house", "dishwasher", "chopstick"], "optsVi": ["tủ quần áo", "nhà nông thôn", "máy rửa bát", "đũa"], "correct": 1, "exp": "Country house là loại hình nhà ở phù hợp để trả lời câu hỏi về nơi ở.", "tag": "house_types"},
+  {"q": "My parents and younger brother. We're moving to a ________ next month!", "qVi": "Bố mẹ và em trai tôi. Chúng tôi sẽ chuyển đến một ________ vào tháng tới!", "key": ["moving to a"], "opts": ["clock", "flat", "desk", "microwave"], "optsVi": ["đồng hồ", "căn hộ", "bàn học", "lò vi sóng"], "correct": 1, "exp": "Flat là loại nhà ở, các từ còn lại là đồ vật.", "tag": "house_types"},
+  {"q": "Are there many ________ in your new flat? - Yes, there are.", "qVi": "Có nhiều ________ trong căn hộ mới của bạn không? - Có, có nhiều.", "key": ["many", "in your new flat"], "opts": ["rooms", "beds", "sofas", "pillows"], "optsVi": ["căn phòng", "giường", "ghế sofa", "gối"], "correct": 0, "exp": "Câu hỏi hỏi về số lượng phòng trong nhà/căn hộ.", "tag": "room_types"},
+  {"q": "There's a living room, three ________, a kitchen and two bathrooms.", "qVi": "Có một phòng khách, ba ________, một nhà bếp và hai phòng tắm.", "key": ["living room", "kitchen", "bathrooms"], "opts": ["pillows", "bedrooms", "bowls", "chopsticks"], "optsVi": ["gối", "phòng ngủ", "bát", "đũa"], "correct": 1, "exp": "Đơn vị phòng trong nhà là phòng ngủ (bedrooms).", "tag": "room_types"},
+  {"q": "There's a living room, three bedrooms, a ________ and two bathrooms.", "qVi": "Có một phòng khách, ba phòng ngủ, một ________ và hai phòng tắm.", "key": ["living room", "bedrooms", "bathrooms"], "opts": ["kitchen", "picture", "lamp", "television"], "optsVi": ["nhà bếp", "bức tranh", "đèn", "ti vi"], "correct": 0, "exp": "Kitchen là một khu vực chức năng chính trong nhà.", "tag": "room_types"},
+  {"q": "My grandparents live in a ________ in Nam Dinh.", "qVi": "Ông bà tôi sống trong một ________ ở Nam Định.", "key": ["live in a"], "opts": ["country house", "shelf", "chest of drawers", "toilet"], "optsVi": ["nhà nông thôn", "kệ", "tủ ngăn kéo", "nhà vệ sinh"], "correct": 0, "exp": "Country house là kiểu nhà ở.", "tag": "house_types"},
+  {"q": "There are four ________ in the house and a big garden.", "qVi": "Có bốn cái ________ trong nhà và một khu vườn lớn.", "key": ["four", "in the house"], "opts": ["sinks", "rooms", "cookers", "fridges"], "optsVi": ["bồn rửa", "căn phòng", "bếp nấu", "tủ lạnh"], "correct": 1, "exp": "Rooms dùng để chỉ các không gian chức năng trong nhà.", "tag": "room_types"},
+  {"q": "I like the ________. There is a big window in this room.", "qVi": "Tôi thích ________. Có một cái cửa sổ lớn trong căn phòng này.", "key": ["big window", "in this room"], "opts": ["living room", "chopstick", "microwave", "dishwasher"], "optsVi": ["phòng khách", "đũa", "lò vi sóng", "máy rửa bát"], "correct": 0, "exp": "Phòng khách là một căn phòng, phù hợp mô tả có cửa sổ.", "tag": "room_types"},
+  {"q": "I'm in Da Lat with my parents. We're staying at the Crazy House Hotel. Wow! It really is ________.", "qVi": "Tôi đang ở Đà Lạt với bố mẹ. Chúng tôi ở khách sạn Crazy House. Chà! Nó thực sự rất ________.", "key": ["Crazy House Hotel"], "opts": ["messy", "crazy", "flat", "stilt house"], "optsVi": ["lộn xộn", "kỳ dị", "phẳng", "nhà sàn"], "correct": 1, "exp": "Kiến trúc độc đáo/kỳ dị của khách sạn Crazy House.", "tag": "house_types"},
+  {"q": "There are ten ________ in the hotel. There's a Kangaroo Room, an Eagle Room, and even an Ant Room.", "qVi": "Có mười ________ trong khách sạn. Có phòng Kangaroo, phòng Đại bàng và thậm chí là phòng Kiến.", "key": ["ten"], "opts": ["bowls", "rooms", "sofas", "cupboards"], "optsVi": ["bát", "phòng", "ghế sofa", "tủ"], "correct": 1, "exp": "Các không gian cho khách nghỉ lại gọi là phòng (rooms).", "tag": "room_types"},
+  {"q": "I'm staying in the Tiger ________. It's called the Tiger Room because there's a big tiger on the wall.", "qVi": "Tôi đang ở trong ________ Hổ. Nó gọi là phòng Hổ vì có con hổ lớn trên tường.", "key": ["Tiger Room"], "opts": ["Room", "Kitchen", "Attic", "Garage"], "optsVi": ["Phòng", "Nhà bếp", "Gác mái", "Gara"], "correct": 0, "exp": "Từ chỉ đơn vị phòng.", "tag": "room_types"},
+  {"q": "What's in your room? - A sofa and a television. Is it the ________? - Yes.", "qVi": "Có gì trong phòng bạn? - Một sofa và ti vi. Đó là ________ phải không? - Vâng.", "key": ["sofa", "television"], "opts": ["bathroom", "living room", "kitchen", "hall"], "optsVi": ["phòng tắm", "phòng khách", "nhà bếp", "hành lang"], "correct": 1, "exp": "Sofa và TV là nội thất phòng khách.", "tag": "room_types"},
+  {"q": "Look at the house. Name the rooms in it. There is a ________, a kitchen, a bedroom, a bathroom, and a living room.", "qVi": "Nhìn vào ngôi nhà. Hãy gọi tên các phòng. Có một ________, nhà bếp, phòng ngủ, phòng tắm, phòng khách.", "key": ["kitchen", "bedroom", "bathroom", "living room"], "opts": ["hall", "fridge", "lamp", "cooker"], "optsVi": ["hành lang", "tủ lạnh", "đèn", "bếp nấu"], "correct": 0, "exp": "Hall (sảnh/hành lang) là một không gian trong nhà.", "tag": "room_types"},
+  {"q": "Mum, are you home? - Yes, honey. I'm in the ________. I've bought these new bowls and chopsticks.", "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ đang ở trong ________. Mẹ mới mua bát đũa này.", "key": ["bowls", "chopsticks"], "opts": ["kitchen", "bedroom", "attic", "bathroom"], "optsVi": ["nhà bếp", "phòng ngủ", "gác mái", "phòng tắm"], "correct": 0, "exp": "Nhà bếp là nơi chứa bát đũa.", "tag": "room_types"},
+  {"q": "My grandfather likes the ________ the best. The kitchen is my grandfather's favourite room.", "qVi": "Ông tôi thích ________ nhất. Nhà bếp là phòng yêu thích của ông.", "key": ["favourite room", "kitchen"], "opts": ["kitchen", "pillow", "bed", "clock"], "optsVi": ["nhà bếp", "gối", "giường", "đồng hồ"], "correct": 0, "exp": "Câu hỏi lặp lại thông tin từ câu sau.", "tag": "room_types"},
+  {"q": "Mai's house has seven ________. The living room is next to the kitchen.", "qVi": "Nhà Mai có bảy ________. Phòng khách cạnh nhà bếp.", "key": ["living room", "kitchen"], "opts": ["tables", "desks", "rooms", "shelves"], "optsVi": ["bàn", "bàn học", "căn phòng", "kệ"], "correct": 2, "exp": "Tổng số lượng không gian trong nhà là phòng (rooms).", "tag": "room_types"},
+  {"q": "She often listens to music in her ________.", "qVi": "Cô ấy thường nghe nhạc trong ________.", "key": ["listen to music"], "opts": ["bedroom", "sink", "dishwasher", "cooker"], "optsVi": ["phòng ngủ", "bồn rửa", "máy rửa bát", "bếp nấu"], "correct": 0, "exp": "Phòng ngủ là nơi nghỉ ngơi, nghe nhạc.", "tag": "room_types"},
+  {"q": "Where do you live? - I live in a ________.", "qVi": "Bạn sống ở đâu? - Tôi sống trong một ________.", "key": ["live in a"], "opts": ["flat", "television", "cupboard", "chest of drawers"], "optsVi": ["căn hộ", "ti vi", "tủ bếp", "tủ ngăn kéo"], "correct": 0, "exp": "Flat là từ chỉ nơi ở.", "tag": "house_types"},
+  {"q": "This is the Shark Room. There's a table and a sofa in the middle of the ________.", "qVi": "Đây là phòng Cá mập. Có bàn và sofa ở giữa ________.", "key": ["middle", "sofa"], "opts": ["room", "picture", "clock", "lamp"], "optsVi": ["căn phòng", "bức tranh", "đồng hồ", "đèn"], "correct": 0, "exp": "Vị trí của nội thất nằm trong căn phòng (room).", "tag": "room_types"},
+  {"q": "My bedroom isn't nice. - How about putting a ________ on the wall?", "qVi": "Phòng ngủ không đẹp. - Sao không treo một ________ trên tường?", "key": ["on the wall"], "opts": ["picture", "cooker", "fridge", "sink"], "optsVi": ["bức tranh", "bếp", "tủ lạnh", "bồn rửa"], "correct": 0, "exp": "Tranh thường treo trên tường.", "tag": "furniture"},
+  {"q": "There's a lamp, a wardrobe and a ________. You should stay here when you visit Da Lat.", "qVi": "Có một cái đèn, một tủ quần áo và một ________. Bạn nên ở đây khi thăm Đà Lạt.", "key": ["lamp", "wardrobe"], "opts": ["desk", "bathroom", "kitchen", "hall"], "optsVi": ["bàn học", "phòng tắm", "nhà bếp", "hành lang"], "correct": 0, "exp": "Bàn học là đồ nội thất phòng ngủ.", "tag": "furniture"},
+  {"q": "I see. Is there a ________ behind you? - Yes, there is.", "qVi": "Tôi hiểu rồi. Có một cái ________ đằng sau bạn không? - Có.", "key": ["behind you"], "opts": ["TV", "town house", "villa", "country house"], "optsVi": ["Ti vi", "nhà phố", "biệt thự", "nhà nông thôn"], "correct": 0, "exp": "Ti vi là vật dụng.", "tag": "house_items"},
+  {"q": "There are four ________ and a table in the middle of the room.", "qVi": "Có bốn cái ________ và một cái bàn ở giữa phòng.", "key": ["table", "middle"], "opts": ["chairs", "kitchens", "flats", "villas"], "optsVi": ["ghế", "nhà bếp", "căn hộ", "biệt thự"], "correct": 0, "exp": "Ghế luôn đi cùng bàn.", "tag": "furniture"},
+  {"q": "I like the living room. There is a big ________ in this room.", "qVi": "Tôi thích phòng khách. Có một cái ________ lớn trong căn phòng này.", "key": ["living room", "big"], "opts": ["window", "chopstick", "microwave", "dishwasher"], "optsVi": ["cửa sổ", "đũa", "lò vi sóng", "máy rửa bát"], "correct": 0, "exp": "Cửa sổ là một phần của kiến trúc phòng.", "tag": "house_items"},
+  {"q": "There are two family ________ on the wall.", "qVi": "Có hai bức ________ gia đình trên tường.", "key": ["on the wall"], "opts": ["photos", "beds", "sinks", "fridges"], "optsVi": ["ảnh", "giường", "bồn rửa", "tủ lạnh"], "correct": 0, "exp": "Ảnh treo tường.", "tag": "house_items"},
+  {"q": "It's called the Tiger Room because there's a big tiger on the ________.", "qVi": "Nó gọi là phòng Hổ vì có con hổ lớn trên ________.", "key": ["on the"], "opts": ["wall", "floor", "garden", "attic"], "optsVi": ["tường", "sàn nhà", "khu vườn", "gác mái"], "correct": 0, "exp": "Tranh/hình trang trí thường nằm trên tường.", "tag": "spatial_relations"},
+  {"q": "Look at the picture. The cap is under the ________.", "qVi": "Nhìn vào bức tranh. Cái mũ ở dưới ________.", "key": ["under"], "opts": ["pillow", "kitchen", "flat", "villa"], "optsVi": ["gối", "nhà bếp", "căn hộ", "biệt thự"], "correct": 0, "exp": "Mũ đặt dưới gối.", "tag": "spatial_relations"},
+  {"q": "The bed is next to the window, but the ________ is a strange shape.", "qVi": "Giường cạnh cửa sổ, nhưng cái ________ hình thù kỳ lạ.", "key": ["bed", "window"], "opts": ["window", "sink", "cooker", "fridge"], "optsVi": ["cửa sổ", "bồn rửa", "bếp nấu", "tủ lạnh"], "correct": 0, "exp": "Cửa sổ được nhắc đến trong câu đầu, là đồ vật có hình dáng.", "tag": "house_items"},
+  {"q": "I put my bag under the ________.", "qVi": "Tôi để cặp dưới ________.", "key": ["under"], "opts": ["bed", "flat", "villa", "stilt house"], "optsVi": ["giường", "căn hộ", "biệt thự", "nhà sàn"], "correct": 0, "exp": "Vật đặt dưới gầm giường.", "tag": "spatial_relations"},
+  {"q": "There's a lamp, a ________ and a desk. You should stay here when you visit Da Lat.", "qVi": "Có đèn, một cái ________ và bàn học. Bạn nên ở đây khi đến Đà Lạt.", "key": ["lamp", "desk"], "opts": ["wardrobe", "kitchen", "bathroom", "hall"], "optsVi": ["tủ quần áo", "nhà bếp", "phòng tắm", "hành lang"], "correct": 0, "exp": "Tủ quần áo là nội thất phòng ngủ.", "tag": "furniture"},
+  {"q": "There are four chairs and a ________ in the middle of the room.", "qVi": "Có bốn ghế và một cái ________ ở giữa phòng.", "key": ["four chairs"], "opts": ["table", "bathroom", "hall", "kitchen"], "optsVi": ["bàn", "phòng tắm", "hành lang", "nhà bếp"], "correct": 0, "exp": "Bàn là trung tâm của bộ ghế.", "tag": "furniture"},
+  {"q": "What's in your room? - A ________ and a television.", "qVi": "Có gì trong phòng? - Một cái ________ và một cái ti vi.", "key": ["television"], "opts": ["sofa", "bathroom", "hall", "kitchen"], "optsVi": ["ghế sofa", "phòng tắm", "hành lang", "nhà bếp"], "correct": 0, "exp": "Sofa là đồ nội thất cùng loại với TV.", "tag": "furniture"},
+  {"q": "Mum, are you home? - Yes, honey. I've bought these new ________ and chopsticks.", "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ mua mấy cái ________ và đũa này.", "key": ["bowls and chopsticks"], "opts": ["bowls", "beds", "clocks", "pictures"], "optsVi": ["bát", "giường", "đồng hồ", "tranh"], "correct": 0, "exp": "Bát và đũa là cặp đồ dùng nhà bếp.", "tag": "house_items"},
+  {"q": "Mum, are you home? - Yes, honey. I've bought these new bowls and ________.", "qVi": "Mẹ ơi, mẹ có nhà không? - Có, con yêu. Mẹ mua mấy cái bát và ________ này.", "key": ["bowls"], "opts": ["chopsticks", "wardrobes", "cupboards", "sofas"], "optsVi": ["đũa", "tủ quần áo", "tủ bếp", "ghế sofa"], "correct": 0, "exp": "Đũa đi kèm với bát.", "tag": "house_items"},
+  {"q": "Don't forget we need two ________ for my bedroom, Mum.", "qVi": "Đừng quên chúng ta cần hai cái ________ cho phòng ngủ, mẹ ơi.", "key": ["bedroom"], "opts": ["lamps", "cookers", "fridges", "sinks"], "optsVi": ["đèn", "bếp nấu", "tủ lạnh", "bồn rửa"], "correct": 0, "exp": "Đèn bàn (lamps) dùng trong phòng ngủ.", "tag": "furniture"},
+  {"q": "Elena has a big ________ in her bedroom.", "qVi": "Elena có một cái ________ lớn trong phòng ngủ.", "key": ["bedroom"], "opts": ["bookshelf", "dishwasher", "microwave", "air conditioner"], "optsVi": ["kệ sách", "máy rửa bát", "lò vi sóng", "điều hòa"], "correct": 0, "exp": "Kệ sách là vật dụng phòng ngủ.", "tag": "furniture"},
+  {"q": "There's a big ________ next to the door.", "qVi": "Có một cái ________ lớn cạnh cửa ra vào.", "key": ["next to the door"], "opts": ["bed", "kitchen", "bathroom", "hall"], "optsVi": ["giường", "nhà bếp", "phòng tắm", "hành lang"], "correct": 0, "exp": "Giường là đồ nội thất phòng.", "tag": "furniture"},
+  {"q": "In her bedroom, there's a ________ on the wall.", "qVi": "Trong phòng ngủ, có một cái ________ trên tường.", "key": ["on the wall"], "opts": ["clock", "sofa", "desk", "table"], "optsVi": ["đồng hồ", "ghế sofa", "bàn học", "bàn"], "correct": 0, "exp": "Đồng hồ treo tường.", "tag": "furniture"},
+  {"q": "This is the Shark Room. There's a big shark at the ________.", "qVi": "Đây là phòng Cá mập. Có một con cá mập lớn ở ________.", "key": ["at the"], "opts": ["door", "pillow", "chopstick", "bowl"], "optsVi": ["cửa ra vào", "gối", "đũa", "bát"], "correct": 0, "exp": "Vị trí đặt hình trang trí lớn.", "tag": "spatial_relations"}
+];
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9004";
+        const LESSON_NAME = "Unit 4: Heritage & Past";
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec'; // Link Google Apps Script
+
+        let currentUser = "";
+        let currentClass = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || classInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                currentClass = classInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser} (${currentClass})`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key ? item.key.join('; ') : ''}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong> ${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        // THUẬT TOÁN ĐÁNH GIÁ SƯ PHẠM
+        function generateFeedbackReport(scoresObj) {
+            let totalPercentage = (correctCount / totalCount) * 100;
+            
+            let report = { level: "", strengths: [], weaknesses: [], actionPlan: [] };
+
+            // Xác định Mức độ
+            if (totalPercentage >= 80 && scoresObj.collocations >= 60) {
+                report.level = "Khá / Giỏi (Tư duy ngôn ngữ tốt, hiểu sâu bản chất từ vựng và văn hóa truyền thống).";
+            } else if (totalPercentage >= 50 && scoresObj.collocations < 50) {
+                report.level = "Trung bình - Học lệch (Nắm tốt từ vựng đơn lẻ nhưng hổng mảng kết hợp từ và cụm động từ).";
+            } else if (totalPercentage >= 50) {
+                report.level = "Trung bình (Nhận diện được dạng bài nhưng còn sai kiến thức nền tảng).";
+            } else {
+                report.level = "Cần cố gắng (Chưa vững kiến thức nền tảng; nhận diện dạng bài còn yếu).";
+            }
+
+            // Điểm mạnh
+            if (scoresObj.vocab >= 70) report.strengths.push("Nắm rất vững vốn từ vựng nền tảng chủ đề bài học.");
+            if (scoresObj.collocations >= 70) report.strengths.push("Sử dụng thành thạo các cụm từ cố định nâng cao.");
+            if (scoresObj.phrasalVerbs >= 70) report.strengths.push("Phản xạ tốt với các cụm động từ và giới từ đi kèm.");
+            if (report.strengths.length === 0) report.strengths.push("Đã có cố gắng hoàn thành bài thi.");
+
+            // Điểm yếu & Lời khuyên
+            if (scoresObj.collocations < 60) {
+                report.weaknesses.push("Hổng mảng Cụm từ cố định (Collocations): Thường dịch theo kiểu word-by-word.");
+                report.actionPlan.push("Chấm dứt học từ vựng đơn lẻ: Phải học từ mới đi kèm với giới từ và cấu trúc nguyên cụm.");
+            }
+            if (scoresObj.phrasalVerbs < 60) {
+                report.weaknesses.push("Yếu mảng Cụm động từ (Phrasal verbs): Chưa thuộc hoặc nhầm lẫn giới từ.");
+                report.actionPlan.push("Lập sổ tay tổng hợp các Phrasal verbs đã sai và đặt câu thực tế để ghi nhớ.");
+            }
+            if (scoresObj.vocab < 50) {
+                report.weaknesses.push("Thiếu vốn từ vựng nền tảng cơ bản về chủ đề bài học.");
+                report.actionPlan.push("Học lại bảng từ vựng Sách giáo khoa, chú trọng học phát âm và dịch sát ngữ cảnh.");
+            }
+            if (scoresObj.wordForm < 50) {
+                report.weaknesses.push("Còn nhầm lẫn các từ loại (Danh/Động/Tính/Trạng) hoặc từ có vỏ chữ giống nhau.");
+                report.actionPlan.push("Rèn tính cẩn thận, học phân biệt rõ hậu tố từ loại và dấu hiệu nhận biết.");
+            }
+            if (report.weaknesses.length === 0) {
+                report.weaknesses.push("Không có điểm yếu nghiêm trọng.");
+                report.actionPlan.push("Tiếp tục duy trì phong độ và làm thêm bài tập nâng cao.");
+            }
+
+            return report;
+        }
+
+      function submitQuiz() {
+    if (window.innerWidth <= 768) toggleSidebar();
+    if (answeredSet.size < totalCount) {
+        if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
+    }
+
+    const submitBtn = document.querySelector('.sidebar .btn-submit');
+    submitBtn.innerText = "Đang gửi...";
+    submitBtn.disabled = true;
+
+    // Tính toán dữ liệu
+    let stats = { vocab: { total: 0, correct: 0 }, collocations: { total: 0, correct: 0 }, phrasalVerbs: { total: 0, correct: 0 }, wordForm: { total: 0, correct: 0 } };
+    let correctList = [];
+    let wrongList = [];
+
+    for (let i = 0; i < totalCount; i++) {
+        let tag = quizData[i].tag || 'vocab';
+        if(!stats[tag]) stats[tag] = { total: 0, correct: 0 };
+        stats[tag].total++;
+        const navNum = document.getElementById(`nav-${i}`);
+        if (navNum.classList.contains('done-correct')) {
+            correctList.push(i + 1);
+            stats[tag].correct++;
+        } else {
+            wrongList.push(i + 1);
+        }
+    }
+
+    let scoresObj = {
+        vocab: stats.vocab.total > 0 ? (stats.vocab.correct / stats.vocab.total) * 100 : 100,
+        collocations: stats.collocations.total > 0 ? (stats.collocations.correct / stats.collocations.total) * 100 : 100,
+        phrasalVerbs: stats.phrasalVerbs.total > 0 ? (stats.phrasalVerbs.correct / stats.phrasalVerbs.total) * 100 : 100,
+        wordForm: stats.wordForm.total > 0 ? (stats.wordForm.correct / stats.wordForm.total) * 100 : 100
+    };
+
+    let report = generateFeedbackReport(scoresObj);
+    const finalScore = (correctCount / totalCount * 10).toFixed(1);
+
+    // Chuẩn bị dữ liệu gửi (Dạng URLSearchParams)
+    let formData = new URLSearchParams();
+    formData.append('studentName', currentUser);
+    formData.append('className', currentClass);
+    formData.append('quizName', LESSON_NAME);
+    formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
+    formData.append('correctAnswers', correctList.join(', '));
+    formData.append('wrongAnswers', wrongList.join(', '));
+    formData.append('level', report.level);
+    formData.append('strengths', report.strengths.join('\n'));
+    formData.append('weaknesses', report.weaknesses.join('\n'));
+    formData.append('actionPlan', report.actionPlan.join('\n'));
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+    }).then(() => {
+        showResultModal(finalScore, report);
+        submitBtn.innerText = "Nộp bài";
+        submitBtn.disabled = false;
+    }).catch(() => {
+        alert("Lỗi mạng!");
+        submitBtn.innerText = "Nộp bài";
+        submitBtn.disabled = false;
+    });
+}
+        function showResultModal(score, report) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            
+            // Hiển thị nội dung sư phạm lên Modal
+            document.getElementById('eval-level').innerText = report.level;
+            
+            const ulStrengths = document.getElementById('eval-strengths');
+            ulStrengths.innerHTML = "";
+            report.strengths.forEach(s => ulStrengths.innerHTML += `<li>${s}</li>`);
+            
+            const ulWeaknesses = document.getElementById('eval-weaknesses');
+            ulWeaknesses.innerHTML = "";
+            report.weaknesses.forEach(w => ulWeaknesses.innerHTML += `<li>${w}</li>`);
+            
+            const ulAction = document.getElementById('eval-action');
+            ulAction.innerHTML = "";
+            report.actionPlan.forEach(a => ulAction.innerHTML += `<li>${a}</li>`);
+
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
