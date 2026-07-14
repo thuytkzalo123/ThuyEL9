@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Trả Lời Trắc Nghiệm - Global Success</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 15px 10px;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; }
+
+        header {
+            text-align: center; margin-bottom: 15px; padding: 15px;
+            background: #ffffff; color: var(--text-main);
+            border-radius: 12px; border: 2px solid var(--text-main);
+        }
+        header h1 { font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        header p { font-size: 13px; color: var(--text-muted); }
+
+        .student-info-box {
+            background: var(--card-bg); padding: 12px; border-radius: 12px;
+            border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; gap: 8px;
+        }
+        .info-input {
+            padding: 8px 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 13px; outline: none;
+        }
+        .info-input:focus { border-color: var(--primary-color); }
+        #student-name { flex: 2; }
+        #student-class { flex: 1; }
+
+        .sticky-progress {
+            position: sticky; top: 10px; z-index: 100; background: var(--card-bg);
+            padding: 12px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; border: 1px solid var(--border-color);
+        }
+        .progress-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .progress-bar-container { background-color: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.3s ease; }
+
+        .sheet-container {
+            background: var(--card-bg); padding: 15px; border-radius: 12px;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px; /* Giảm gap để phiếu gọn hơn */
+        }
+        
+        .row-answer {
+            display: flex; flex-direction: column; padding: 10px;
+            border-bottom: 1px dashed #e2e8f0; border-radius: 8px; transition: background 0.2s;
+        }
+        .row-answer.answered { background-color: #f8fafc; }
+        
+        /* Cấu trúc hàng ngang cho Q1 và các nút A B C D */
+        .answer-wrapper {
+            display: flex; align-items: center;
+        }
+        
+        .question-num { 
+            font-size: 15px; font-weight: 700; width: 45px; color: var(--text-main); 
+        }
+
+        .options-group { display: flex; gap: 14px; align-items: center; }
+        .bubble-label {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border: 1.5px solid #475569; border-radius: 50%;
+            font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; transition: all 0.15s ease;
+        }
+        .bubble-label input { position: absolute; opacity: 0; cursor: pointer; }
+        .bubble-label:has(input:checked) { background-color: #0f172a; border-color: #0f172a; color: #ffffff; }
+        .row-answer.show-result .bubble-label { pointer-events: none; }
+        .bubble-label.correct-target { background-color: var(--success) !important; border-color: var(--success) !important; color: white !important; }
+        .bubble-label.wrong-target { background-color: var(--danger) !important; border-color: var(--danger) !important; color: white !important; }
+
+        .explanation-box {
+            display: none; margin-top: 12px; padding: 12px; border-radius: 6px;
+            background-color: #fffbeb; border-left: 3px solid #f59e0b; font-size: 12px; line-height: 1.5; color: #92400e;
+        }
+
+        .actions-vessel { margin: 25px 0; text-align: center; }
+        .btn-submit {
+            background: #0f172a; color: white; border: 2px solid #0f172a; padding: 12px 50px;
+            font-size: 15px; font-weight: 700; text-transform: uppercase; border-radius: 6px; cursor: pointer; width: 100%; transition: all 0.2s;
+        }
+        .btn-submit:hover { background: #1e293b; }
+
+        .result-section {
+            display: none; background: var(--card-bg); border-radius: 12px;
+            padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 30px;
+        }
+        .result-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed var(--border-color); }
+        .score-display { font-size: 42px; font-weight: 800; color: var(--primary-color); }
+
+        .chart-container { position: relative; margin: auto; height: 320px; width: 100%; margin-bottom: 25px; }
+        .analysis-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; border-left: 4px solid #0f172a; padding-left: 8px; }
+
+        .category-report-card {
+            background: #ffffff; border-radius: 8px; padding: 12px 14px;
+            margin-bottom: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .category-report-header {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px;
+        }
+        .badge-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+        .badge-excellent { background-color: #d1fae5; color: #065f46; }
+        .badge-good { background-color: #e0f2fe; color: #0369a1; }
+        .badge-weak { background-color: #fee2e2; color: #b91c1c; }
+
+        .weak-details { font-size: 13px; color: #475569; line-height: 1.4; }
+        .weak-details strong { color: #64748b; font-weight: 600; }
+        .success-details { font-size: 13px; color: #0d9488; font-weight: 500; }
+
+        .action-plan-box {
+            margin-top: 20px; padding: 15px; background: #eff6ff;
+            border-left: 4px solid var(--primary-color); border-radius: 6px; font-size: 13px; color: #1e3a8a;
+        }
+        .action-plan-box ul { margin-top: 8px; padding-left: 20px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ANSWER SHEET</h1>
+        <p>Phiếu Trắc Nghiệm Rút Gọn & Chẩn Đoán Năng Lực</p>
+    </header>
+
+    <div class="student-info-box">
+        <input type="text" id="student-name" class="info-input" placeholder="Họ và tên học sinh..." required>
+        <input type="text" id="student-class" class="info-input" placeholder="Lớp (VD: 9A1)" required>
+    </div>
+
+    <div class="sticky-progress">
+        <div class="progress-info">
+            <span id="progressText">Đã chọn: 0/40 câu</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <div class="sheet-container" id="sheetGrid"></div>
+    </form>
+
+    <div class="actions-vessel">
+        <button type="button" class="btn-submit" id="submitBtn" onclick="submitQuiz()">Nộp Phiếu Bài Làm</button>
+    </div>
+
+    <div class="result-section" id="resultSection">
+        <div class="result-header">
+            <h2>KẾT QUẢ BÀI LÀM</h2>
+            <div class="score-display" id="scoreDisplay">0/40</div>
+            <p id="overallFeedback" style="font-size:14px; margin-top:5px; font-weight:500;"></p>
+        </div>
+
+        <div class="analysis-title">Biểu Đồ Thống Kê 9 Nhóm Kỹ Năng</div>
+        <div class="chart-container">
+            <canvas id="skillsChart"></canvas>
+        </div>
+
+        <div class="analysis-title">Nhận Xét Phân Loại Kỹ Năng Chi Tiết</div>
+        <div id="detailedAnalysis"></div>
+
+        <div class="action-plan-box" id="actionPlanSection" style="display:none;">
+            <strong>🎯 Định hướng học tập cá nhân hóa (Ánh xạ theo Dual-Tags):</strong>
+            <ul id="actionPlanList"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec';
+const LESSON_NAME = "Phiếu Trắc Nghiệm Rút Gọn Đề 34";
+
+const feedbackConfig = {
+    "skill_gram_tense": { title: "Các thì ngữ pháp (Tenses)", weak: "Chưa nắm vững sự phối hợp thì QK đơn - QK tiếp diễn hoặc quy tắc phát âm -ed.", action: "Vẽ trục thời gian phân biệt hành động đang diễn ra (QK tiếp diễn) và hành động xen vào (QK đơn)." },
+    "skill_gram_modal": { title: "Động từ khuyết thiếu (Modal)", weak: "Nhầm lẫn chức năng của các động từ khuyết thiếu chỉ lời khuyên (should) và sự bắt buộc (must).", action: "Ghi nhớ: 'should' dùng cho lời khuyên, 'must' dùng cho sự bắt buộc hoặc quy định." },
+    "skill_gram_wish": { title: "Cấu trúc Câu điều ước (Wish)", weak: "Quên quy tắc 'lùi thì' về Quá khứ đơn trong câu điều ước.", action: "Học thuộc lòng: 'Ước trái với thực tế hiện tại -> luôn lùi 1 thì về Quá khứ đơn (V2/ed)'." },
+    "skill_gram_conditional": { title: "Câu điều kiện & Unless", weak: "Chưa chuyển đổi thành thạo giữa If not và Unless hoặc chia sai thì câu điều kiện.", action: "Luyện tập viết lại câu: Unless + S + V(khẳng định) = If + S + don't/doesn't + V." },
+    "skill_gram_connector": { title: "Phép thế & Từ nối", weak: "Gặp khó khăn khi xác định đối tượng được thay thế bởi các đại từ (they/it) trong bài đọc.", action: "Khi đọc bài, luôn tìm danh từ số ít/số nhiều đứng ở câu ngay trước đại từ để xác định đối tượng." },
+    "skill_vocab_core": { title: "Từ vựng nền tảng", weak: "Thiếu từ vựng cơ bản về lối sống, công nghệ và văn hóa; chưa nắm quy tắc âm câm.", action: "Học từ vựng theo chủ đề SGK, chú ý từ đồng nghĩa (habit = routine) và âm câm." },
+    "skill_vocab_colloc": { title: "Cụm từ cố định", weak: "Hổng mảng Cụm từ cố định, thường ghép từ tùy tiện theo tư duy dịch word-by-word.", action: "Chấm dứt học từ đơn lẻ. Khi gặp từ mới, phải học nguyên cụm (VD: preserve cultural values)." },
+    "skill_vocab_phrasal": { title: "Cụm động từ", weak: "Chưa nhớ nghĩa các cụm động từ quen thuộc chỉ tâm lý và đời sống như stressed out.", action: "Lập sổ tay chuyên đề Phrasal verbs, đặt câu thực tế với bản thân để ghi nhớ sâu." }
+};
+
+const quizData = [
+    { id: 1, correct: "A", category: "Phát âm", tags: ["topic_culture", "skill_gram_tense"], detail: "Phát âm đuôi -ed", exp: "Đuôi -ed trong developed phát âm là /t/, các từ còn lại là /d/." },
+    { id: 2, correct: "C", category: "Phát âm", tags: ["topic_health", "skill_vocab_core"], detail: "Nhận diện âm câm", exp: "Chữ 'h' trong hour là âm câm (/aʊər/), các từ còn lại phát âm là /h/." },
+    { id: 3, correct: "B", category: "Kỹ năng giao tiếp", tags: ["topic_edu", "skill_vocab_core"], detail: "Giao tiếp lớp học", exp: "Trật tự logic: c - a - b (hỏi mượn sách -> nghe không rõ -> nhắc lại lịch sự)." },
+    { id: 4, correct: "A", category: "Kỹ năng giao tiếp", tags: ["topic_health", "skill_vocab_colloc"], detail: "Giao tiếp về quản lý thời gian", exp: "Trật tự logic: c - a - e - b - d (hỏi thăm sức khỏe và khuyên bảo)." },
+    { id: 5, correct: "C", category: "Từ vựng", tags: ["topic_tech", "skill_vocab_core"], detail: "Sự xao nhãng (distraction)", exp: "distractions: sự xao nhãng." },
+    { id: 6, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Bảo tồn giá trị văn hóa", exp: "preserve: bảo tồn, gìn giữ (preserve cultural values)." },
+    { id: 7, correct: "A", category: "Từ vựng", tags: ["topic_health", "skill_vocab_colloc"], detail: "Sức khỏe tinh thần", exp: "mental: tinh thần (mental health)." },
+    { id: 8, correct: "D", category: "Từ vựng", tags: ["topic_family", "skill_vocab_core"], detail: "Truyền thống gia đình", exp: "custom: phong tục / truyền thống thói quen." },
+    { id: 9, correct: "B", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_modal"], detail: "Lời khuyên (should)", exp: "should: nên (đưa ra lời khuyên)." },
+    { id: 10, correct: "A", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "must: phải (quy định bắt buộc)." },
+    { id: 11, correct: "D", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_tense"], detail: "Quá khứ tiếp diễn + Quá khứ đơn", exp: "were studying: Hành động đang xảy ra thì hành động khác xen vào (when)." },
+    { id: 12, correct: "B", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_tense"], detail: "Mệnh đề thời gian với while", exp: "were exploring: Quá khứ tiếp diễn đứng sau While." },
+    { id: 13, correct: "C", category: "Ngữ pháp", tags: ["topic_living", "skill_gram_wish"], detail: "Câu điều ước ở hiện tại", exp: "had: Ước trái với thực tế ở hiện tại (lùi về Quá khứ đơn)." },
+    { id: 14, correct: "A", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_wish"], detail: "Câu điều ước ở hiện tại", exp: "provided: Ước trái với thực tế ở hiện tại (lùi về Quá khứ đơn)." },
+    { id: 15, correct: "B", category: "Từ vựng", tags: ["topic_living", "skill_vocab_colloc"], detail: "Ưu tiên hàng đầu", exp: "priority: sự ưu tiên (a top priority)." },
+    { id: 16, correct: "C", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_tense"], detail: "Hai hành động song song trong QK", exp: "was watching: Hai hành động xảy ra song song nối bằng while." },
+    { id: 17, correct: "A", category: "Cụm động từ", tags: ["topic_health", "skill_vocab_phrasal"], detail: "Áp lực tâm lý", exp: "stressed out: căng thẳng, bị áp lực nặng nề." },
+    { id: 18, correct: "C", category: "Từ vựng", tags: ["topic_health", "skill_vocab_colloc"], detail: "Lối sống cân bằng", exp: "well-balanced: cân bằng (well-balanced lifestyle)." },
+    { id: 19, correct: "C", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "must: phải (quy định hạn chót)." },
+    { id: 20, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Ăn sâu bén rễ", exp: "deep-rooted: lâu đời, ăn sâu bén rễ." },
+    { id: 21, correct: "A", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Di tích lịch sử", exp: "historic: có ý nghĩa lịch sử (historic monument)." },
+    { id: 22, correct: "C", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_tense"], detail: "Quá khứ tiếp diễn (Tobe)", exp: "were: Chủ ngữ số nhiều đi với trợ động từ were." },
+    { id: 23, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Bảo tồn giá trị", exp: "preserve: bảo tồn, gìn giữ." },
+    { id: 24, correct: "A", category: "Từ vựng", tags: ["topic_community", "skill_vocab_core"], detail: "Tương lai", exp: "future: tương lai (build a better future)." },
+    { id: 25, correct: "C", category: "Đọc hiểu văn bản", tags: ["topic_tech", "skill_vocab_core"], detail: "Ý chính bài đọc", exp: "Ý chính: Tác động tiêu cực của màn hình điện tử đối với giấc ngủ." },
+    { id: 26, correct: "A", category: "Đọc hiểu văn bản", tags: ["topic_living", "skill_vocab_core"], detail: "Từ đồng nghĩa", exp: "habit = routine (thói quen)." },
+    { id: 27, correct: "C", category: "Đọc hiểu văn bản", tags: ["topic_health", "skill_vocab_phrasal"], detail: "Từ trái nghĩa", exp: "relaxed: thư giãn (trái nghĩa với stressed out)." },
+    { id: 28, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_edu", "skill_gram_connector"], detail: "Đại từ thay thế", exp: "they thay thế cho danh từ students ở câu trước." },
+    { id: 29, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_tech", "skill_vocab_core"], detail: "Tìm thông tin chi tiết", exp: "Ánh sáng xanh khiến não bộ lầm tưởng là ban ngày." },
+    { id: 30, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_health", "skill_gram_tense"], detail: "Tìm thông tin chi tiết", exp: "Đang quan sát thói quen (were observing)." },
+    { id: 31, correct: "B", category: "Viết lại câu", tags: ["topic_health", "skill_gram_modal"], detail: "Khuyên bảo (should)", exp: "good idea = should." },
+    { id: 32, correct: "C", category: "Viết lại câu", tags: ["topic_culture", "skill_gram_wish"], detail: "Câu điều ước", exp: "What a pity = I wish (lùi về Quá khứ đơn)." },
+    { id: 33, correct: "A", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_tense"], detail: "Nối câu bằng while", exp: "Hành động đang xảy ra thì hành động khác xen vào." },
+    { id: 34, correct: "B", category: "Viết lại câu", tags: ["topic_travel", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "necessary = must." },
+    { id: 35, correct: "A", category: "Viết lại câu", tags: ["topic_living", "skill_gram_wish"], detail: "Câu điều ước", exp: "Thực tế hiện tại không biết -> Ước là biết (knew)." },
+    { id: 36, correct: "A", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_conditional"], detail: "Câu điều kiện loại 1", exp: "If + HTĐ, S + must + V." },
+    { id: 37, correct: "B", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_tense"], detail: "Nối câu bằng while", exp: "Hai hành động đang xảy ra song song trong quá khứ." },
+    { id: 38, correct: "C", category: "Viết lại câu", tags: ["topic_tech", "skill_gram_conditional"], detail: "Cấu trúc Unless", exp: "Unless = If not." },
+    { id: 39, correct: "A", category: "Kết hợp câu", tags: ["topic_edu", "skill_gram_conditional"], detail: "Câu điều kiện + should", exp: "Mệnh đề chính dùng should để đưa lời khuyên." },
+    { id: 40, correct: "B", category: "Kết hợp câu", tags: ["topic_health", "skill_gram_tense"], detail: "Nối câu bằng when", exp: "Liên từ when đứng trước hành động bất ngờ xen vào." }
+];
+
+function renderAnswerSheet() {
+    const grid = document.getElementById('sheetGrid');
+    let html = '';
+    quizData.forEach(q => {
+        html += `
+            <div class="row-answer" id="row_q${q.id}">
+                <div class="answer-wrapper">
+                    <div class="question-num">Q${q.id}</div>
+                    <div class="options-group">
+                        <label class="bubble-label" id="lbl_q${q.id}_A"><input type="radio" name="q${q.id}" value="A" onchange="updateProgress()">A</label>
+                        <label class="bubble-label" id="lbl_q${q.id}_B"><input type="radio" name="q${q.id}" value="B" onchange="updateProgress()">B</label>
+                        <label class="bubble-label" id="lbl_q${q.id}_C"><input type="radio" name="q${q.id}" value="C" onchange="updateProgress()">C</label>
+                        <label class="bubble-label" id="lbl_q${q.id}_D"><input type="radio" name="q${q.id}" value="D" onchange="updateProgress()">D</label>
+                    </div>
+                </div>
+                <div class="explanation-box" id="exp_${q.id}">
+                    <strong>💡 Kỹ năng (${q.category}):</strong> ${q.detail}<br>
+                    <strong>📝 Giải thích:</strong> ${q.exp}
+                </div>
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+    document.getElementById('progressText').innerText = `Đã chọn: 0/${quizData.length} câu`;
+}
+
+function updateProgress() {
+    const form = document.getElementById('quizForm');
+    let answeredCount = 0;
+    quizData.forEach(q => {
+        if (form.elements[`q${q.id}`]?.value) {
+            answeredCount++;
+            document.getElementById(`row_q${q.id}`).classList.add('answered');
+        }
+    });
+    const percent = Math.round((answeredCount / quizData.length) * 100);
+    document.getElementById('progressText').innerText = `Đã chọn: ${answeredCount}/${quizData.length} câu`;
+    document.getElementById('progressPercent').innerText = `${percent}%`;
+    document.getElementById('progressBar').style.width = `${percent}%`;
+}
+
+let skillsChartInstance = null;
+
+function submitQuiz() {
+    const studentName = document.getElementById('student-name').value.trim();
+    const studentClass = document.getElementById('student-class').value.trim();
+    if (!studentName || !studentClass) {
+        alert("Vui lòng nhập đầy đủ Họ tên và Lớp trước khi nộp bài!");
+        document.getElementById('student-name').focus();
+        return;
+    }
+
+    const form = document.getElementById('quizForm');
+    let totalCorrect = 0;
+    
+    let categoryStats = {};
+    let tagStats = {};
+    
+    let correctList = [];
+    let wrongList = [];
+
+    quizData.forEach(q => {
+        const userAnswer = form.elements[`q${q.id}`]?.value;
+        const row = document.getElementById(`row_q${q.id}`);
+        row.classList.add('show-result');
+        document.getElementById(`exp_${q.id}`).style.display = "block";
+
+        let isCorrect = (userAnswer === q.correct);
+        if (isCorrect) {
+            totalCorrect++;
+            correctList.push(q.id);
+            if (userAnswer) document.getElementById(`lbl_q${q.id}_${userAnswer}`).classList.add('correct-target');
+        } else {
+            wrongList.push(q.id);
+            if (userAnswer) document.getElementById(`lbl_q${q.id}_${userAnswer}`).classList.add('wrong-target');
+            document.getElementById(`lbl_q${q.id}_${q.correct}`).classList.add('correct-target');
+        }
+
+        let cat = q.category;
+        if (!categoryStats[cat]) categoryStats[cat] = { correct: 0, total: 0, mistakes: [] };
+        categoryStats[cat].total++;
+        if (isCorrect) categoryStats[cat].correct++;
+        else categoryStats[cat].mistakes.push(q.detail);
+
+        q.tags.forEach(tag => {
+            if (!tagStats[tag]) tagStats[tag] = { correct: 0, total: 0, mistakes: [] };
+            tagStats[tag].total++;
+            if (isCorrect) tagStats[tag].correct++;
+            else tagStats[tag].mistakes.push(q.detail);
+        });
+    });
+
+    form.querySelectorAll('input[type="radio"]').forEach(el => el.disabled = true);
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').innerText = "Đang lưu dữ liệu...";
+
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('scoreDisplay').innerText = `${totalCorrect}/${quizData.length}`;
+    
+    let scorePct = (totalCorrect / quizData.length) * 100;
+    let feedback = "";
+    let levelReport = "";
+    if (scorePct >= 85) { feedback = "Xuất sắc! Bạn nắm rất vững các kiến thức trong bộ đề."; levelReport = "Xuất sắc"; }
+    else if (scorePct >= 65) { feedback = "Khá tốt! Bạn đạt mức cơ bản nhưng cần khắc phục các kỹ năng bị hổng."; levelReport = "Khá"; }
+    else { feedback = "Cần cố gắng nhiều hơn! Hãy ôn lại lộ trình định hướng học tập bên dưới."; levelReport = "Cần cố gắng"; }
+    document.getElementById('overallFeedback').innerText = feedback;
+
+    let detailedHtml = "";
+    let labels = [];
+    let correctData = [];
+    let strengths = [];
+    let weaknesses = [];
+    let actionPlan = [];
+
+    for (let cat in categoryStats) {
+        labels.push(cat);
+        let pct = Math.round((categoryStats[cat].correct / categoryStats[cat].total) * 100);
+        correctData.push(pct);
+
+        let badgeClass = "badge-weak";
+        let statusText = "Cần ôn tập";
+        if (pct === 100) { badgeClass = "badge-excellent"; statusText = "Thành thạo"; strengths.push(cat); }
+        else if (pct >= 70) { badgeClass = "badge-good"; statusText = "Khá/Tốt"; strengths.push(cat); }
+        else { weaknesses.push(`${cat} (${pct}%)`); }
+
+        detailedHtml += `
+            <div class="category-report-card">
+                <div class="category-report-header">
+                    <span><strong>${cat}</strong> (Đúng ${categoryStats[cat].correct}/${categoryStats[cat].total})</span>
+                    <span class="badge-status ${badgeClass}">${statusText} (${pct}%)</span>
+                </div>
+                ${categoryStats[cat].mistakes.length > 0 ? `
+                    <div class="weak-details">
+                        <strong>Trọng tâm bị hổng:</strong> ${[...new Set(categoryStats[cat].mistakes)].join(', ')}
+                    </div>
+                ` : `<div class="success-details">✓ Đạt điểm tối đa phần kiến thức này!</div>`}
+            </div>
+        `;
+    }
+    document.getElementById('detailedAnalysis').innerHTML = detailedHtml;
+
+    for (let tag in tagStats) {
+        let pct = Math.round((tagStats[tag].correct / tagStats[tag].total) * 100);
+        let config = feedbackConfig[tag];
+        if (pct < 70 && config) {
+            actionPlan.push(`<b>[${config.title}]</b>: ${config.action}`);
+        }
+    }
+
+    if (actionPlan.length > 0) {
+        document.getElementById('actionPlanSection').style.display = "block";
+        document.getElementById('actionPlanList').innerHTML = [...new Set(actionPlan)].map(a => `<li>${a}</li>`).join('');
+    }
+
+    if (skillsChartInstance) { skillsChartInstance.destroy(); }
+    const ctx = document.getElementById('skillsChart').getContext('2d');
+    skillsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Tỷ lệ đúng (%)',
+                data: correctData,
+                backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                borderWidth: 1, borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            scales: { x: { min: 0, max: 100 } }
+        }
+    });
+
+    let formData = new URLSearchParams();
+    formData.append('studentName', studentName);
+    formData.append('className', studentClass);
+    formData.append('quizName', LESSON_NAME);
+    formData.append('score', `${(totalCorrect / quizData.length * 10).toFixed(1)} (${totalCorrect}/${quizData.length})`);
+    formData.append('correctAnswers', correctList.join(', '));
+    formData.append('wrongAnswers', wrongList.join(', '));
+    formData.append('level', levelReport);
+    formData.append('strengths', strengths.join('\n') || "Chưa có");
+    formData.append('weaknesses', weaknesses.join('\n') || "Không có");
+    formData.append('actionPlan', actionPlan.map(a => a.replace(/<[^>]*>?/gm, '')).join('\n') || "Tiếp tục duy trì phong độ");
+
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: formData })
+        .then(() => document.getElementById('submitBtn').innerText = "Đã Nộp & Lưu Kết Quả")
+        .catch(() => document.getElementById('submitBtn').innerText = "Đã Nộp (Lỗi mạng cục bộ)");
+
+    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+window.onload = renderAnswerSheet;
+</script>
+</body>
+</html>
