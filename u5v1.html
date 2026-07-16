@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hệ thống Đánh giá Từ vựng & Ngữ pháp - Global Success</title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; background: none; border: none; font-size: 1.5em; cursor: pointer; color: #5f6368; padding: 5px; }
+        .header-title { margin: 0; font-size: 1.2em; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-container { width: 100%; height: 6px; background-color: #eee; border-radius: 4px; margin-top: 10px; }
+        #progress-bar { width: 0%; height: 100%; background-color: var(--dark-blue); border-radius: 4px; transition: width 0.4s ease; }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex; flex: 1; padding: 20px; gap: 25px;
+            max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px; background: white; padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column;
+            height: calc(100% - 40px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s ease; z-index: 1000;
+        }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        
+        .stats-box { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; color: #333; }
+        .stat-value { font-weight: bold; color: var(--dark-blue); }
+        .nav-container { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .q-num {
+            aspect-ratio: 1; border: 1px solid var(--border-color); border-radius: 5px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9em; background: #fff;
+        }
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%; padding: 12px; background-color: var(--dark-blue); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area { flex: 1; overflow-y: auto; padding-right: 5px; padding-bottom: 20px; }
+        .question-card {
+            background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);
+            margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #202124; }
+        .btn-hint-toggle {
+            align-self: flex-start; background-color: white; border: 1px solid #ffb74d; color: #f57f17;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 15px;
+        }
+        .hint-content { display: none; background-color: #fff3e0; border-left: 4px solid #ffb74d; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 0.95em; color: #e65100; }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .option-btn {
+            padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: white;
+            text-align: left; cursor: pointer; font-size: 1em; display: flex; flex-direction: column; line-height: 1.4; transition: background-color 0.2s;
+        }
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px; align-self: flex-start; background: #f1f3f4; border: none; padding: 8px 16px;
+            border-radius: 20px; font-size: 0.9em; color: #555; display: flex; align-items: center; gap: 6px; font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+        .trans-text { display: none; color: var(--trans-color); font-style: italic; font-size: 0.95em; margin-top: 5px; font-weight: normal; border-top: 1px dashed #eee; padding-top: 4px; }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 6px; background-color: #fffde7; border-left: 4px solid #fbc02d; display: none; font-size: 0.95em; line-height: 1.5; }
+
+        /* === MODAL & EVALUATION === */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 650px;
+            max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: zoomIn 0.3s;
+        }
+        .modal-header-score { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-score { font-size: 3em; font-weight: bold; color: var(--dark-blue); }
+        .eval-section { margin-bottom: 15px; padding: 15px; border-radius: 8px; background: #f8f9fa; }
+        .eval-section h4 { margin-top: 0; margin-bottom: 8px; color: #333; }
+        .eval-ul { margin: 0; padding-left: 20px; font-size: 0.95em; color: #444; line-height: 1.5; }
+        .eval-ul li { margin-bottom: 6px; }
+        .modal-btn { padding: 12px; background: var(--dark-blue); color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; margin-top: 15px; font-weight:bold; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        .login-error { color: var(--wrong-red); font-size: 0.9em; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="text" id="student-class" class="login-input" placeholder="Lớp của bạn (VD: 9A1)" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Vui lòng nhập đủ thông tin và đúng mật khẩu!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tập tự luyện - Global Success</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-header-score">
+                <div>
+                    <h2 style="margin: 0; color: #333;">Kết quả bài làm</h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">Số câu đúng: <b id="final-correct">0</b>/<span id="final-total">0</span></p>
+                </div>
+                <div class="modal-score" id="final-score">0.0</div>
+            </div>
+            
+            <!-- Vùng Đánh Giá Sư Phạm -->
+            <div class="eval-section" style="background-color: #e3f2fd;">
+                <h4 style="color: #1565c0;">📊 Mức độ nhận thức</h4>
+                <div id="eval-level" style="font-weight: 500; color: #0d47a1;">---</div>
+            </div>
+            
+            <div class="eval-section" style="background-color: #e8f5e9; border-left: 4px solid #4caf50;">
+                <h4 style="color: #2e7d32;">✨ Điểm mạnh</h4>
+                <ul class="eval-ul" id="eval-strengths"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fce8e6; border-left: 4px solid #d32f2f;">
+                <h4 style="color: #c62828;">⚠️ Trọng tâm bị hổng (Điểm yếu)</h4>
+                <ul class="eval-ul" id="eval-weaknesses"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fff8e1; border-left: 4px solid #fbc02d;">
+                <h4 style="color: #f57f17;">🎯 Định hướng học tập</h4>
+                <ul class="eval-ul" id="eval-action"></ul>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Đóng & Xem lại chi tiết</button>
+        </div>
+    </div>
+
+    <script>
+        // === TỪ ĐIỂN CHẨN ĐOÁN SƯ PHẠM (MASTER FEEDBACK CONFIG) ===
+        const feedbackConfig = {
+            // Nhóm Chủ đề (Topics)
+            "topic_family": {
+                title: "Chủ đề Gia đình (Family Life)",
+                strength: "Nắm rất vững từ vựng và ngữ cảnh giao tiếp về chủ đề Gia đình.",
+                weak: "Chưa nhớ kỹ từ vựng và các tình huống giao tiếp về chủ đề Gia đình.",
+                action: "Ôn lại sơ đồ tư duy (Mindmap) từ vựng về các mối quan hệ gia đình và công việc nhà trong SGK."
+            },
+            "topic_nature": {
+                title: "Chủ đề Tự nhiên & Kỳ quan (Nature & Wonders)",
+                strength: "Vốn từ vựng phong phú khi miêu tả cảnh quan tự nhiên và các kỳ quan.",
+                weak: "Thiếu từ vựng miêu tả địa hình, thiên nhiên và các kỳ quan thế giới.",
+                action: "Lập danh sách các tính từ miêu tả cảnh đẹp (breathtaking, magnificent...) và tập đặt câu với địa danh thực tế."
+            },
+            "topic_env": {
+                title: "Chủ đề Môi trường (The Environment)",
+                strength: "Hiểu sâu các thuật ngữ chuyên môn về bảo vệ môi trường và hệ sinh thái.",
+                weak: "Hổng từ vựng chuyên ngành về môi trường, ô nhiễm và năng lượng xanh.",
+                action: "Đọc lại các bài đọc hiểu (Reading) chủ đề Environment, chú ý các cụm từ chỉ nguyên nhân - kết quả."
+            },
+            "topic_tech": {
+                title: "Chủ đề Công nghệ & Khoa học (Science & Technology)",
+                strength: "Sử dụng chính xác các từ vựng hiện đại về công nghệ, thiết bị số và AI.",
+                weak: "Gặp khó khăn với các từ vựng chuyên ngành Khoa học - Công nghệ.",
+                action: "Học từ mới thông qua việc xem các video khoa học ngắn bằng tiếng Anh (chú ý bật phụ đề)."
+            },
+            "topic_culture": {
+                title: "Chủ đề Văn hoá & Di sản (Culture & Heritage)",
+                strength: "Am hiểu từ vựng về truyền thống, phong tục và bảo tồn di sản văn hóa.",
+                weak: "Chưa nắm vững cách diễn đạt về văn hóa truyền thống và bảo tồn di sản.",
+                action: "Tổng hợp các danh từ chỉ di tích (pagoda, temple, structure) và động từ bảo tồn (preserve, restore)."
+            },
+            "topic_travel": {
+                title: "Chủ đề Du lịch & Khám phá (Travel & Tourism)",
+                strength: "Tự tin sử dụng từ vựng về đặt phòng, hỏi đường và trải nghiệm du lịch.",
+                weak: "Yếu từ vựng về các phương tiện di chuyển, địa điểm du lịch và thủ tục.",
+                action: "Thực hành viết một đoạn văn ngắn (khoảng 80 từ) lên kế hoạch cho một chuyến du lịch bằng tiếng Anh."
+            },
+            "topic_career": {
+                title: "Chủ đề Nghề nghiệp & Tương lai (Careers & The Future)",
+                strength: "Nắm vững yêu cầu công việc và từ vựng định hướng nghề nghiệp.",
+                weak: "Thiếu từ vựng chỉ nghề nghiệp mới và các kỹ năng làm việc trong tương lai.",
+                action: "Học thuộc các cụm từ chỉ kỹ năng (soft skills, teamwork) và áp dụng vào bài tập điền từ."
+            },
+            "topic_living": {
+                title: "Chủ đề Đời sống Nông thôn - Thành thị (Country & City Life)",
+                strength: "Phân biệt và miêu tả rất tốt đặc điểm đời sống nông thôn và đô thị.",
+                weak: "Chưa nhớ các tính từ so sánh nhịp sống giữa thành thị và nông thôn.",
+                action: "Vẽ bảng đối chiếu Bảng từ vựng City vs. Countryside (VD: bustling vs. tranquil) để ghi nhớ."
+            },
+            "topic_health": {
+                title: "Chủ đề Sức khỏe & Lối sống (Health & Healthy Living)",
+                strength: "Am hiểu từ vựng về chế độ dinh dưỡng, tập luyện và lối sống lành mạnh.",
+                weak: "Gặp khó khăn khi gọi tên các triệu chứng bệnh và lời khuyên sức khỏe.",
+                action: "Ôn lại cấu trúc đưa ra lời khuyên (should / ought to / had better) kết hợp từ vựng về sức khỏe."
+            },
+            "topic_community": {
+                title: "Chủ đề Cộng đồng địa phương (Local Community)",
+                strength: "Hiểu rõ từ vựng về làng nghề truyền thống và hoạt động cộng đồng.",
+                weak: "Chưa nhớ tên các làng nghề truyền thống, sản phẩm thủ công và dịch vụ công cộng.",
+                action: "Học theo cụm danh từ chỉ nghề thủ công (pottery making, artisan, lacquerware) trong SGK."
+            },
+            "topic_edu": {
+                title: "Chủ đề Học tập & Tiếng Anh (Education & English Learning)",
+                strength: "Nắm vững thuật ngữ về phương pháp học tập và kỹ năng ngôn ngữ.",
+                weak: "Thiếu từ vựng về trường lớp, thi cử và việc rèn luyện ngoại ngữ.",
+                action: "Ghi chép lại các phương pháp học từ vựng hiệu quả bằng tiếng Anh và tự áp dụng hàng ngày."
+            },
+            "topic_hobbies": {
+                title: "Chủ đề Giải trí & Sở thích (Leisure & Hobbies)",
+                strength: "Sử dụng linh hoạt từ vựng miêu tả sở thích và thời gian rảnh rỗi.",
+                weak: "Chưa thành thạo các động từ chỉ sự yêu thích đi kèm V-ing / to V.",
+                action: "Học thuộc lòng bảng động từ chỉ sở thích (fancy, adore, detest + V-ing) qua việc tự đặt câu về bản thân."
+            },
+
+            // Nhóm Từ vựng (Vocabulary Skills)
+            "skill_vocab_core": {
+                title: "Từ vựng nền tảng (Core Vocabulary)",
+                strength: "Nắm rất vững nghĩa và cách dùng của các từ vựng cốt lõi trong bài.",
+                weak: "Thiếu vốn từ vựng cơ bản, gặp khó khăn khi hiểu nghĩa của câu hỏi.",
+                action: "Dừng việc dịch word-by-word. Học lại bảng từ vựng SGK, chú ý phát âm và nghĩa trong ngữ cảnh."
+            },
+            "skill_vocab_colloc": {
+                title: "Cụm từ cố định (Collocations)",
+                strength: "Sử dụng thành thạo các cụm từ cố định tự nhiên như người bản xứ.",
+                weak: "Hổng mảng Cụm từ cố định, thường ghép từ tùy tiện theo tư duy tiếng Việt.",
+                action: "Chấm dứt học từ đơn lẻ. Khi gặp từ mới, bắt buộc phải học cả cụm (VD: học 'take pride in' thay vì chỉ học 'pride')."
+            },
+            "skill_vocab_phrasal": {
+                title: "Cụm động từ (Phrasal Verbs)",
+                strength: "Phản xạ rất tốt với các cụm động từ và giới từ đi kèm.",
+                weak: "Yếu mảng Cụm động từ, thường nhầm lẫn nghĩa khi thay đổi giới từ.",
+                action: "Lập sổ tay chuyên đề Phrasal Verbs, vẽ hình ảnh minh họa cho các giới từ (up, down, off, over) để nhớ nghĩa chuyển."
+            },
+            "skill_vocab_wordform": {
+                title: "Biến đổi từ loại (Word Form)",
+                strength: "Phân tích cấu trúc câu tốt, nhận diện chính xác Danh - Động - Tính - Trạng.",
+                weak: "Hay nhầm lẫn giữa các từ loại hoặc từ có vỏ chữ giống nhau.",
+                action: "Rèn tính cẩn thận. Học thuộc các hậu tố từ loại (VD: -tion là danh từ, -ive là tính từ) và xác định từ loại trước khi chọn đáp án."
+            },
+
+            // Nhóm Ngữ pháp (Grammar Skills)
+            "skill_gram_tense": {
+                title: "Các thì trong Tiếng Anh (Tenses)",
+                strength: "Chia thì chính xác, nhận diện tốt dấu hiệu thời gian trong câu.",
+                weak: "Chưa nắm vững công thức và cách dùng của các thì căn bản.",
+                action: "Vẽ trục thời gian (Timeline) cho các thì, học thuộc lòng các trạng từ nhận biết (yesterday, since, tomorrow...)."
+            },
+            "skill_gram_passive": {
+                title: "Câu bị động (Passive Voice)",
+                strength: "Chuyển đổi thành thạo cấu trúc chủ động sang bị động ở các thì.",
+                weak: "Thường quên cấu trúc 'To be + V3/ed' hoặc chia sai động từ To be.",
+                action: "Luyện tập chuyên đề Câu bị động. Luôn xác định tân ngữ (Object) và thì của câu chủ động trước khi làm bài."
+            },
+            "skill_gram_reported": {
+                title: "Câu tường thuật (Reported Speech)",
+                strength: "Nắm vững quy tắc lùi thì và đổi ngôi trong câu tường thuật.",
+                weak: "Hay quên 'lùi thì' hoặc chưa đổi trạng từ chỉ thời gian/nơi chốn.",
+                action: "Học thuộc bảng chuyển đổi trạng từ (now -> then, tomorrow -> the next day) và quy tắc lùi 1 thì về quá khứ."
+            },
+            "skill_gram_relative": {
+                title: "Mệnh đề quan hệ (Relative Clauses)",
+                strength: "Sử dụng chính xác các đại từ quan hệ (who, which, that, where, whose).",
+                weak: "Nhầm lẫn chức năng của các đại từ quan hệ hoặc dùng sai dấu phẩy.",
+                action: "Làm bài tập nối 2 câu thành 1 câu dùng mệnh đề quan hệ. Nhớ quy tắc: 'who' cho người, 'which' cho vật, 'whose' chỉ sở hữu."
+            },
+            "skill_gram_conditional": {
+                title: "Câu điều kiện (Conditionals)",
+                strength: "Phân biệt và áp dụng rất tốt câu điều kiện loại 1, 2 và 3.",
+                weak: "Nhầm lẫn công thức giữa các loại câu điều kiện, đặc biệt là loại 2.",
+                action: "Ghi nhớ công thức lùi thì: Loại 1 (Có thể xảy ra -> HTĐ + TlĐ), Loại 2 (Không có thật ở hiện tại -> QKĐ + Would + V)."
+            },
+            "skill_gram_wish": {
+                title: "Cấu trúc Câu ước (Wish / If only)",
+                strength: "Thành thạo cấu trúc giả định với Wish ở hiện tại và tương lai.",
+                weak: "Quên quy tắc lùi thì sau động từ Wish.",
+                action: "Nhớ thần chú 'Ước là phải lùi thì': Ước cho hiện tại dùng Quá khứ đơn (Be -> were cho mọi ngôi)."
+            },
+            "skill_gram_adverbial": {
+                title: "Mệnh đề trạng ngữ (Adverbial Clauses)",
+                strength: "Kết nối câu logic bằng các mệnh đề chỉ nguyên nhân, kết quả, thời gian.",
+                weak: "Chưa hiểu nghĩa của các liên từ nối mệnh đề (although, because, when...).",
+                action: "Phân loại liên từ theo nhóm ý nghĩa: Nhượng bộ (Although/Even though), Nguyên nhân (Because/As/Since)."
+            },
+            "skill_gram_comparison": {
+                title: "Cấu trúc So sánh (Comparisons)",
+                strength: "Vận dụng tốt so sánh hơn, so sánh nhất và so sánh kép (The more... the more).",
+                weak: "Chia sai tính từ ngắn/dài hoặc nhầm lẫn giữa so sánh hơn và so sánh nhất.",
+                action: "Học thuộc bảng tính từ bất quy tắc (good -> better -> best) và nhận diện từ khóa 'than' (so sánh hơn), 'the' (so sánh nhất)."
+            },
+            "skill_gram_modal": {
+                title: "Động từ khuyết thiếu (Modal Verbs)",
+                strength: "Hiểu sắc thái biểu cảm của can, must, should, have to, might...",
+                weak: "Dùng sai động từ khuyết thiếu trong các tình huống đưa lời khuyên, bắt buộc.",
+                action: "Ghi nhớ sau Modal Verb luôn là Động từ nguyên thể (V-inf). Phân biệt 'must' (tự bắt buộc) và 'have to' (ngoại cảnh bắt buộc)."
+            },
+            "skill_gram_article": {
+                title: "Mạo từ (Articles: A / An / The / Zero)",
+                strength: "Sử dụng mạo từ chuẩn xác theo danh từ xác định và chưa xác định.",
+                weak: "Thường bỏ quên mạo từ hoặc dùng 'the' trước danh từ chung chưa xác định.",
+                action: "Nhớ quy tắc: 'A/An' dùng cho lần đầu nhắc đến (số ít), 'The' dùng cho vật duy nhất hoặc cả người nói và nghe đều đã biết."
+            },
+            "skill_gram_quantifier": {
+                title: "Lượng từ (Quantifiers)",
+                strength: "Phân biệt chính xác much/many, a few/a little, some/any.",
+                weak: "Nhầm lẫn giữa danh từ đếm được và không đếm được khi đi với lượng từ.",
+                action: "Lập 2 cột danh từ Đếm được (Many, A few) và Không đếm được (Much, A little) để tự sắp xếp từ vựng."
+            },
+            "skill_gram_connector": {
+                title: "Từ nối & Liên từ (Connectors & Conjunctions)",
+                strength: "Tạo sự mạch lạc cho câu bằng từ nối (however, therefore, moreover...).",
+                weak: "Dùng sai từ nối chỉ sự tương phản hoặc kết quả, đặt sai vị trí dấu câu.",
+                action: "Chú ý dấu câu: 'However, Therefore' thường đứng sau dấu chấm và trước dấu phẩy. Luyện tập chọn từ nối theo ngữ cảnh logic."
+            }
+        };
+
+        // === DỮ LIỆU CAU HỎI (TÍCH HỢP DUAL-TAGS & 3S EXPLANATION) ===
+        const quizData = [
+  {
+    "q": "Tom and his family had a great time in Da Lat. They rode a _____ to the top of Langbiang Mountain.[cite: 6]",
+    "qVi": "Tom và gia đình đã có một khoảng thời gian tuyệt vời ở Đà Lạt. Họ đã cưỡi _____ lên đỉnh núi Langbiang.",
+    "key": ["rode a", "to the top of Langbiang Mountain"],
+    "opts": ["horse", "jeep", "bike", "yacht"],
+    "optsVi": ["con ngựa", "xe gíp", "xe đạp", "du thuyền"],
+    "correct": 0,
+    "exp": "Động từ 'ride' (quá khứ là 'rode') mang nghĩa là <i>'cưỡi'</i>, kết hợp chuẩn xác nhất với động từ đi kèm là <b>horse</b> (cưỡi ngựa)[cite: 6]. Các phương tiện xe cọ như jeep dùng động từ 'drive/take', du thuyền (yacht) dùng cho sông nước[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_colloc"]
+  },
+  {
+    "q": "They took an _____ of Langbiang Mountain to learn about the environment there.[cite: 6]",
+    "qVi": "Họ đã tham gia một _____ núi Langbiang để tìm hiểu về môi trường ở đó.",
+    "key": ["took an", "learn about the environment"],
+    "opts": ["eco-tour", "excursion", "army camp", "training course"],
+    "optsVi": ["chuyến du lịch sinh thái", "chuyến tham quan / dã ngoại", "doanh trại quân đội", "khóa đào tạo"],
+    "correct": 0,
+    "exp": "Cụm từ <b>eco-tour</b> (du lịch sinh thái) gắn liền trực tiếp với mục đích 'learn about the environment' (tìm hiểu về môi trường thiên nhiên)[cite: 6]. Chú ý mạo từ 'an' đứng trước nguyên âm[cite: 6].",
+    "tags": ["topic_env", "skill_vocab_core"]
+  },
+  {
+    "q": "The area of Langbiang Mountain is _____ in flora and fauna with many plant species.[cite: 6]",
+    "qVi": "Khu vực núi Langbiang rất _____ về thực vật và động vật với nhiều loài thực vật.",
+    "key": ["is", "in flora and fauna", "many plant species"],
+    "opts": ["beautiful", "rich", "magnificent", "amazing"],
+    "optsVi": ["xinh đẹp", "phong phú / giàu có", "tráng lệ", "kinh ngạc"],
+    "correct": 1,
+    "exp": "Cụm từ cố định <b>be rich in + N</b> mang nghĩa là <i>'phong phú, dồi dào về cái gì'</i> (ở đây là phong phú về thảm động thực vật - flora and fauna)[cite: 6].",
+    "tags": ["topic_nature", "skill_vocab_colloc"]
+  },
+  {
+    "q": "It was a _____ ride up to the mountain top. Tom felt very excited during the trip.[cite: 6]",
+    "qVi": "Đó là một chuyến đi _____ lên đỉnh núi. Tom cảm thấy rất hào hứng trong suốt chuyến đi.",
+    "key": ["ride", "felt very excited"],
+    "opts": ["relaxing", "unpleasant", "thrilling", "helpless"],
+    "optsVi": ["thư giãn", "khó chịu", "kịch tính / hồi hộp thích thú", "bất lực"],
+    "correct": 2,
+    "exp": "Tính từ <b>thrilling</b> (kịch tính, hồi hộp và đầy thích thú) phản ánh đúng cảm xúc 'very excited' (rất hào hứng) của Tom khi đi lên đỉnh núi[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "In the evening, they saw a _____ show and danced with the local people.[cite: 6]",
+    "qVi": "Vào buổi tối, họ đã xem một buổi biểu diễn _____ và nhảy múa cùng người dân địa phương.",
+    "key": ["saw a", "show and danced with the local people"],
+    "opts": ["tribal dance", "performance", "gong", "board game"],
+    "optsVi": ["múa truyền thống / múa bộ tộc", "màn trình diễn", "cồng chiêng", "trò chơi cờ bàn"],
+    "correct": 0,
+    "exp": "Cụm từ <b>tribal dance show</b> có nghĩa là <i>'buổi biểu diễn múa truyền thống của đồng bào dân tộc/bộ tộc'</i>, phù hợp với ngữ cảnh giao lưu văn hóa và nhảy múa cùng người bản địa[cite: 6].",
+    "tags": ["topic_culture", "skill_vocab_colloc"]
+  },
+  {
+    "q": "They took many pictures of the _____ scenery from the top of the mountain.[cite: 6]",
+    "qVi": "Họ đã chụp rất nhiều bức ảnh về phong cảnh _____ từ trên đỉnh núi.",
+    "key": ["pictures of the", "scenery from the top of the mountain"],
+    "opts": ["brilliant", "magnificent", "exciting", "touching"],
+    "optsVi": ["rực rỡ / thông minh", "tráng lệ / lộng lẫy", "hào hứng", "cảm động"],
+    "correct": 1,
+    "exp": "Tính từ <b>magnificent</b> (tráng lệ, hùng vĩ, tuyệt đẹp) là từ vựng đắt giá và tự nhiên nhất dùng để bổ nghĩa cho phong cảnh thiên nhiên rộng lớn (scenery) nhìn từ đỉnh núi[cite: 6].",
+    "tags": ["topic_nature", "skill_vocab_colloc"]
+  },
+  {
+    "q": "We tried _____ pork in Cu Lan Village. It was a really memorable evening.[cite: 6]",
+    "qVi": "Chúng tôi đã thử món thịt heo _____ ở làng Cù Lần. Đó thực sự là một buổi tối đáng nhớ.",
+    "key": ["tried", "pork in Cu Lan Village"],
+    "opts": ["grilled", "boiled", "fried", "raw"],
+    "optsVi": ["nướng", "luộc", "chiên / rán", "sống / chưa nấu chín"],
+    "correct": 0,
+    "exp": "Trong văn hóa ẩm thực vùng cao tại làng Cù Lần, món đặc sản nổi tiếng thường được nhắc đến là <b>grilled pork</b> (thịt heo nướng)[cite: 6].",
+    "tags": ["topic_culture", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Snorkelling in the _____ reef is an exciting experience that you shouldn't miss.[cite: 6]",
+    "qVi": "Lặn với ống thở ở rạn _____ là một trải nghiệm thú vị mà bạn không nên bỏ lỡ.",
+    "key": ["Snorkelling in the", "reef"],
+    "opts": ["mountain", "coral", "forest", "village"],
+    "optsVi": ["núi", "san hô", "rừng", "làng xã"],
+    "correct": 1,
+    "exp": "Cụm danh từ cố định: <b>coral reef</b> có nghĩa là <i>'rạn san hô'</i>, là địa điểm đặc trưng cho hoạt động lặn biển (snorkelling)[cite: 6].",
+    "tags": ["topic_nature", "skill_vocab_colloc"]
+  },
+  {
+    "q": "It was wonderful to see many types of _____ fishes swimming around the seabed.[cite: 6]",
+    "qVi": "Thật tuyệt vời khi nhìn thấy nhiều loài cá _____ bơi lội xung quanh đáy biển.",
+    "key": ["many types of", "fishes swimming around the seabed"],
+    "opts": ["big", "fast", "colourful", "wild"],
+    "optsVi": ["to lớn", "nhanh", "sặc sỡ / nhiều màu sắc", "hoang dã"],
+    "correct": 2,
+    "exp": "Cảnh tượng rực rỡ dưới đáy biển thường được miêu tả qua hình ảnh các loài cá <b>colourful</b> (sặc sỡ, nhiều màu sắc)[cite: 6].",
+    "tags": ["topic_nature", "skill_vocab_colloc"]
+  },
+  {
+    "q": "We hired _____ and cycled around the beautiful area in Ninh Binh.[cite: 6]",
+    "qVi": "Chúng tôi đã thuê _____ và đạp xe dạo quanh khu vực tuyệt đẹp ở Ninh Bình.",
+    "key": ["hired", "and cycled around"],
+    "opts": ["jeeps", "bikes", "horses", "yachts"],
+    "optsVi": ["xe gíp", "xe đạp", "ngựa", "du thuyền"],
+    "correct": 1,
+    "exp": "Động từ 'cycled' (đạp xe) ở vế sau là từ khóa trực tiếp chỉ ra phương tiện được thuê ở vế trước là <b>bikes</b> (xe đạp)[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_colloc"]
+  },
+  {
+    "q": "The students worked together to _____ tents before it started to rain.[cite: 6]",
+    "qVi": "Các học sinh đã làm việc cùng nhau để _____ lều trước khi trời bắt đầu mưa.",
+    "key": ["worked together to", "tents"],
+    "opts": ["put up", "build", "hire", "explore"],
+    "optsVi": ["dựng lên", "xây dựng", "thuê", "khám phá"],
+    "correct": 0,
+    "exp": "Cụm động từ cố định: <b>put up a tent</b> có nghĩa là <i>'dựng lều / cắm trại'</i>[cite: 6]. Không dùng 'build' cho lều bạt[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_phrasal"]
+  },
+  {
+    "q": "Did you _____ the seabed when you went snorkelling last summer?[cite: 6]",
+    "qVi": "Bạn có _____ đáy biển khi bạn đi lặn với ống thở vào mùa hè năm ngoái không?",
+    "key": ["the seabed when you went snorkelling"],
+    "opts": ["view", "explore", "see", "tour"],
+    "optsVi": ["ngắm nhìn", "khám phá / thám hiểm", "nhìn thấy", "du lịch"],
+    "correct": 1,
+    "exp": "Động từ <b>explore</b> (khám phá, thám hiểm) kết hợp tự nhiên nhất với 'the seabed' (đáy biển) để nói về hoạt động lặn biển trải nghiệm[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "We had a _____ tour around the village and visited many interesting sites.[cite: 6]",
+    "qVi": "Chúng tôi đã có một chuyến tham quan _____ quanh làng và ghé thăm nhiều địa điểm thú vị.",
+    "key": ["had a", "tour around the village", "visited many interesting sites"],
+    "opts": ["brilliant", "helpless", "unpleasant", "embarrassing"],
+    "optsVi": ["tuyệt vời / rực rỡ", "bất lực", "khó chịu", "xấu hổ / ngượng ngùng"],
+    "correct": 0,
+    "exp": "Một chuyến đi ghé thăm nhiều địa điểm thú vị (interesting sites) mang tính chất tích cực, do đó tính từ phù hợp duy nhất là <b>brilliant</b> (tuyệt vời, xuất sắc)[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "Taking photos from a mountain _____ is one of my favorite activities.[cite: 6]",
+    "qVi": "Chụp ảnh từ _____ núi là một trong những hoạt động yêu thích của tôi.",
+    "key": ["Taking photos from a mountain"],
+    "opts": ["side", "top", "foot", "wall"],
+    "optsVi": ["sườn / bên", "đỉnh", "chân", "bức tường"],
+    "correct": 1,
+    "exp": "Cụm danh từ quen thuộc: <b>mountain top</b> (đỉnh núi), nơi có tầm nhìn bao quát và đẹp nhất để chụp ảnh[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_colloc"]
+  },
+  {
+    "q": "My most _____ experience was travelling to a new place without my parents.[cite: 6]",
+    "qVi": "Trải nghiệm _____ nhất của tôi là đi du lịch đến một nơi mới mà không có bố mẹ.",
+    "key": ["most", "experience was travelling to a new place"],
+    "opts": ["enjoyable", "unpleasant", "embarrassing", "helpless"],
+    "optsVi": ["thú vị / thích thú", "khó chịu", "xấu hổ", "bất lực"],
+    "correct": 0,
+    "exp": "Việc tự lập đi du lịch khám phá nơi mới thường được xem là một trải nghiệm <b>enjoyable</b> (thú vị, đầy niềm vui) đối với các bạn trẻ[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "They have some local _____ for Mi after their trip to Da Lat.[cite: 6]",
+    "qVi": "Họ có một vài _____ địa phương cho Mi sau chuyến đi của họ đến Đà Lạt.",
+    "key": ["some local", "after their trip to Da Lat"],
+    "opts": ["specialities", "findings", "responsibilities", "skills"],
+    "optsVi": ["đặc sản", "phát hiện / kết quả", "trách nhiệm", "kỹ năng"],
+    "correct": 0,
+    "exp": "Cụm từ <b>local specialities</b> có nghĩa là <i>'đặc sản địa phương'</i>, thường được mua về làm quà sau các chuyến du lịch[cite: 6].",
+    "tags": ["topic_culture", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Cycling around the area was so _____. I felt very peaceful.[cite: 6]",
+    "qVi": "Đạp xe quanh khu vực đó thật _____. Tôi cảm thấy rất bình yên.",
+    "key": ["Cycling around", "was so", "felt very peaceful"],
+    "opts": ["exhilarating", "thrilling", "relaxing", "touching"],
+    "optsVi": ["hào hứng / phấn chấn", "kịch tính", "thư giãn", "cảm động"],
+    "correct": 2,
+    "exp": "Cảm giác 'very peaceful' (rất bình yên) đồng điệu hoàn toàn với tính từ <b>relaxing</b> (thư giãn, thoải mái)[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_core"]
+  },
+  {
+    "q": "We joined _____ building activities in the afternoon by the sea.[cite: 6]",
+    "qVi": "Chúng tôi đã tham gia các hoạt động xây dựng _____ vào buổi chiều bên bờ biển.",
+    "key": ["joined", "building activities in the afternoon"],
+    "opts": ["class", "team", "school", "group"],
+    "optsVi": ["lớp học", "đội ngũ / tập thể", "trường học", "nhóm"],
+    "correct": 1,
+    "exp": "Cụm danh từ cố định rất phổ biến: <b>team building</b> (hoạt động gắn kết tập thể / xây dựng tinh thần đồng đội)[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_colloc"]
+  },
+  {
+    "q": "An _____ taught some of the students how to go snorkelling safely.[cite: 6]",
+    "qVi": "Một _____ đã dạy một số học sinh cách lặn với ống thở một cách an toàn.",
+    "key": ["An", "taught some of the students how to go snorkelling"],
+    "opts": ["instructor", "army leader", "teacher", "local person"],
+    "optsVi": ["huấn luyện viên / người hướng dẫn", "chỉ huy quân đội", "giáo viên", "người dân địa phương"],
+    "correct": 0,
+    "exp": "Người dạy các kỹ năng thể thao hoặc hoạt động thực tế ngoài trời (như lặn biển, bơi lội) gọi là <b>instructor</b> (huấn luyện viên, người hướng dẫn)[cite: 6]. Chú ý mạo từ 'An' đứng trước từ bắt đầu bằng nguyên âm[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_core"]
+  },
+  {
+    "q": "It was _____ to see the magnificent mountain range from the distance.[cite: 6]",
+    "qVi": "Thật _____ khi nhìn thấy dãy núi tráng lệ từ phía xa.",
+    "key": ["was", "to see the magnificent mountain range"],
+    "opts": ["embarrassing", "amazing", "helpless", "unpleasant"],
+    "optsVi": ["xấu hổ", "tuyệt vời / kinh ngạc", "bất lực", "khó chịu"],
+    "correct": 1,
+    "exp": "Việc ngắm nhìn một dãy núi tráng lệ (magnificent mountain range) mang lại cảm giác <b>amazing</b> (tuyệt vời, đầy kinh ngạc)[cite: 6].",
+    "tags": ["topic_nature", "skill_vocab_core"]
+  },
+  {
+    "q": "My mind suddenly _____ blank when the teacher asked me how to do the homework.[cite: 6]",
+    "qVi": "Đầu óc tôi bỗng nhiên _____ trống rỗng khi giáo viên hỏi tôi cách làm bài tập về nhà.",
+    "key": ["mind suddenly", "blank when the teacher asked me"],
+    "opts": ["went", "became", "turned", "felt"],
+    "optsVi": ["đã đi (go blank)", "đã trở nên", "đã chuyển sang", "đã cảm thấy"],
+    "correct": 0,
+    "exp": "Thành ngữ (Idiom): <b>go blank</b> (quá khứ là <b>went blank</b>) mang nghĩa là <i>'đầu óc trống rỗng, tạm thời không nhớ ra được gì'</i>[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_phrasal"]
+  },
+  {
+    "q": "I didn't understand the lesson at all, so I just learnt it by _____.[cite: 6]",
+    "qVi": "Tôi không hiểu bài học một chút nào cả, vì vậy tôi chỉ học _____.",
+    "key": ["didn't understand the lesson", "learnt it by"],
+    "opts": ["rote", "heart", "hand", "chance"],
+    "optsVi": ["vẹt (by rote)", "thuộc lòng (by heart)", "tay", "tình cờ"],
+    "correct": 0,
+    "exp": "Cụm từ <b>learn by rote</b> có nghĩa là <i>'học vẹt, học thuộc lòng mà không thực sự hiểu bản chất bài học'</i>[cite: 6]. Phân biệt với 'learn by heart' (học thuộc lòng ghi nhớ thấu đáo)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "He felt _____ when he couldn't protect himself from being bullied by his peers.[cite: 6]",
+    "qVi": "Cậu ấy cảm thấy _____ khi không thể tự bảo vệ mình khỏi bị bạn bè bắt nạt.",
+    "key": ["felt", "couldn't protect himself from being bullied"],
+    "opts": ["exhilarating", "brilliant", "helpless", "amazing"],
+    "optsVi": ["hào hứng", "rực rỡ", "bất lực", "tuyệt vời"],
+    "correct": 2,
+    "exp": "Khi không thể tự bảo vệ bản thân trước sự bắt nạt (couldn't protect himself), cảm xúc nảy sinh sẽ là <b>helpless</b> (bất lực, không thể làm gì được)[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_core"]
+  },
+  {
+    "q": "I had an _____ moment when I took another student's bag by mistake.[cite: 6]",
+    "qVi": "Tôi đã có một khoảnh khắc _____ khi tôi cầm nhầm cặp sách của một học sinh khác.",
+    "key": ["had an", "moment when I took another student's bag by mistake"],
+    "opts": ["touching", "embarrassing", "pleasant", "exciting"],
+    "optsVi": ["cảm động", "xấu hổ / ngượng ngùng", "dễ chịu", "hào hứng"],
+    "correct": 1,
+    "exp": "Việc cầm nhầm đồ của người khác (took by mistake) trong tình huống giao tiếp thường tạo ra tình huống <b>embarrassing</b> (xấu hổ, ngượng ngùng)[cite: 6]. Chú ý mạo từ 'an'[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "We have made a class _____ with photos of every student to remember our time together.[cite: 6]",
+    "qVi": "Chúng tôi đã làm một cuốn _____ của lớp với ảnh của từng học sinh để ghi nhớ khoảng thời gian bên nhau.",
+    "key": ["made a class", "with photos of every student to remember our time"],
+    "opts": ["yearbook", "textbook", "workbook", "notebook"],
+    "optsVi": ["kỷ yếu / sách thường niên", "sách giáo khoa", "sách bài tập", "vở ghi chép"],
+    "correct": 0,
+    "exp": "Danh từ <b>yearbook</b> (sách kỷ yếu, sách thường niên) là cuốn ấn phẩm tập hợp hình ảnh và kỷ niệm của học sinh trong một năm học[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "Students could see the university's _____ when they toured the campus.[cite: 6]",
+    "qVi": "Học sinh có thể nhìn thấy các _____ của trường đại học khi họ tham quan khuôn viên trường.",
+    "key": ["see the university's", "when they toured the campus"],
+    "opts": ["projects", "specialities", "facilities", "courses"],
+    "optsVi": ["dự án", "đặc sản", "cơ sở vật chất", "khóa học"],
+    "correct": 2,
+    "exp": "Khi đi tham quan khuôn viên trường đại học (tour the campus), thứ nhìn thấy trực tiếp là <b>facilities</b> (cơ sở vật chất, phòng ốc, trang thiết bị)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "Winning a gold _____ in the sports competition was my most pleasant experience.[cite: 6]",
+    "qVi": "Giành được một _____ vàng trong cuộc thi thể thao là trải nghiệm vui vẻ nhất của tôi.",
+    "key": ["Winning a gold", "in the sports competition"],
+    "opts": ["medal", "card", "gift", "prize"],
+    "optsVi": ["huy chương", "thẻ", "món quà", "giải thưởng (nói chung)"],
+    "correct": 0,
+    "exp": "Cụm danh từ cố định trong thể thao: <b>gold medal</b> (huy chương vàng)[cite: 6]. 'Prize' (giải thưởng) thường không đi trực tiếp với tính từ 'gold' theo cách này[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_colloc"]
+  },
+  {
+    "q": "She has never worked in such an _____ workplace before. Everyone was so mean.[cite: 6]",
+    "qVi": "Cô ấy chưa bao giờ làm việc trong một nơi làm việc _____ như vậy trước đây. Mọi người đều rất xấu tính.",
+    "key": ["such an", "workplace before", "Everyone was so mean"],
+    "opts": ["pleasant", "unpleasant", "exhilarating", "brilliant"],
+    "optsVi": ["dễ chịu", "khó chịu / tồi tệ", "hào hứng", "tuyệt vời"],
+    "correct": 1,
+    "exp": "Vế sau 'Everyone was so mean' (Mọi người rất xấu tính/ích kỷ) giải thích cho môi trường làm việc <b>unpleasant</b> (khó chịu, tồi tệ)[cite: 6]. Mạo từ 'an' đi kèm nguyên âm[cite: 6].",
+    "tags": ["topic_career", "skill_vocab_core"]
+  },
+  {
+    "q": "The parachute jump was an _____ experience for the boy. He was so happy.[cite: 6]",
+    "qVi": "Cú nhảy dù là một trải nghiệm _____ đối với cậu bé. Cậu ấy đã rất hạnh phúc.",
+    "key": ["parachute jump was an", "experience", "He was so happy"],
+    "opts": ["exhilarating", "embarrassing", "helpless", "unpleasant"],
+    "optsVi": ["vô cùng hào hứng / phấn khích tột độ", "xấu hổ", "bất lực", "khó chịu"],
+    "correct": 0,
+    "exp": "Trải nghiệm mạo hiểm như nhảy dù (parachute jump) mang lại cảm giác 'so happy' (rất hạnh phúc/phấn khích) nên dùng tính từ <b>exhilarating</b> (hào hứng, phấn chấn tột độ)[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_core"]
+  },
+  {
+    "q": "Youngsters should be aware of their _____ to the community and environment.[cite: 6]",
+    "qVi": "Thanh thiếu niên nên nhận thức được _____ của mình đối với cộng đồng và môi trường.",
+    "key": ["aware of their", "to the community and environment"],
+    "opts": ["findings", "experiences", "responsibilities", "facilities"],
+    "optsVi": ["phát hiện", "trải nghiệm", "trách nhiệm", "cơ sở vật chất"],
+    "correct": 2,
+    "exp": "Cụm từ <b>responsibility to/towards somebody/something</b> mang nghĩa là <i>'trách nhiệm đối với ai/cái gì'</i> (ở đây là trách nhiệm với cộng đồng và môi trường)[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_colloc"]
+  },
+  {
+    "q": "We had _____ moments when we received letters from our parents at the camp.[cite: 6]",
+    "qVi": "Chúng tôi đã có những khoảnh khắc _____ khi nhận được thư của bố mẹ tại khu trại.",
+    "key": ["had", "moments when we received letters from our parents"],
+    "opts": ["embarrassing", "touching", "helpless", "unpleasant"],
+    "optsVi": ["xấu hổ", "cảm động / xúc động", "bất lực", "khó chịu"],
+    "correct": 1,
+    "exp": "Việc xa nhà đi cắm trại và nhận được thư của bố mẹ thường mang lại những khoảnh khắc <b>touching</b> (đầy cảm xúc, xúc động, chạm đến trái tim)[cite: 6].",
+    "tags": ["topic_family", "skill_vocab_core"]
+  },
+  {
+    "q": "I _____ an exam because I didn't revise the lesson before. I felt so sad.[cite: 6]",
+    "qVi": "Tôi đã _____ một bài kiểm tra vì tôi không ôn bài trước đó. Tôi cảm thấy rất buồn.",
+    "key": ["an exam because I didn't revise", "felt so sad"],
+    "opts": ["failed", "won", "joined", "took"],
+    "optsVi": ["trượt / thi rớt", "chiến thắng", "tham gia", "thực hiện / làm"],
+    "correct": 0,
+    "exp": "Việc không ôn bài (didn't revise) dẫn đến kết quả buồn rầu là <b>fail an exam</b> (trượt/rớt kỳ thi)[cite: 6]. 'Take an exam' chỉ là làm bài thi nói chung, không nói lên kết quả trượt/đỗ[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Lacking _____ makes it difficult for him to give a performance in front of the class.[cite: 6]",
+    "qVi": "Sự thiếu _____ khiến cậu ấy gặp khó khăn khi biểu diễn trước lớp.",
+    "key": ["Lacking", "difficult for him to give a performance in front of the class"],
+    "opts": ["finding", "confidence", "skill", "experience"],
+    "optsVi": ["phát hiện", "sự tự tin", "kỹ năng", "kinh nghiệm"],
+    "correct": 1,
+    "exp": "Việc đứng biểu diễn trước đám đông/lớp học đòi hỏi sự tự tin, do đó việc 'gặp khó khăn khi biểu diễn' là do <b>lack of confidence / lacking confidence</b> (thiếu tự tin)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "Coming to school _____ is an unpleasant experience that I want to avoid.[cite: 6]",
+    "qVi": "Đến trường _____ là một trải nghiệm không mấy vui vẻ mà tôi muốn tránh.",
+    "key": ["Coming to school", "is an unpleasant experience that I want to avoid"],
+    "opts": ["early", "late", "soon", "on time"],
+    "optsVi": ["sớm", "muộn / trễ", "sớm / chẳng bao lâu", "đúng giờ"],
+    "correct": 1,
+    "exp": "Một trải nghiệm không vui vẻ cần tránh (unpleasant experience to avoid) liên quan đến giờ giấc đến trường chính là đi học <b>late</b> (muộn, trễ giờ)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "I had a _____ day because I slipped and hurt my ankle during the trip.[cite: 6]",
+    "qVi": "Tôi đã có một ngày _____ vì tôi bị trượt chân và đau mắt cá chân trong chuyến đi.",
+    "key": ["had a", "day because I slipped and hurt my ankle"],
+    "opts": ["brilliant", "enjoyable", "terrible", "thrilling"],
+    "optsVi": ["tuyệt vời", "thú vị", "tồi tệ / kinh khủng", "kịch tính"],
+    "correct": 2,
+    "exp": "Việc gặp tai nạn ngã trượt chân và chấn thương (slipped and hurt my ankle) khiến ngày hôm đó trở nên <b>terrible</b> (rất tồi tệ, kinh khủng)[cite: 6].",
+    "tags": ["topic_health", "skill_vocab_core"]
+  },
+  {
+    "q": "After we joined team building activities, we all got _____ to each other.[cite: 6]",
+    "qVi": "Sau khi chúng tôi tham gia các hoạt động gắn kết đồng đội, tất cả chúng tôi trở nên _____ với nhau hơn.",
+    "key": ["joined team building activities", "got", "to each other"],
+    "opts": ["far", "closer", "different", "away"],
+    "optsVi": ["xa", "gần gũi / thân thiết hơn", "khác biệt", "rời xa"],
+    "correct": 1,
+    "exp": "Cụm từ <b>get closer to each other</b> mang nghĩa là <i>'trở nên gần gũi, gắn bó và thân thiết với nhau hơn'</i>, là mục đích chính của các hoạt động team building[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_colloc"]
+  },
+  {
+    "q": "I'm really sorry. I'm late. I hope you can _____ my apology.[cite: 6]",
+    "qVi": "Tôi thực sự xin lỗi. Tôi đến muộn. Tôi hy vọng bạn có thể _____ lời xin lỗi của tôi.",
+    "key": ["hope you can", "my apology"],
+    "opts": ["respond", "accept", "make", "give"],
+    "optsVi": ["phản hồi", "chấp nhận", "làm / tạo ra", "cho"],
+    "correct": 1,
+    "exp": "Cụm từ cố định trong giao tiếp: <b>accept one's apology</b> (chấp nhận lời xin lỗi của ai đó / tha thứ cho ai)[cite: 6]. 'Make an apology' là đưa ra lời xin lỗi[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_colloc"]
+  },
+  {
+    "q": "\"Oops, my _____! I thought I could do the washing later,\" the son said to his mum.[cite: 6]",
+    "qVi": "\"Ối, _____ của con! Con nghĩ là con có thể giặt đồ sau,\" người con trai nói với mẹ.",
+    "key": ["Oops, my", "I thought I could do the washing later"],
+    "opts": ["fault", "mistake", "problem", "wrong"],
+    "optsVi": ["lỗi (My fault!)", "sai lầm (by mistake / make a mistake)", "vấn đề", "sai (tính từ)"],
+    "correct": 0,
+    "exp": "Cụm từ giao tiếp thông dụng: <b>My fault!</b> (Lỗi của tôi / Lỗi của con!) dùng để nhanh chóng nhận lỗi về bản thân trong tình huống hàng ngày[cite: 6].",
+    "tags": ["topic_family", "skill_vocab_colloc"]
+  },
+  {
+    "q": "My peer _____ me at school, and I didn't know how to solve the problem.[cite: 6]",
+    "qVi": "Bạn đồng trang lứa đã _____ tôi ở trường, và tôi không biết phải giải quyết vấn đề như thế nào.",
+    "key": ["peer", "me at school", "didn't know how to solve the problem"],
+    "opts": ["bullied", "helped", "cheered", "danced"],
+    "optsVi": ["bắt nạt", "giúp đỡ", "cổ vũ / chúc mừng", "nhảy múa"],
+    "correct": 0,
+    "exp": "Ngữ cảnh gặp rắc rối không biết cách giải quyết (didn't know how to solve the problem) với bạn bè ở trường chỉ hành vi <b>bully</b> (quá khứ là <b>bullied</b> - bắt nạt học đường)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "I felt _____ after I toured the beautiful campus of the new university.[cite: 6]",
+    "qVi": "Tôi cảm thấy _____ sau khi đi tham quan khuôn viên tuyệt đẹp của trường đại học mới.",
+    "key": ["felt", "after I toured the beautiful campus"],
+    "opts": ["pleasant", "pleased", "unpleasant", "helpless"],
+    "optsVi": ["dễ chịu (thường miêu tả tính chất sự vật/không khí)", "hài lòng / vui lòng (miêu tả cảm xúc con người)", "khó chịu", "bất lực"],
+    "correct": 1,
+    "exp": "Miêu tả cảm xúc, tâm trạng hài lòng của con người (I felt...) phải dùng tính từ đuôi -ed là <b>pleased</b> (hài lòng, vui vẻ)[cite: 6]. 'Pleasant' thường dùng để miêu tả tính chất của sự vật/chuyến đi/thời tiết (a pleasant trip)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_wordform"]
+  },
+  {
+    "q": "I had a hard 10-day course in an _____ camp in Son Tay last summer.[cite: 6]",
+    "qVi": "Tôi đã tham gia một khóa học 10 ngày đầy gian khổ trong một trại _____ ở Sơn Tây vào mùa hè năm ngoái.",
+    "key": ["hard 10-day course in an", "camp in Son Tay"],
+    "opts": ["army", "eco", "English", "art"],
+    "optsVi": ["quân đội (army camp: học kỳ quân đội)", "sinh thái", "tiếng Anh", "nghệ thuật"],
+    "correct": 0,
+    "exp": "Cụm danh từ <b>army camp</b> (học kỳ quân đội / trại huấn luyện quân sự) là môi trường rèn luyện kỷ luật đầy thử thách và gian khổ (hard course) cho học sinh mỗi dịp hè[cite: 6]. Chú ý mạo từ 'an'[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "We attended classes which were like _____ courses for soldiers.[cite: 6]",
+    "qVi": "Chúng tôi đã tham gia các lớp học giống như các khóa _____ dành cho quân nhân.",
+    "key": ["like", "courses for soldiers"],
+    "opts": ["reading", "training", "cooking", "singing"],
+    "optsVi": ["đọc sách", "huấn luyện / đào tạo", "nấu ăn", "ca hát"],
+    "correct": 1,
+    "exp": "Cụm từ <b>training course</b> mang nghĩa là <i>'khóa huấn luyện / khóa đào tạo'</i>, phù hợp với chế độ rèn luyện dành cho quân nhân (soldiers)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "The team _____ walked us through many exciting activities in the evening.[cite: 6]",
+    "qVi": "Các _____ của đội đã hướng dẫn chúng tôi tham gia nhiều hoạt động thú vị vào buổi tối.",
+    "key": ["team", "walked us through many exciting activities"],
+    "opts": ["workers", "leaders", "peers", "partners"],
+    "optsVi": ["công nhân", "đội trưởng / người dẫn dắt", "bạn đồng trang lứa", "đối tác"],
+    "correct": 1,
+    "exp": "Người phụ trách điều phối, dẫn dắt các hoạt động trong trại hè/team building được gọi là <b>team leaders</b> (đội trưởng, người dẫn dắt)[cite: 6].",
+    "tags": ["topic_community", "skill_vocab_colloc"]
+  },
+  {
+    "q": "We joined a performance that had the _____: environment protection.[cite: 6]",
+    "qVi": "Chúng tôi đã tham gia một buổi biểu diễn có _____ là: bảo vệ môi trường.",
+    "key": ["had the", "environment protection"],
+    "opts": ["topic", "theme", "lesson", "story"],
+    "optsVi": ["chủ đề (đoạn văn/cuộc thảo luận)", "chủ đề chính / chủ đề xuyên suốt (tiệc/lễ hội/màn trình diễn)", "bài học", "câu chuyện"],
+    "correct": 1,
+    "exp": "Danh từ <b>theme</b> chỉ <i>'chủ đề chính, thông điệp xuyên suốt'</i> của một buổi biểu diễn nghệ thuật, sự kiện hay lễ hội (here: environment protection)[cite: 6].",
+    "tags": ["topic_env", "skill_vocab_core"]
+  },
+  {
+    "q": "Akiko stayed in Thornwood _____ on the outskirts of New York City for three weeks.[cite: 6]",
+    "qVi": "Akiko đã ở tại _____ Thornwood ở ngoại ô thành phố New York trong ba tuần.",
+    "key": ["stayed in Thornwood", "on the outskirts of New York City"],
+    "opts": ["campus", "hotel", "tent", "house"],
+    "optsVi": ["khuôn viên (trường học/trại)", "khách sạn", "lều", "ngôi nhà"],
+    "correct": 0,
+    "exp": "Trong ngữ cảnh các khóa học nội trú hay trại hè quốc tế, danh từ <b>campus</b> chỉ <i>'khuôn viên, khu nội trú trường học'</i> rộng lớn (here: Thornwood campus)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "All students in the summer course tried to _____ in English as much as possible.[cite: 6]",
+    "qVi": "Tất cả học sinh trong khóa học mùa hè đã cố gắng _____ bằng tiếng Anh nhiều nhất có thể.",
+    "key": ["tried to", "in English as much as possible"],
+    "opts": ["talk", "communicate", "speak", "write"],
+    "optsVi": ["trò chuyện", "giao tiếp", "nói (thường đi trực tiếp với ngôn ngữ: speak English)", "viết"],
+    "correct": 1,
+    "exp": "Động từ <b>communicate in + ngôn ngữ</b> có nghĩa là <i>'giao tiếp bằng thứ tiếng gì'</i>[cite: 6]. Nếu dùng 'speak' thì không có giới từ 'in' (speak English)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_phrasal"]
+  },
+  {
+    "q": "In the evening, the students played _____ games like billiards and chess.[cite: 6]",
+    "qVi": "Vào buổi tối, các học sinh đã chơi các trò chơi _____ như bida và cờ vua.",
+    "key": ["played", "games like billiards and chess"],
+    "opts": ["computer", "board", "mobile", "traditional"],
+    "optsVi": ["máy tính", "cờ bàn / cờ gỗ", "di động", "truyền thống"],
+    "correct": 1,
+    "exp": "Cụm danh từ <b>board games</b> chỉ <i>'các trò chơi cờ bàn / cờ trí tuệ'</i> chơi trên mặt phẳng như cờ vua (chess), cờ tỷ phú... bida cũng thuộc nhóm trò chơi giải trí trong nhà này tại trại hè[cite: 6].",
+    "tags": ["topic_hobbies", "skill_vocab_colloc"]
+  },
+  {
+    "q": "The most _____ experience for Akiko was visiting the top of Rockefeller Centre.[cite: 6]",
+    "qVi": "Trải nghiệm _____ nhất đối với Akiko là đến thăm đỉnh của Trung tâm Rockefeller.",
+    "key": ["The most", "experience for Akiko was visiting the top of Rockefeller Centre"],
+    "opts": ["special", "embarrassing", "helpless", "unpleasant"],
+    "optsVi": ["đặc biệt / đáng nhớ nhất", "xấu hổ", "bất lực", "khó chịu"],
+    "correct": 0,
+    "exp": "Việc được lên thăm đỉnh tòa nhà nổi tiếng Rockefeller Centre là một trải nghiệm tích cực và đáng nhớ, do đó tính từ phù hợp là <b>special</b> (đặc biệt, tuyệt vời nhất)[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "From the top of the building, Akiko could _____ the whole city below.[cite: 6]",
+    "qVi": "Từ trên đỉnh tòa nhà, Akiko có thể _____ toàn bộ thành phố bên dưới.",
+    "key": ["From the top of the building", "could", "the whole city below"],
+    "opts": ["view", "tour", "explore", "see"],
+    "optsVi": ["chiêm ngưỡng / ngắm nhìn (thường trang trọng, chú ý đến tầm nhìn cảnh quan)", "du lịch", "khám phá", "nhìn thấy (nói chung)"],
+    "correct": 0,
+    "exp": "Động từ <b>view</b> mang nghĩa là <i>'chiêm ngưỡng, ngắm nhìn toàn cảnh'</i> từ một vị trí trên cao (tầm nhìn toàn cảnh - view the whole city)[cite: 6].",
+    "tags": ["topic_travel", "skill_vocab_core"]
+  },
+  {
+    "q": "Duong felt like he _____ a lot after his first trip without his parents.[cite: 6]",
+    "qVi": "Dương cảm thấy như mình đã _____ rất nhiều sau chuyến đi đầu tiên không có bố mẹ.",
+    "key": ["felt like he", "a lot after his first trip without his parents"],
+    "opts": ["grew up", "went away", "put up", "sat down"],
+    "optsVi": ["trưởng thành / lớn khôn hơn", "rời đi", "dựng lên", "ngồi xuống"],
+    "correct": 0,
+    "exp": "Cụm động từ <b>grow up</b> (quá khứ là <b>grew up</b>) mang nghĩa là <i>'trưởng thành, lớn khôn và tự lập hơn'</i> sau những trải nghiệm tự đi du lịch một mình[cite: 6].",
+    "tags": ["topic_family", "skill_vocab_phrasal"]
+  },
+  {
+    "q": "I attended a course on _____ skills to learn how to communicate better.[cite: 6]",
+    "qVi": "Tôi đã tham gia một khóa học về kỹ năng _____ để học cách giao tiếp tốt hơn.",
+    "key": ["a course on", "skills to learn how to communicate better"],
+    "opts": ["hard", "soft", "fast", "old"],
+    "optsVi": ["cứng (hard skills: kỹ năng chuyên môn kỹ thuật)", "mềm (soft skills: kỹ năng mềm/giao tiếp)", "nhanh", "cũ"],
+    "correct": 1,
+    "exp": "Cụm từ cố định: <b>soft skills</b> có nghĩa là <i>'kỹ năng mềm'</i> (như kỹ năng giao tiếp, làm việc nhóm, quản lý thời gian...)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "During the project, we worked in groups to _____ difficult problems.[cite: 6]",
+    "qVi": "Trong suốt dự án, chúng tôi đã làm việc theo nhóm để _____ các vấn đề khó khăn.",
+    "key": ["worked in groups to", "difficult problems"],
+    "opts": ["do", "solve", "take", "give"],
+    "optsVi": ["làm", "giải quyết", "lấy", "cho"],
+    "correct": 1,
+    "exp": "Cụm động từ cố định: <b>solve a problem / solve problems</b> có nghĩa là <i>'giải quyết vấn đề / tìm ra giải pháp cho khó khăn'</i>[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "I remember being so _____ at first, but the trainers helped me a lot.[cite: 6]",
+    "qVi": "Tôi nhớ lúc đầu mình đã rất _____, nhưng các huấn luyện viên đã giúp đỡ tôi rất nhiều.",
+    "key": ["remember being so", "at first, but the trainers helped me a lot"],
+    "opts": ["embarrassed", "thrilling", "exhilarating", "magnificent"],
+    "optsVi": ["bẽn lẽn / ngượng ngùng (miêu tả cảm xúc con người)", "kịch tính (tính chất sự việc)", "hào hứng tột độ (tính chất sự việc)", "tráng lệ (tính chất sự vật)"],
+    "correct": 0,
+    "exp": "Đứng sau động từ 'being' và miêu tả cảm xúc, tâm trạng bỡ ngỡ ban đầu của học sinh cần dùng tính từ đuôi -ed là <b>embarrassed</b> (ngượng ngùng, bẽn lẽn, bối rối)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_wordform"]
+  },
+  {
+    "q": "Taking an _____ to visit the historical site was part of our summer course.[cite: 6]",
+    "qVi": "Tham gia một _____ để đến thăm di tích lịch sử là một phần trong khóa học mùa hè của chúng tôi.",
+    "key": ["Taking an", "to visit the historical site"],
+    "opts": ["eco-tour", "excursion", "army camp", "training course"],
+    "optsVi": ["chuyến du lịch sinh thái", "chuyến tham quan dã ngoại (học tập)", "doanh trại quân đội", "khóa huấn luyện"],
+    "correct": 1,
+    "exp": "Danh từ <b>excursion</b> chỉ <i>'chuyến tham quan, dã ngoại học tập thực tế ngắn ngày'</i> do nhà trường tổ chức để thăm các di tích, bảo tàng[cite: 6]. Chú ý mạo từ 'an'[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  },
+  {
+    "q": "We are now more aware of environment _____ after taking the course.[cite: 6]",
+    "qVi": "Giờ đây chúng tôi đã có ý thức hơn về việc _____ môi trường sau khi tham gia khóa học.",
+    "key": ["aware of environment", "after taking the course"],
+    "opts": ["protection", "pollution", "finding", "experience"],
+    "optsVi": ["sự bảo vệ", "sự ô nhiễm", "phát hiện", "kinh nghiệm"],
+    "correct": 0,
+    "exp": "Cụm danh từ cố định mang ý nghĩa tích cực trong các khóa học kỹ năng/sinh thái: <b>environment protection</b> (bảo vệ môi trường)[cite: 6].",
+    "tags": ["topic_env", "skill_vocab_colloc"]
+  },
+  {
+    "q": "I _____ I could visit all those magnificent sites one day.[cite: 6]",
+    "qVi": "Tôi _____ một ngày nào đó mình có thể đến thăm tất cả những địa điểm tráng lệ đó.",
+    "key": ["I", "I could visit all those magnificent sites one day"],
+    "opts": ["wish", "hope", "like", "want"],
+    "optsVi": ["ước (Cấu trúc: wish + S + could/would + V)", "hy vọng (Cấu trúc: hope + S + will/can + V)", "thích", "muốn (Cấu trúc: want to + V)"],
+    "correct": 0,
+    "exp": "Cấu trúc câu ước ở tương lai/hiện tại với động từ khiếm khuyết lùi thì (could visit): <b>S + wish + S + could/would + V-inf</b>[cite: 6]. Nếu dùng 'hope' thì phía sau chia hiện tại/tương lai (hope I can visit)[cite: 6].",
+    "tags": ["topic_travel", "skill_gram_wish"]
+  },
+  {
+    "q": "Everything was different from my life at home when I was at the _____ camp.[cite: 6]",
+    "qVi": "Mọi thứ đều khác biệt so với cuộc sống ở nhà của tôi khi tôi ở trại _____.",
+    "key": ["different from my life at home when I was at the", "camp"],
+    "opts": ["school", "army", "dance", "song"],
+    "optsVi": ["trường học", "quân đội (army camp: học kỳ quân đội)", "nhảy múa", "bài hát"],
+    "correct": 1,
+    "exp": "Môi trường có lối sống kỷ luật, khác biệt hoàn toàn với sinh hoạt thoải mái ở nhà (different from life at home) chính là <b>army camp</b> (trại huấn luyện quân đội / học kỳ quân sự)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Duong could only _____ his parents once a day while he was at the camp.[cite: 6]",
+    "qVi": "Dương chỉ có thể _____ cho bố mẹ mỗi ngày một lần trong khi cậu ấy ở trại.",
+    "key": ["could only", "his parents once a day while he was at the camp"],
+    "opts": ["call", "see", "visit", "meet"],
+    "optsVi": ["gọi điện thoại", "nhìn thấy", "thăm", "gặp gỡ"],
+    "correct": 0,
+    "exp": "Khi tham gia các trại hè quân đội/nội trú rèn luyện tính tự lập, học sinh thường bị hạn chế sử dụng điện thoại và chỉ được <b>call</b> (gọi điện thoại về) cho bố mẹ theo khung giờ quy định (once a day)[cite: 6].",
+    "tags": ["topic_family", "skill_vocab_core"]
+  },
+  {
+    "q": "They had touching moments when they received _____ from their family.[cite: 6]",
+    "qVi": "Họ đã có những khoảnh khắc xúc động khi nhận được _____ từ gia đình của mình.",
+    "key": ["touching moments when they received", "from their family"],
+    "opts": ["books", "letters", "pictures", "money"],
+    "optsVi": ["sách", "những bức thư tay", "bức ảnh", "tiền"],
+    "correct": 1,
+    "exp": "Món quà tinh thần truyền thống mang lại nhiều cảm xúc xúc động nhất (touching moments) cho học sinh xa nhà tại trại hè chính là <b>letters</b> (những bức thư tay hỏi thăm) từ bố mẹ[cite: 6].",
+    "tags": ["topic_family", "skill_vocab_core"]
+  },
+  {
+    "q": "The training was _____ but exciting. We had to wake up at 5 a.m. every day.[cite: 6]",
+    "qVi": "Việc huấn luyện rất _____ nhưng thú vị. Chúng tôi phải thức dậy vào lúc 5 giờ sáng mỗi ngày.",
+    "key": ["training was", "but exciting", "wake up at 5 a.m. every day"],
+    "opts": ["strict", "easy", "slow", "light"],
+    "optsVi": ["nghiêm khắc / kỷ luật thép", "dễ dàng", "chậm chạp", "nhẹ nhàng"],
+    "correct": 0,
+    "exp": "Tính từ <b>strict</b> (nghiêm khắc, tuân thủ kỷ luật chặt chẽ) được giải thích bằng yêu cầu sinh hoạt quân sự: 'must wake up at 5 a.m. every day' (thức dậy từ 5 giờ sáng mỗi ngày)[cite: 6].",
+    "tags": ["topic_edu", "skill_vocab_core"]
+  }
+]         
+          ;
+
+        // Cấu hình bài thi
+        const QUIZ_PASSWORD = "9005";
+        const LESSON_NAME = "Unit 5";
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec';
+
+        let currentUser = "";
+        let currentClass = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || classInput === "" || passInput !== QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                currentClass = classInput;
+                document.getElementById('login-overlay').style.display = "none";
+                document.querySelector('.header-title').innerText = `${LESSON_NAME} - ${currentUser} (${currentClass})`;
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${item.q}
+                        <div class="trans-text" id="trans-q-${index}">${item.qVi}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key ? item.key.join('; ') : 'Không có gợi ý đặc biệt'}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${opt}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${item.optsVi[i]})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            for (let i = 0; i < 4; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if(optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong><br>${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        // === THUẬT TOÁN ĐÁNH GIÁ SƯ PHẠM TỰ ĐỘNG (3A LOGIC) ===
+        function generateFeedbackReport(scoresObj) {
+            let totalPercentage = (correctCount / totalCount) * 100;
+            let report = { level: "", strengths: [], weaknesses: [], actionPlan: [] };
+
+            // 1. Phân loại Mức độ nhận thức tổng quát
+            if (totalPercentage >= 85) {
+                report.level = "Xuất sắc (Nắm rất vững kiến thức nền tảng và am hiểu chuyên sâu các chủ đề).";
+            } else if (totalPercentage >= 65) {
+                report.level = "Khá / Giỏi (Tư duy ngôn ngữ tốt, tuy nhiên cần khắc phục một số lỗi ở trọng tâm bị hổng).";
+            } else if (totalPercentage >= 50) {
+                report.level = "Trung bình (Nhận diện được cơ bản dạng bài nhưng còn thiếu chính xác ở cấu trúc khó).";
+            } else {
+                report.level = "Cần cố gắng (Chưa vững kiến thức nền tảng; cần ôn tập lại theo định hướng bên dưới).";
+            }
+
+            // 2. Chẩn đoán tự động ánh xạ từ Từ điển feedbackConfig
+            for (let tag in scoresObj) {
+                let score = scoresObj[tag];
+                let config = feedbackConfig[tag];
+                
+                if (config) {
+                    if (score < 60) { // Điểm yếu (<60%)
+                        report.weaknesses.push(`<b>[${config.title}]</b>: ${config.weak}`);
+                        report.actionPlan.push(`👉 <b>Khắc phục ${config.title}</b>: ${config.action}`);
+                    } else if (score >= 80) { // Điểm mạnh (>=80%)
+                        report.strengths.push(`<b>[${config.title}]</b>: ${config.strength}`);
+                    }
+                }
+            }
+
+            // 3. Xử lý trường hợp dự phòng (Fallback)
+            if (report.weaknesses.length === 0) {
+                report.weaknesses.push("Không phát hiện lỗ hổng kiến thức nghiêm trọng trong bài làm này.");
+                report.actionPlan.push("🎯 <b>Mục tiêu tiếp theo</b>: Tiếp tục duy trì phong độ và thử thách với các đề nâng cao (Advance level).");
+            }
+            if (report.strengths.length === 0) {
+                report.strengths.push("Đã có tinh thần cố gắng hoàn thành bài thi.");
+            }
+
+            return report;
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
+            }
+
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            submitBtn.innerText = "Đang gửi...";
+            submitBtn.disabled = true;
+
+            // Tính toán thống kê động theo hệ thống Dual-Tags
+            let stats = {};
+            let correctList = [];
+            let wrongList = [];
+
+            for (let i = 0; i < totalCount; i++) {
+                // Lấy mảng tags, hỗ trợ fallback nếu câu hỏi cũ chỉ dùng 1 chuỗi tag
+                let tagsList = quizData[i].tags || (quizData[i].tag ? [quizData[i].tag] : ['skill_vocab_core']);
+                
+                const navNum = document.getElementById(`nav-${i}`);
+                let isCorrect = navNum.classList.contains('done-correct');
+
+                if (isCorrect) {
+                    correctList.push(i + 1);
+                } else {
+                    wrongList.push(i + 1);
+                }
+
+                // Cộng dồn số liệu cho từng tag trong câu hỏi
+                tagsList.forEach(tag => {
+                    if (!stats[tag]) stats[tag] = { total: 0, correct: 0 };
+                    stats[tag].total++;
+                    if (isCorrect) {
+                        stats[tag].correct++;
+                    }
+                });
+            }
+
+            // Quy đổi sang tỉ lệ phần trăm cho từng tag
+            let scoresObj = {};
+            for (let tag in stats) {
+                scoresObj[tag] = stats[tag].total > 0 ? (stats[tag].correct / stats[tag].total) * 100 : 100;
+            }
+
+            let report = generateFeedbackReport(scoresObj);
+            const finalScore = (correctCount / totalCount * 10).toFixed(1);
+
+            // Chuẩn bị dữ liệu gửi đi (URLSearchParams đảm bảo không bị chặn bởi CORS)
+            let formData = new URLSearchParams();
+            formData.append('studentName', currentUser);
+            formData.append('className', currentClass);
+            formData.append('quizName', LESSON_NAME);
+            formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
+            formData.append('correctAnswers', correctList.join(', '));
+            formData.append('wrongAnswers', wrongList.join(', '));
+            formData.append('level', report.level);
+            // Gỡ bỏ thẻ HTML <b> khi gửi vào Google Sheets để báo cáo dạng text sạch
+            formData.append('strengths', report.strengths.map(s => s.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('weaknesses', report.weaknesses.map(w => w.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('actionPlan', report.actionPlan.map(a => a.replace(/<[^>]*>?/gm, '')).join('\n'));
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                showResultModal(finalScore, report);
+                submitBtn.innerText = "Nộp bài";
+                submitBtn.disabled = false;
+            }).catch(() => {
+                alert("Đã ghi nhận bài làm nhưng máy chủ phản hồi chậm. Hệ thống sẽ tiếp tục hiển thị bảng đánh giá!");
+                showResultModal(finalScore, report);
+                submitBtn.innerText = "Nộp bài";
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showResultModal(score, report) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            
+            // Hiển thị nội dung sư phạm lên Modal
+            document.getElementById('eval-level').innerText = report.level;
+            
+            const ulStrengths = document.getElementById('eval-strengths');
+            ulStrengths.innerHTML = "";
+            report.strengths.forEach(s => ulStrengths.innerHTML += `<li>${s}</li>`);
+            
+            const ulWeaknesses = document.getElementById('eval-weaknesses');
+            ulWeaknesses.innerHTML = "";
+            report.weaknesses.forEach(w => ulWeaknesses.innerHTML += `<li>${w}</li>`);
+            
+            const ulAction = document.getElementById('eval-action');
+            ulAction.innerHTML = "";
+            report.actionPlan.forEach(a => ulAction.innerHTML += `<li>${a}</li>`);
+
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
