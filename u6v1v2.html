@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hệ thống Đánh giá Từ vựng & Ngữ pháp - Global Success</title>
+    <style>
+        :root {
+            --primary-blue: #e8f0fe;
+            --dark-blue: #1a73e8;
+            --border-color: #dadce0;
+            --correct-green: #1e8e3e;
+            --wrong-red: #d93025;
+            --trans-color: #5f6368;
+            --hint-bg: #fff8e1;
+            --hint-text: #f57f17;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            flex-shrink: 0;
+        }
+
+        .header-top { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; background: none; border: none; font-size: 1.5em; cursor: pointer; color: #5f6368; padding: 5px; }
+        .header-title { margin: 0; font-size: 1.2em; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-container { width: 100%; height: 6px; background-color: #eee; border-radius: 4px; margin-top: 10px; }
+        #progress-bar { width: 0%; height: 100%; background-color: var(--dark-blue); border-radius: 4px; transition: width 0.4s ease; }
+
+        /* === MAIN LAYOUT === */
+        .main-container {
+            display: flex; flex: 1; padding: 20px; gap: 25px;
+            max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 280px; background: white; padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column;
+            height: calc(100% - 40px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s ease; z-index: 1000;
+        }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        
+        .stats-box { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; color: #333; }
+        .stat-value { font-weight: bold; color: var(--dark-blue); }
+        .nav-container { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .q-num {
+            aspect-ratio: 1; border: 1px solid var(--border-color); border-radius: 5px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9em; background: #fff;
+        }
+        .q-num.done-correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); font-weight: bold; }
+        .q-num.done-wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); font-weight: bold; }
+
+        .btn-submit {
+            width: 100%; padding: 12px; background-color: var(--dark-blue); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* === QUIZ AREA === */
+        .quiz-area { flex: 1; overflow-y: auto; padding-right: 5px; padding-bottom: 20px; }
+        .question-card {
+            background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);
+            margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; line-height: 1.5; color: #202124; }
+        .btn-hint-toggle {
+            align-self: flex-start; background-color: white; border: 1px solid #ffb74d; color: #f57f17;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 15px;
+        }
+        .hint-content { display: none; background-color: #fff3e0; border-left: 4px solid #ffb74d; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 0.95em; color: #e65100; }
+        .hint-content.show { display: block; animation: fadeIn 0.3s; }
+
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .option-btn {
+            padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 8px; background: white;
+            text-align: left; cursor: pointer; font-size: 1em; display: flex; flex-direction: column; line-height: 1.4; transition: background-color 0.2s;
+        }
+        .option-btn:active { background-color: #f1f3f4; }
+        .option-btn.disabled { cursor: default; opacity: 0.9; }
+        .option-btn.correct { background-color: #e6f4ea; border-color: var(--correct-green); color: var(--correct-green); }
+        .option-btn.wrong { background-color: #fce8e6; border-color: var(--wrong-red); color: var(--wrong-red); }
+
+        .btn-trans-toggle {
+            margin-top: 20px; align-self: flex-start; background: #f1f3f4; border: none; padding: 8px 16px;
+            border-radius: 20px; font-size: 0.9em; color: #555; display: flex; align-items: center; gap: 6px; font-weight: 500;
+        }
+        .btn-trans-toggle:disabled { opacity: 0.5; background-color: #eee; }
+        .trans-text { display: none; color: var(--trans-color); font-style: italic; font-size: 0.95em; margin-top: 5px; font-weight: normal; border-top: 1px dashed #eee; padding-top: 4px; }
+        .trans-text.show { display: block; animation: fadeIn 0.3s; }
+        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 6px; background-color: #fffde7; border-left: 4px solid #fbc02d; display: none; font-size: 0.95em; line-height: 1.5; }
+
+        /* === MODAL & EVALUATION === */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 650px;
+            max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: zoomIn 0.3s;
+        }
+        .modal-header-score { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-score { font-size: 3em; font-weight: bold; color: var(--dark-blue); }
+        .eval-section { margin-bottom: 15px; padding: 15px; border-radius: 8px; background: #f8f9fa; }
+        .eval-section h4 { margin-top: 0; margin-bottom: 8px; color: #333; }
+        .eval-ul { margin: 0; padding-left: 20px; font-size: 0.95em; color: #444; line-height: 1.5; }
+        .eval-ul li { margin-bottom: 6px; }
+        .modal-btn { padding: 12px; background: var(--dark-blue); color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; width: 100%; margin-top: 15px; font-weight:bold; }
+
+        /* Hidden by default; only meaningful inside the mobile slide-in sidebar */
+        .mobile-only { display: none; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .mobile-only { display: inline-block; }
+            body { height: auto; overflow: auto; }
+            .main-container { padding: 10px; display: block; height: auto; overflow: visible; }
+            .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; margin: 0; border-radius: 0; border: none; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .quiz-area { padding: 0; height: auto; overflow: visible; margin-bottom: 50px; }
+            .question-card { padding: 15px; margin-bottom: 15px; }
+            .options-list { grid-template-columns: 1fr; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* === LOGIN OVERLAY === */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        .login-error { color: var(--wrong-red); font-size: 0.9em; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top: 0; color: var(--dark-blue);">Đăng nhập</h2>
+            <p style="font-size: 0.9em; color: #555;">Vui lòng nhập thông tin để làm bài</p>
+            <input type="text" id="student-name" class="login-input" placeholder="Họ và Tên của bạn" required>
+            <input type="text" id="student-class" class="login-input" placeholder="Lớp của bạn (VD: 9A1)" required>
+            <input type="password" id="student-pass" class="login-input" placeholder="Nhập mật khẩu" required>
+            <div id="login-error" class="login-error">Vui lòng nhập đủ thông tin và đúng mật khẩu!</div>
+            <button class="btn-submit" onclick="checkLogin()">Vào làm</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h2 class="header-title">Bài tập tự luyện - Global Success</h2>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0; color:#444">Thống kê</h3>
+                <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5em; color:#888; padding: 5px;" class="mobile-only">✕</span>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span>Số câu đúng:</span>
+                    <span class="stat-value"><span id="stat-correct">0</span>/<span id="stat-total">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <span>Điểm số:</span>
+                    <span class="stat-value"><span id="stat-score">0.0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <h4 style="margin:0 0 10px 0;">Danh sách câu hỏi</h4>
+                <div class="question-grid" id="q-nav"></div>
+            </div>
+
+            <button class="btn-submit" onclick="submitQuiz()">Nộp bài</button>
+        </div>
+
+        <div class="quiz-area" id="quiz-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-header-score">
+                <div>
+                    <h2 style="margin: 0; color: #333;">Kết quả bài làm</h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">Số câu đúng: <b id="final-correct">0</b>/<span id="final-total">0</span></p>
+                </div>
+                <div class="modal-score" id="final-score">0.0</div>
+            </div>
+            
+            <!-- Vùng Đánh Giá Sư Phạm -->
+            <div class="eval-section" style="background-color: #e3f2fd;">
+                <h4 style="color: #1565c0;">📊 Mức độ nhận thức</h4>
+                <div id="eval-level" style="font-weight: 500; color: #0d47a1;">---</div>
+            </div>
+            
+            <div class="eval-section" style="background-color: #e8f5e9; border-left: 4px solid #4caf50;">
+                <h4 style="color: #2e7d32;">✨ Điểm mạnh</h4>
+                <ul class="eval-ul" id="eval-strengths"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fce8e6; border-left: 4px solid #d32f2f;">
+                <h4 style="color: #c62828;">⚠️ Trọng tâm bị hổng (Điểm yếu)</h4>
+                <ul class="eval-ul" id="eval-weaknesses"></ul>
+            </div>
+
+            <div class="eval-section" style="background-color: #fff8e1; border-left: 4px solid #fbc02d;">
+                <h4 style="color: #f57f17;">🎯 Định hướng học tập</h4>
+                <ul class="eval-ul" id="eval-action"></ul>
+            </div>
+            
+            <button class="modal-btn" onclick="closeModal()">Đóng & Xem lại chi tiết</button>
+        </div>
+    </div>
+
+    <script>
+        // === TỪ ĐIỂN CHẨN ĐOÁN SƯ PHẠM (MASTER FEEDBACK CONFIG) ===
+        const feedbackConfig = {
+            // Nhóm Chủ đề (Topics)
+            "topic_family": {
+                title: "Chủ đề Gia đình (Family Life)",
+                strength: "Nắm rất vững từ vựng và ngữ cảnh giao tiếp về chủ đề Gia đình.",
+                weak: "Chưa nhớ kỹ từ vựng và các tình huống giao tiếp về chủ đề Gia đình.",
+                action: "Ôn lại sơ đồ tư duy (Mindmap) từ vựng về các mối quan hệ gia đình và công việc nhà trong SGK."
+            },
+            "topic_nature": {
+                title: "Chủ đề Tự nhiên & Kỳ quan (Nature & Wonders)",
+                strength: "Vốn từ vựng phong phú khi miêu tả cảnh quan tự nhiên và các kỳ quan.",
+                weak: "Thiếu từ vựng miêu tả địa hình, thiên nhiên và các kỳ quan thế giới.",
+                action: "Lập danh sách các tính từ miêu tả cảnh đẹp (breathtaking, magnificent...) và tập đặt câu với địa danh thực tế."
+            },
+            "topic_env": {
+                title: "Chủ đề Môi trường (The Environment)",
+                strength: "Hiểu sâu các thuật ngữ chuyên môn về bảo vệ môi trường và hệ sinh thái.",
+                weak: "Hổng từ vựng chuyên ngành về môi trường, ô nhiễm và năng lượng xanh.",
+                action: "Đọc lại các bài đọc hiểu (Reading) chủ đề Environment, chú ý các cụm từ chỉ nguyên nhân - kết quả."
+            },
+            "topic_tech": {
+                title: "Chủ đề Công nghệ & Khoa học (Science & Technology)",
+                strength: "Sử dụng chính xác các từ vựng hiện đại về công nghệ, thiết bị số và AI.",
+                weak: "Gặp khó khăn với các từ vựng chuyên ngành Khoa học - Công nghệ.",
+                action: "Học từ mới thông qua việc xem các video khoa học ngắn bằng tiếng Anh (chú ý bật phụ đề)."
+            },
+            "topic_culture": {
+                title: "Chủ đề Văn hoá & Di sản (Culture & Heritage)",
+                strength: "Am hiểu từ vựng về truyền thống, phong tục và bảo tồn di sản văn hóa.",
+                weak: "Chưa nắm vững cách diễn đạt về văn hóa truyền thống và bảo tồn di sản.",
+                action: "Tổng hợp các danh từ chỉ di tích (pagoda, temple, structure) và động từ bảo tồn (preserve, restore)."
+            },
+            "topic_travel": {
+                title: "Chủ đề Du lịch & Khám phá (Travel & Tourism)",
+                strength: "Tự tin sử dụng từ vựng về đặt phòng, hỏi đường và trải nghiệm du lịch.",
+                weak: "Yếu từ vựng về các phương tiện di chuyển, địa điểm du lịch và thủ tục.",
+                action: "Thực hành viết một đoạn văn ngắn (khoảng 80 từ) lên kế hoạch cho một chuyến du lịch bằng tiếng Anh."
+            },
+            "topic_career": {
+                title: "Chủ đề Nghề nghiệp & Tương lai (Careers & The Future)",
+                strength: "Nắm vững yêu cầu công việc và từ vựng định hướng nghề nghiệp.",
+                weak: "Thiếu từ vựng chỉ nghề nghiệp mới và các kỹ năng làm việc trong tương lai.",
+                action: "Học thuộc các cụm từ chỉ kỹ năng (soft skills, teamwork) và áp dụng vào bài tập điền từ."
+            },
+            "topic_living": {
+                title: "Chủ đề Đời sống Nông thôn - Thành thị (Country & City Life)",
+                strength: "Phân biệt và miêu tả rất tốt đặc điểm đời sống nông thôn và đô thị.",
+                weak: "Chưa nhớ các tính từ so sánh nhịp sống giữa thành thị và nông thôn.",
+                action: "Vẽ bảng đối chiếu Bảng từ vựng City vs. Countryside (VD: bustling vs. tranquil) để ghi nhớ."
+            },
+            "topic_health": {
+                title: "Chủ đề Sức khỏe & Lối sống (Health & Healthy Living)",
+                strength: "Am hiểu từ vựng về chế độ dinh dưỡng, tập luyện và lối sống lành mạnh.",
+                weak: "Gặp khó khăn khi gọi tên các triệu chứng bệnh và lời khuyên sức khỏe.",
+                action: "Ôn lại cấu trúc đưa ra lời khuyên (should / ought to / had better) kết hợp từ vựng về sức khỏe."
+            },
+            "topic_community": {
+                title: "Chủ đề Cộng đồng địa phương (Local Community)",
+                strength: "Hiểu rõ từ vựng về làng nghề truyền thống và hoạt động cộng đồng.",
+                weak: "Chưa nhớ tên các làng nghề truyền thống, sản phẩm thủ công và dịch vụ công cộng.",
+                action: "Học theo cụm danh từ chỉ nghề thủ công (pottery making, artisan, lacquerware) trong SGK."
+            },
+            "topic_edu": {
+                title: "Chủ đề Học tập & Tiếng Anh (Education & English Learning)",
+                strength: "Nắm vững thuật ngữ về phương pháp học tập và kỹ năng ngôn ngữ.",
+                weak: "Thiếu từ vựng về trường lớp, thi cử và việc rèn luyện ngoại ngữ.",
+                action: "Ghi chép lại các phương pháp học từ vựng hiệu quả bằng tiếng Anh và tự áp dụng hàng ngày."
+            },
+            "topic_hobbies": {
+                title: "Chủ đề Giải trí & Sở thích (Leisure & Hobbies)",
+                strength: "Sử dụng linh hoạt từ vựng miêu tả sở thích và thời gian rảnh rỗi.",
+                weak: "Chưa thành thạo các động từ chỉ sự yêu thích đi kèm V-ing / to V.",
+                action: "Học thuộc lòng bảng động từ chỉ sở thích (fancy, adore, detest + V-ing) qua việc tự đặt câu về bản thân."
+            },
+
+            // Nhóm Từ vựng (Vocabulary Skills)
+            "skill_vocab_core": {
+                title: "Từ vựng nền tảng (Core Vocabulary)",
+                strength: "Nắm rất vững nghĩa và cách dùng của các từ vựng cốt lõi trong bài.",
+                weak: "Thiếu vốn từ vựng cơ bản, gặp khó khăn khi hiểu nghĩa của câu hỏi.",
+                action: "Dừng việc dịch word-by-word. Học lại bảng từ vựng SGK, chú ý phát âm và nghĩa trong ngữ cảnh."
+            },
+            "skill_vocab_colloc": {
+                title: "Cụm từ cố định (Collocations)",
+                strength: "Sử dụng thành thạo các cụm từ cố định tự nhiên như người bản xứ.",
+                weak: "Hổng mảng Cụm từ cố định, thường ghép từ tùy tiện theo tư duy tiếng Việt.",
+                action: "Chấm dứt học từ đơn lẻ. Khi gặp từ mới, bắt buộc phải học cả cụm (VD: học 'take pride in' thay vì chỉ học 'pride')."
+            },
+            "skill_vocab_phrasal": {
+                title: "Cụm động từ (Phrasal Verbs)",
+                strength: "Phản xạ rất tốt với các cụm động từ và giới từ đi kèm.",
+                weak: "Yếu mảng Cụm động từ, thường nhầm lẫn nghĩa khi thay đổi giới từ.",
+                action: "Lập sổ tay chuyên đề Phrasal Verbs, vẽ hình ảnh minh họa cho các giới từ (up, down, off, over) để nhớ nghĩa chuyển."
+            },
+            "skill_vocab_wordform": {
+                title: "Biến đổi từ loại (Word Form)",
+                strength: "Phân tích cấu trúc câu tốt, nhận diện chính xác Danh - Động - Tính - Trạng.",
+                weak: "Hay nhầm lẫn giữa các từ loại hoặc từ có vỏ chữ giống nhau.",
+                action: "Rèn tính cẩn thận. Học thuộc các hậu tố từ loại (VD: -tion là danh từ, -ive là tính từ) và xác định từ loại trước khi chọn đáp án."
+            },
+
+            // Nhóm Ngữ pháp (Grammar Skills)
+            "skill_gram_tense": {
+                title: "Các thì trong Tiếng Anh (Tenses)",
+                strength: "Chia thì chính xác, nhận diện tốt dấu hiệu thời gian trong câu.",
+                weak: "Chưa nắm vững công thức và cách dùng của các thì căn bản.",
+                action: "Vẽ trục thời gian (Timeline) cho các thì, học thuộc lòng các trạng từ nhận biết (yesterday, since, tomorrow...)."
+            },
+            "skill_gram_passive": {
+                title: "Câu bị động (Passive Voice)",
+                strength: "Chuyển đổi thành thạo cấu trúc chủ động sang bị động ở các thì.",
+                weak: "Thường quên cấu trúc 'To be + V3/ed' hoặc chia sai động từ To be.",
+                action: "Luyện tập chuyên đề Câu bị động. Luôn xác định tân ngữ (Object) và thì của câu chủ động trước khi làm bài."
+            },
+            "skill_gram_reported": {
+                title: "Câu tường thuật (Reported Speech)",
+                strength: "Nắm vững quy tắc lùi thì và đổi ngôi trong câu tường thuật.",
+                weak: "Hay quên 'lùi thì' hoặc chưa đổi trạng từ chỉ thời gian/nơi chốn.",
+                action: "Học thuộc bảng chuyển đổi trạng từ (now -> then, tomorrow -> the next day) và quy tắc lùi 1 thì về quá khứ."
+            },
+            "skill_gram_relative": {
+                title: "Mệnh đề quan hệ (Relative Clauses)",
+                strength: "Sử dụng chính xác các đại từ quan hệ (who, which, that, where, whose).",
+                weak: "Nhầm lẫn chức năng của các đại từ quan hệ hoặc dùng sai dấu phẩy.",
+                action: "Làm bài tập nối 2 câu thành 1 câu dùng mệnh đề quan hệ. Nhớ quy tắc: 'who' cho người, 'which' cho vật, 'whose' chỉ sở hữu."
+            },
+            "skill_gram_conditional": {
+                title: "Câu điều kiện (Conditionals)",
+                strength: "Phân biệt và áp dụng rất tốt câu điều kiện loại 1, 2 và 3.",
+                weak: "Nhầm lẫn công thức giữa các loại câu điều kiện, đặc biệt là loại 2.",
+                action: "Ghi nhớ công thức lùi thì: Loại 1 (Có thể xảy ra -> HTĐ + TlĐ), Loại 2 (Không có thật ở hiện tại -> QKĐ + Would + V)."
+            },
+            "skill_gram_wish": {
+                title: "Cấu trúc Câu ước (Wish / If only)",
+                strength: "Thành thạo cấu trúc giả định với Wish ở hiện tại và tương lai.",
+                weak: "Quên quy tắc lùi thì sau động từ Wish.",
+                action: "Nhớ thần chú 'Ước là phải lùi thì': Ước cho hiện tại dùng Quá khứ đơn (Be -> were cho mọi ngôi)."
+            },
+            "skill_gram_adverbial": {
+                title: "Mệnh đề trạng ngữ (Adverbial Clauses)",
+                strength: "Kết nối câu logic bằng các mệnh đề chỉ nguyên nhân, kết quả, thời gian.",
+                weak: "Chưa hiểu nghĩa của các liên từ nối mệnh đề (although, because, when...).",
+                action: "Phân loại liên từ theo nhóm ý nghĩa: Nhượng bộ (Although/Even though), Nguyên nhân (Because/As/Since)."
+            },
+            "skill_gram_comparison": {
+                title: "Cấu trúc So sánh (Comparisons)",
+                strength: "Vận dụng tốt so sánh hơn, so sánh nhất và so sánh kép (The more... the more).",
+                weak: "Chia sai tính từ ngắn/dài hoặc nhầm lẫn giữa so sánh hơn và so sánh nhất.",
+                action: "Học thuộc bảng tính từ bất quy tắc (good -> better -> best) và nhận diện từ khóa 'than' (so sánh hơn), 'the' (so sánh nhất)."
+            },
+            "skill_gram_modal": {
+                title: "Động từ khuyết thiếu (Modal Verbs)",
+                strength: "Hiểu sắc thái biểu cảm của can, must, should, have to, might...",
+                weak: "Dùng sai động từ khuyết thiếu trong các tình huống đưa lời khuyên, bắt buộc.",
+                action: "Ghi nhớ sau Modal Verb luôn là Động từ nguyên thể (V-inf). Phân biệt 'must' (tự bắt buộc) và 'have to' (ngoại cảnh bắt buộc)."
+            },
+            "skill_gram_article": {
+                title: "Mạo từ (Articles: A / An / The / Zero)",
+                strength: "Sử dụng mạo từ chuẩn xác theo danh từ xác định và chưa xác định.",
+                weak: "Thường bỏ quên mạo từ hoặc dùng 'the' trước danh từ chung chưa xác định.",
+                action: "Nhớ quy tắc: 'A/An' dùng cho lần đầu nhắc đến (số ít), 'The' dùng cho vật duy nhất hoặc cả người nói và nghe đều đã biết."
+            },
+            "skill_gram_quantifier": {
+                title: "Lượng từ (Quantifiers)",
+                strength: "Phân biệt chính xác much/many, a few/a little, some/any.",
+                weak: "Nhầm lẫn giữa danh từ đếm được và không đếm được khi đi với lượng từ.",
+                action: "Lập 2 cột danh từ Đếm được (Many, A few) và Không đếm được (Much, A little) để tự sắp xếp từ vựng."
+            },
+            "skill_gram_connector": {
+                title: "Từ nối & Liên từ (Connectors & Conjunctions)",
+                strength: "Tạo sự mạch lạc cho câu bằng từ nối (however, therefore, moreover...).",
+                weak: "Dùng sai từ nối chỉ sự tương phản hoặc kết quả, đặt sai vị trí dấu câu.",
+                action: "Chú ý dấu câu: 'However, Therefore' thường đứng sau dấu chấm và trước dấu phẩy. Luyện tập chọn từ nối theo ngữ cảnh logic."
+            }
+        };
+
+        // === DỮ LIỆU CAU HỎI (TÍCH HỢP DUAL-TAGS & 3S EXPLANATION) ===
+        const quizData = [
+  {
+    "q": "In the past, children didn't have iPads. They often made their own toys from ______ materials. ",
+    "qVi": "Trong quá khứ, trẻ em không có iPad. Chúng thường tự làm đồ chơi từ các vật liệu ______.",
+    "key": ["made their own toys", "materials"],
+    "opts": ["hi-tech", "electronic", "natural", "modern"],
+    "optsVi": ["công nghệ cao", "điện tử", "tự nhiên", "hiện đại"],
+    "correct": 2,
+    "exp": "Cụm từ cố định <b>natural materials</b> có nghĩa là <i>'vật liệu tự nhiên'</i>. Ngày xưa trẻ em tự làm đồ chơi từ thiên nhiên thay vì dùng đồ công nghệ cao (hi-tech) hay điện tử (electronic) .",
+    "tags": ["topic_hobbies", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Nowadays, many teenagers want to look different, so they ______ their hair purple or green. ",
+    "qVi": "Ngày nay, nhiều thanh thiếu niên muốn trông khác biệt, vì vậy họ ______ tóc của mình thành màu tím hoặc xanh lá cây.",
+    "key": ["their hair purple or green"],
+    "opts": ["dye", "cut", "wash", "take"],
+    "optsVi": ["nhuộm", "cắt", "gội / rửa", "lấy"],
+    "correct": 0,
+    "exp": "Động từ <b>dye</b> mang nghĩa là <i>'nhuộm'</i>. Nhuộm tóc (dye their hair) thành màu tím hoặc xanh lá là hành động thay đổi ngoại hình của giới trẻ .",
+    "tags": ["topic_living", "skill_vocab_core"]
+  },
+  {
+    "q": "My grandpa says that in his generation, many children had to ____ school early to support their families. ",
+    "qVi": "Ông tôi kể rằng ở thế hệ của ông, nhiều trẻ em đã phải ____ học sớm để phụ giúp gia đình.",
+    "key": ["school early", "support their families"],
+    "opts": ["go", "start", "finish", "leave"],
+    "optsVi": ["đi", "bắt đầu", "kết thúc", "rời khỏi / nghỉ"],
+    "correct": 3,
+    "exp": "Cụm từ <b>leave school</b> có nghĩa là <i>'nghỉ học / bỏ học'</i>. Trẻ em ngày xưa thường phải nghỉ học sớm để làm việc phụ giúp gia đình .",
+    "tags": ["topic_edu", "skill_vocab_colloc"]
+  },
+  {
+    "q": "Rapid changes have made the ______ gap wider in many Vietnamese families. ",
+    "qVi": "Những thay đổi nhanh chóng đã làm cho khoảng cách ______ trở nên rộng hơn trong nhiều gia đình Việt Nam.",
+    "key": ["made the", "gap wider in many Vietnamese families"],
+    "opts": ["generation", "lifestyle", "learning", "material"],
+    "optsVi": ["thế hệ", "lối sống", "học tập", "vật chất"],
+    "correct": 0,
+    "exp": "Cụm từ <b>generation gap</b> (khoảng cách thế hệ) là một chủ điểm cốt lõi, chỉ sự bất đồng quan điểm giữa các nhóm tuổi khác nhau trong gia đình và xã hội khi cuộc sống thay đổi nhanh chóng .",
+    "tags": ["topic_family", "skill_vocab_colloc"]
+  }
+] ;
+
+        // === CẤU HÌNH BÀI THI (tách khỏi logic để dễ chỉnh sửa) ===
+        const CONFIG = {
+            QUIZ_PASSWORD: "9006", // Lưu ý: đây chỉ là hàng rào UX, KHÔNG phải bảo mật thật.
+                                    // Vì chạy client-side, bất kỳ ai xem source đều đọc được mật khẩu
+                                    // và có thể gọi checkLogin() trực tiếp từ console để bỏ qua màn hình đăng nhập.
+                                    // Muốn bảo mật thật cần xác thực phía server (vd. kiểm tra trong Apps Script).
+            LESSON_NAME: "Unit 6",
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec',
+            // Ngưỡng đánh giá điểm mạnh/yếu theo Nguyên tắc "Tích cực hóa" (Strengths-first) trong tài liệu nội bộ:
+            // học sinh làm đúng >70% một tag thì được ghi nhận là điểm mạnh.
+            STRENGTH_THRESHOLD: 60,
+            WEAKNESS_THRESHOLD: 40
+        };
+
+        // Thoát ký tự HTML cho các trường văn bản thuần (câu hỏi, đáp án, bản dịch)
+        // để tránh lỗi hiển thị hoặc HTML injection nếu dữ liệu nguồn chứa ký tự đặc biệt (<, >, &...).
+        // Không áp dụng cho `exp`/`key` vì các trường đó CHỦ ĐỊNH chứa thẻ <b>/<i> theo
+        // Nguyên tắc Giải thích chi tiết (in đậm cấu trúc/đáp án đúng).
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        let currentUser = "";
+        let currentClass = "";
+
+        let answeredSet = new Set();
+        let correctCount = 0;
+        const totalCount = quizData.length;
+
+        function checkLogin() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value.trim();
+            const passInput = document.getElementById('student-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (nameInput === "" || classInput === "" || passInput !== CONFIG.QUIZ_PASSWORD) {
+                errorMsg.style.display = "block";
+            } else {
+                currentUser = nameInput;
+                currentClass = classInput;
+                document.getElementById('login-overlay').style.display = "none";
+                // innerText (not innerHTML) is used deliberately so a name/class containing
+                // "<" or "&" can never be interpreted as markup.
+                document.querySelector('.header-title').innerText = `${CONFIG.LESSON_NAME} - ${currentUser} (${currentClass})`;
+            }
+        }
+
+        // Kiểm tra sớm (fail-fast) mọi tag dùng trong quizData đều có trong feedbackConfig,
+        // để lỗi đánh tag sai bị phát hiện ngay khi tải trang thay vì âm thầm mất dữ liệu lúc nộp bài.
+        function validateTags() {
+            quizData.forEach((item, index) => {
+                const tags = item.tags || (item.tag ? [item.tag] : ['skill_vocab_core']);
+                tags.forEach(tag => {
+                    if (!feedbackConfig[tag]) {
+                        console.warn(`[Tagging] Câu ${index + 1} dùng tag "${tag}" không có trong feedbackConfig.`);
+                    }
+                });
+            });
+        }
+
+        function initQuiz() {
+            validateTags();
+            const container = document.getElementById('quiz-container');
+            const nav = document.getElementById('q-nav');
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            quizData.forEach((item, index) => {
+                const displayIndex = index + 1; 
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q-card-${index}`;
+                
+                card.innerHTML = `
+                    <div class="question-text">
+                        Question ${displayIndex}. ${escapeHtml(item.q)}
+                        <div class="trans-text" id="trans-q-${index}">${escapeHtml(item.qVi)}</div>
+                    </div>
+
+                    <button class="btn-hint-toggle" onclick="toggleHint(${index})">
+                        💡 Gợi ý (Keywords)
+                    </button>
+                    <div class="hint-content" id="hint-box-${index}">
+                        <strong>Keywords:</strong> ${item.key && item.key.length ? escapeHtml(item.key.join('; ')) : 'Không có gợi ý đặc biệt'}
+                    </div>
+
+                    <div class="options-list">
+                        ${item.opts.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(this, ${index}, ${i})">
+                                <span><b>${String.fromCharCode(65 + i)}.</b> ${escapeHtml(opt)}</span>
+                                <span class="trans-text" id="trans-opt-${index}-${i}">(${escapeHtml(item.optsVi[i])})</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation-box" id="exp-${index}"></div>
+
+                    <button class="btn-trans-toggle" id="btn-trans-${index}" onclick="toggleTrans(${index})" disabled title="Hãy chọn đáp án trước để xem dịch nghĩa">
+                        🔒 Dịch nghĩa
+                    </button>
+                `;
+                container.appendChild(card);
+
+                const qNum = document.createElement('div');
+                qNum.className = 'q-num';
+                qNum.id = `nav-${index}`;
+                qNum.innerText = displayIndex;
+                qNum.onclick = () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if(window.innerWidth <= 768) toggleSidebar();
+                };
+                nav.appendChild(qNum);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-box-${index}`).classList.toggle('show');
+        }
+
+        function toggleTrans(index) {
+            const qTrans = document.getElementById(`trans-q-${index}`);
+            const btn = document.getElementById(`btn-trans-${index}`);
+            
+            qTrans.classList.toggle('show');
+            const optionCount = quizData[index].opts.length;
+            for (let i = 0; i < optionCount; i++) {
+                const optTrans = document.getElementById(`trans-opt-${index}-${i}`);
+                if (optTrans) optTrans.classList.toggle('show');
+            }
+            
+            if (qTrans.classList.contains('show')) {
+                btn.innerHTML = '🌐 Ẩn dịch nghĩa';
+                btn.style.backgroundColor = '#e8f0fe';
+                btn.style.color = '#1a73e8';
+            } else {
+                btn.innerHTML = '🌐 Dịch nghĩa';
+                btn.style.backgroundColor = '#f1f3f4';
+                btn.style.color = '#555';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-correct').innerText = correctCount;
+            const score = (correctCount / totalCount * 10).toFixed(1);
+            document.getElementById('stat-score').innerText = score;
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            if (answeredSet.has(qIndex)) return;
+            answeredSet.add(qIndex);
+
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const correctIndex = quizData[qIndex].correct;
+            const expBox = document.getElementById(`exp-${qIndex}`);
+            const transBtn = document.getElementById(`btn-trans-${qIndex}`);
+            const navNum = document.getElementById(`nav-${qIndex}`);
+
+            if (transBtn.hasAttribute('disabled')) {
+                transBtn.removeAttribute('disabled');
+                transBtn.innerHTML = '🌐 Dịch nghĩa';
+            }
+
+            if (optIndex === correctIndex) {
+                btn.classList.add('correct');
+                navNum.classList.add('done-correct');
+                correctCount++;
+            } else {
+                btn.classList.add('wrong');
+                navNum.classList.add('done-wrong');
+                buttons[correctIndex].classList.add('correct');
+            }
+
+            updateStats();
+            buttons.forEach(b => b.classList.add('disabled'));
+            const percent = (answeredSet.size / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            expBox.innerHTML = `<strong>Giải thích chi tiết:</strong><br>${quizData[qIndex].exp}`;
+            expBox.style.display = 'block';
+        }
+
+        // === THUẬT TOÁN ĐÁNH GIÁ SƯ PHẠM TỰ ĐỘNG (3A LOGIC) ===
+        // correctCount/totalCount được truyền vào tường minh (thay vì đọc biến ngoài ẩn) để hàm
+        // dễ kiểm thử độc lập và không phụ thuộc ngầm vào trạng thái toàn cục.
+        function generateFeedbackReport(scoresObj, correctCount, totalCount) {
+            let totalPercentage = (correctCount / totalCount) * 100;
+            let report = { level: "", strengths: [], weaknesses: [], actionPlan: [] };
+
+            // 1. Phân loại Mức độ nhận thức tổng quát
+            if (totalPercentage >= 85) {
+                report.level = "Xuất sắc (Nắm rất vững kiến thức nền tảng và am hiểu chuyên sâu các chủ đề).";
+            } else if (totalPercentage >= 65) {
+                report.level = "Khá / Giỏi (Tư duy ngôn ngữ tốt, tuy nhiên cần khắc phục một số lỗi ở trọng tâm bị hổng).";
+            } else if (totalPercentage >= 50) {
+                report.level = "Trung bình (Nhận diện được cơ bản dạng bài nhưng còn thiếu chính xác ở cấu trúc khó).";
+            } else {
+                report.level = "Cần cố gắng (Chưa vững kiến thức nền tảng; cần ôn tập lại theo định hướng bên dưới).";
+            }
+
+            // 2. Chẩn đoán tự động ánh xạ từ Từ điển feedbackConfig
+            for (let tag in scoresObj) {
+                let score = scoresObj[tag];
+                let config = feedbackConfig[tag];
+                
+                if (config) {
+                    if (score < CONFIG.WEAKNESS_THRESHOLD) {
+                        report.weaknesses.push(`<b>[${config.title}]</b>: ${config.weak}`);
+                        report.actionPlan.push(`👉 <b>Khắc phục ${config.title}</b>: ${config.action}`);
+                    } else if (score >= CONFIG.STRENGTH_THRESHOLD) {
+                        report.strengths.push(`<b>[${config.title}]</b>: ${config.strength}`);
+                    }
+                } else {
+                    // Câu hỏi dùng tag không tồn tại trong feedbackConfig: trước đây lỗi này
+                    // bị bỏ qua âm thầm, khiến tag "mồ côi" không bao giờ xuất hiện trong báo cáo.
+                    console.warn(`[Tagging] Không tìm thấy cấu hình cho tag "${tag}". Kiểm tra lại Bảng Tag chuẩn trong tài liệu nội bộ.`);
+                }
+            }
+
+            // 3. Xử lý trường hợp dự phòng (Fallback)
+            if (report.weaknesses.length === 0) {
+                report.weaknesses.push("Không phát hiện lỗ hổng kiến thức nghiêm trọng trong bài làm này.");
+                report.actionPlan.push("🎯 <b>Mục tiêu tiếp theo</b>: Tiếp tục duy trì phong độ và thử thách với các đề nâng cao (Advance level).");
+            }
+            if (report.strengths.length === 0) {
+                report.strengths.push("Đã có tinh thần cố gắng hoàn thành bài thi.");
+            }
+
+            return report;
+        }
+
+        function submitQuiz() {
+            if (window.innerWidth <= 768) toggleSidebar();
+            if (answeredSet.size < totalCount) {
+                if (!confirm(`Bạn mới làm ${answeredSet.size}/${totalCount} câu. Bạn có chắc muốn nộp bài không?`)) return;
+            }
+
+            const submitBtn = document.querySelector('.sidebar .btn-submit');
+            submitBtn.innerText = "Đang gửi...";
+            submitBtn.disabled = true;
+
+            // Tính toán thống kê động theo hệ thống Dual-Tags
+            let stats = {};
+            let correctList = [];
+            let wrongList = [];
+
+            for (let i = 0; i < totalCount; i++) {
+                // Lấy mảng tags, hỗ trợ fallback nếu câu hỏi cũ chỉ dùng 1 chuỗi tag
+                let tagsList = quizData[i].tags || (quizData[i].tag ? [quizData[i].tag] : ['skill_vocab_core']);
+                
+                const navNum = document.getElementById(`nav-${i}`);
+                let isCorrect = navNum.classList.contains('done-correct');
+
+                if (isCorrect) {
+                    correctList.push(i + 1);
+                } else {
+                    wrongList.push(i + 1);
+                }
+
+                // Cộng dồn số liệu cho từng tag trong câu hỏi
+                tagsList.forEach(tag => {
+                    if (!stats[tag]) stats[tag] = { total: 0, correct: 0 };
+                    stats[tag].total++;
+                    if (isCorrect) {
+                        stats[tag].correct++;
+                    }
+                });
+            }
+
+            // Quy đổi sang tỉ lệ phần trăm cho từng tag
+            let scoresObj = {};
+            for (let tag in stats) {
+                scoresObj[tag] = stats[tag].total > 0 ? (stats[tag].correct / stats[tag].total) * 100 : 100;
+            }
+
+            let report = generateFeedbackReport(scoresObj, correctCount, totalCount);
+            const finalScore = (correctCount / totalCount * 10).toFixed(1);
+
+            // Chuẩn bị dữ liệu gửi đi (URLSearchParams đảm bảo không bị chặn bởi CORS)
+            let formData = new URLSearchParams();
+            formData.append('studentName', currentUser);
+            formData.append('className', currentClass);
+            formData.append('quizName', CONFIG.LESSON_NAME);
+            formData.append('score', `${finalScore} (${correctCount}/${totalCount})`);
+            formData.append('correctAnswers', correctList.join(', '));
+            formData.append('wrongAnswers', wrongList.join(', '));
+            formData.append('level', report.level);
+            // Gỡ bỏ thẻ HTML <b> khi gửi vào Google Sheets để báo cáo dạng text sạch
+            formData.append('strengths', report.strengths.map(s => s.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('weaknesses', report.weaknesses.map(w => w.replace(/<[^>]*>?/gm, '')).join('\n'));
+            formData.append('actionPlan', report.actionPlan.map(a => a.replace(/<[^>]*>?/gm, '')).join('\n'));
+
+            fetch(CONFIG.SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                finishSubmission(finalScore, report, submitBtn);
+            }).catch(() => {
+                alert("Đã ghi nhận bài làm nhưng máy chủ phản hồi chậm. Hệ thống sẽ tiếp tục hiển thị bảng đánh giá!");
+                finishSubmission(finalScore, report, submitBtn);
+            });
+        }
+
+        // Sau khi đã nộp, khóa toàn bộ các câu hỏi lại: dữ liệu đã gửi lên Google Sheets
+        // không nên tiếp tục thay đổi trên giao diện, nếu không điểm hiển thị và điểm đã lưu sẽ lệch nhau.
+        function finishSubmission(finalScore, report, submitBtn) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+            document.querySelectorAll('.option-btn').forEach(b => b.onclick = null);
+            showResultModal(finalScore, report);
+            submitBtn.innerText = "Đã nộp bài";
+            submitBtn.disabled = true;
+        }
+
+        function showResultModal(score, report) {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = correctCount;
+            
+            // Hiển thị nội dung sư phạm lên Modal
+            document.getElementById('eval-level').innerText = report.level;
+            
+            document.getElementById('eval-strengths').innerHTML =
+                report.strengths.map(s => `<li>${s}</li>`).join('');
+
+            document.getElementById('eval-weaknesses').innerHTML =
+                report.weaknesses.map(w => `<li>${w}</li>`).join('');
+
+            document.getElementById('eval-action').innerHTML =
+                report.actionPlan.map(a => `<li>${a}</li>`).join('');
+
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
