@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phiếu Trả Lời Trắc Nghiệm - Global Success</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -111,6 +112,7 @@
         .result-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed var(--border-color); }
         .score-display { font-size: 42px; font-weight: 800; color: var(--primary-color); }
 
+        .chart-container { position: relative; margin: auto; height: 320px; width: 100%; margin-bottom: 25px; }
         .analysis-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; border-left: 4px solid #0f172a; padding-left: 8px; }
 
         .category-report-card {
@@ -175,6 +177,11 @@
             <p id="overallFeedback" style="font-size:14px; margin-top:5px; font-weight:500;"></p>
         </div>
 
+        <div class="analysis-title">Biểu Đồ Thống Kê Năng Lực Kiến Thức</div>
+        <div class="chart-container">
+            <canvas id="skillsChart"></canvas>
+        </div>
+
         <div class="analysis-title">Nhận Xét Phân Loại Kỹ Năng Chi Tiết</div>
         <div id="detailedAnalysis"></div>
 
@@ -187,60 +194,127 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOqwwh5ZEWXAyapckL0ZeGuf-mZDjudlUNsaFmoTCc2RTfGQ5fi-OtHKQlllVe8iAYyQ/exec';
-const LESSON_NAME = "Phiếu Trắc Nghiệm Rút Gọn Đề 34";
+const LESSON_NAME = "Phiếu Trắc Nghiệm Rút Gọn Đề TEST 3";
 
 const feedbackConfig = {
-    "skill_gram_tense": { title: "Các thì ngữ pháp (Tenses)", weak: "Chưa nắm vững sự phối hợp thì QK đơn - QK tiếp diễn hoặc quy tắc phát âm -ed.", action: "Vẽ trục thời gian phân biệt hành động đang diễn ra (QK tiếp diễn) và hành động xen vào (QK đơn)." },
-    "skill_gram_modal": { title: "Động từ khuyết thiếu (Modal)", weak: "Nhầm lẫn chức năng của các động từ khuyết thiếu chỉ lời khuyên (should) và sự bắt buộc (must).", action: "Ghi nhớ: 'should' dùng cho lời khuyên, 'must' dùng cho sự bắt buộc hoặc quy định." },
-    "skill_gram_wish": { title: "Cấu trúc Câu điều ước (Wish)", weak: "Quên quy tắc 'lùi thì' về Quá khứ đơn trong câu điều ước.", action: "Học thuộc lòng: 'Ước trái với thực tế hiện tại -> luôn lùi 1 thì về Quá khứ đơn (V2/ed)'." },
-    "skill_gram_conditional": { title: "Câu điều kiện & Unless", weak: "Chưa chuyển đổi thành thạo giữa If not và Unless hoặc chia sai thì câu điều kiện.", action: "Luyện tập viết lại câu: Unless + S + V(khẳng định) = If + S + don't/doesn't + V." },
-    "skill_gram_connector": { title: "Phép thế & Từ nối", weak: "Gặp khó khăn khi xác định đối tượng được thay thế bởi các đại từ (they/it) trong bài đọc.", action: "Khi đọc bài, luôn tìm danh từ số ít/số nhiều đứng ở câu ngay trước đại từ để xác định đối tượng." },
-    "skill_vocab_core": { title: "Từ vựng nền tảng", weak: "Thiếu từ vựng cơ bản về lối sống, công nghệ và văn hóa; chưa nắm quy tắc âm câm.", action: "Học từ vựng theo chủ đề SGK, chú ý từ đồng nghĩa (habit = routine) và âm câm." },
-    "skill_vocab_colloc": { title: "Cụm từ cố định", weak: "Hổng mảng Cụm từ cố định, thường ghép từ tùy tiện theo tư duy dịch word-by-word.", action: "Chấm dứt học từ đơn lẻ. Khi gặp từ mới, phải học nguyên cụm (VD: preserve cultural values)." },
-    "skill_vocab_phrasal": { title: "Cụm động từ", weak: "Chưa nhớ nghĩa các cụm động từ quen thuộc chỉ tâm lý và đời sống như stressed out.", action: "Lập sổ tay chuyên đề Phrasal verbs, đặt câu thực tế với bản thân để ghi nhớ sâu." }
+    "skill_vocab_core": {
+        title: "Từ vựng nền tảng & Phát âm (Core Vocab)",
+        weak: "Chưa nắm vững cách phát âm phụ âm cơ bản hoặc hổng từ vựng nền tảng theo chủ điểm.",
+        action: "Học từ vựng phải đi kèm phiên âm IPA; phân biệt kỹ các phụ âm dễ nhầm lẫn như /j/ và /w/."
+    },
+    "skill_vocab_phrasal": {
+        title: "Thành ngữ & Cụm động từ (Idioms & Phrasal Verbs)",
+        weak: "Không nhớ nghĩa bóng của các thành ngữ hoặc cụm động từ (VD: went blank).",
+        action: "Học thành ngữ qua ngữ cảnh thực tế, không dịch word-by-word từ tiếng Việt sang tiếng Anh."
+    },
+    "skill_vocab_colloc": {
+        title: "Sự kết hợp từ & Dạng thức động từ (Collocations)",
+        weak: "Chưa nhớ cấu trúc V-ing / To-V theo sau các động từ đặc biệt (fancy, decide, suggest, avoid).",
+        action: "Lập bảng liệt kê: [Nhóm + V-ing] (fancy, suggest, avoid) và [Nhóm + To-V] (decide, promise)."
+    },
+    "skill_vocab_context": {
+        title: "Từ vựng trong ngữ cảnh & Đọc hiểu (Contextual Vocab)",
+        weak: "Lúng túng khi đoán nghĩa từ mới hoặc tìm từ đồng nghĩa/trái nghĩa trong bài đọc hiểu.",
+        action: "Luyện kỹ năng Đọc quét (Scanning), luôn tìm manh mối (context clues) ở câu liền trước và liền sau từ cần đoán."
+    },
+    "skill_gram_tense": {
+        title: "Các thì ngữ pháp (Tenses)",
+        weak: "Nhầm lẫn dấu hiệu của Hiện tại hoàn thành (twice, since) và sự phối hợp thì Quá khứ tiếp diễn (while/when).",
+        action: "Vẽ trục thời gian để phân biệt: HTHT diễn tả trải nghiệm cho đến hiện tại; QKTD diễn tả hành động đang xảy ra."
+    },
+    "skill_gram_modal": {
+        title: "Động từ khuyết thiếu (Modal Verbs)",
+        weak: "Chưa nắm rõ sắc thái bắt buộc của 'must' so với các động từ khuyết thiếu khác.",
+        action: "Ghi nhớ: 'must' dùng cho quy định, sự bắt buộc phải thực hiện (không có sự lựa chọn)."
+    },
+    "skill_gram_connector": {
+        title: "Từ nối & Liên từ (Connectors)",
+        weak: "Không phân biệt được chức năng của liên từ nhượng bộ (Although), nguyên nhân (Because) và tương phản (However).",
+        action: "Chú ý cả ngữ nghĩa lẫn dấu câu: 'Although' đứng đầu/giữa mệnh đề phụ, 'However' thường đứng sau dấu chấm phẩy (;)."
+    },
+    "skill_gram_reported": {
+        title: "Câu tường thuật & Đề nghị (Reported Speech)",
+        weak: "Chưa linh hoạt khi chuyển đổi mẫu câu đề nghị trực tiếp sang gián tiếp.",
+        action: "Học thuộc cấu trúc quy đổi: 'Why don't we + V' tương đương với 'suggest + V-ing'."
+    },
+    "topic_edu": {
+        title: "Chủ đề Giáo dục & Học tập",
+        weak: "Thiếu từ vựng miêu tả phương pháp học (learning by rote) và tình huống giao tiếp học đường.",
+        action: "Tập trung ôn tập các cụm từ mô tả sự thay đổi của trường học xưa và nay."
+    },
+    "topic_family": {
+        title: "Chủ đề Gia đình",
+        weak: "Chưa phân biệt rõ các cụm từ về gia đình (extended family, nuclear family, generation gap).",
+        action: "Học theo sơ đồ tư duy (Mindmap) để kết nối các khái niệm trong chủ đề Gia đình."
+    },
+    "topic_culture": {
+        title: "Chủ đề Văn hóa truyền thống",
+        weak: "Thiếu vốn từ miêu tả các giá trị văn hóa, đồ chơi dân gian và cách sinh hoạt thời xưa.",
+        action: "Tổng hợp các danh từ và động từ mô tả lối sống trong quá khứ."
+    },
+    "topic_travel": {
+        title: "Chủ đề Du lịch & Thám hiểm",
+        weak: "Hổng từ vựng miêu tả cảm xúc trải nghiệm (thrilling, memorable) và các chuyến đi thực tế.",
+        action: "Ôn tập các tính từ đuôi -ed/-ing dùng để miêu tả cảm nhận của con người đối với chuyến đi."
+    },
+    "topic_living": {
+        title: "Chủ đề Đời sống",
+        weak: "Chưa nắm bắt được ý chính khi đọc các bài văn miêu tả sự thay đổi trong điều kiện sống.",
+        action: "Rèn luyện kỹ năng tìm câu chủ đề (Topic sentence) thường nằm ở đầu hoặc cuối đoạn văn."
+    },
+    "topic_hobbies": {
+        title: "Chủ đề Giải trí & Sở thích",
+        weak: "Sai sót khi sử dụng cấu trúc mô tả sở thích và thói quen giải trí hằng ngày.",
+        action: "Luyện đặt câu kết hợp các động từ chỉ sở thích (fancy, enjoy) với danh động từ (V-ing)."
+    },
+    "topic_env": {
+        title: "Chủ đề Môi trường & Thiên nhiên",
+        weak: "Thiếu phản xạ kết hợp từ khi mô tả các hoạt động bảo vệ môi trường và sinh hoạt ngoài trời.",
+        action: "Học từ mới thông qua việc đọc các đoạn văn ngắn về tự nhiên và du lịch sinh thái."
+    }
 };
 
 const quizData = [
-    { id: 1, correct: "A", category: "Phát âm", tags: ["topic_culture", "skill_gram_tense"], detail: "Phát âm đuôi -ed", exp: "Đuôi -ed trong developed phát âm là /t/, các từ còn lại là /d/." },
-    { id: 2, correct: "C", category: "Phát âm", tags: ["topic_health", "skill_vocab_core"], detail: "Nhận diện âm câm", exp: "Chữ 'h' trong hour là âm câm (/aʊər/), các từ còn lại phát âm là /h/." },
-    { id: 3, correct: "B", category: "Kỹ năng giao tiếp", tags: ["topic_edu", "skill_vocab_core"], detail: "Giao tiếp lớp học", exp: "Trật tự logic: c - a - b (hỏi mượn sách -> nghe không rõ -> nhắc lại lịch sự)." },
-    { id: 4, correct: "A", category: "Kỹ năng giao tiếp", tags: ["topic_health", "skill_vocab_colloc"], detail: "Giao tiếp về quản lý thời gian", exp: "Trật tự logic: c - a - e - b - d (hỏi thăm sức khỏe và khuyên bảo)." },
-    { id: 5, correct: "C", category: "Từ vựng", tags: ["topic_tech", "skill_vocab_core"], detail: "Sự xao nhãng (distraction)", exp: "distractions: sự xao nhãng." },
-    { id: 6, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Bảo tồn giá trị văn hóa", exp: "preserve: bảo tồn, gìn giữ (preserve cultural values)." },
-    { id: 7, correct: "A", category: "Từ vựng", tags: ["topic_health", "skill_vocab_colloc"], detail: "Sức khỏe tinh thần", exp: "mental: tinh thần (mental health)." },
-    { id: 8, correct: "D", category: "Từ vựng", tags: ["topic_family", "skill_vocab_core"], detail: "Truyền thống gia đình", exp: "custom: phong tục / truyền thống thói quen." },
-    { id: 9, correct: "B", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_modal"], detail: "Lời khuyên (should)", exp: "should: nên (đưa ra lời khuyên)." },
-    { id: 10, correct: "A", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "must: phải (quy định bắt buộc)." },
-    { id: 11, correct: "D", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_tense"], detail: "Quá khứ tiếp diễn + Quá khứ đơn", exp: "were studying: Hành động đang xảy ra thì hành động khác xen vào (when)." },
-    { id: 12, correct: "B", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_tense"], detail: "Mệnh đề thời gian với while", exp: "were exploring: Quá khứ tiếp diễn đứng sau While." },
-    { id: 13, correct: "C", category: "Ngữ pháp", tags: ["topic_living", "skill_gram_wish"], detail: "Câu điều ước ở hiện tại", exp: "had: Ước trái với thực tế ở hiện tại (lùi về Quá khứ đơn)." },
-    { id: 14, correct: "A", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_wish"], detail: "Câu điều ước ở hiện tại", exp: "provided: Ước trái với thực tế ở hiện tại (lùi về Quá khứ đơn)." },
-    { id: 15, correct: "B", category: "Từ vựng", tags: ["topic_living", "skill_vocab_colloc"], detail: "Ưu tiên hàng đầu", exp: "priority: sự ưu tiên (a top priority)." },
-    { id: 16, correct: "C", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_tense"], detail: "Hai hành động song song trong QK", exp: "was watching: Hai hành động xảy ra song song nối bằng while." },
-    { id: 17, correct: "A", category: "Cụm động từ", tags: ["topic_health", "skill_vocab_phrasal"], detail: "Áp lực tâm lý", exp: "stressed out: căng thẳng, bị áp lực nặng nề." },
-    { id: 18, correct: "C", category: "Từ vựng", tags: ["topic_health", "skill_vocab_colloc"], detail: "Lối sống cân bằng", exp: "well-balanced: cân bằng (well-balanced lifestyle)." },
-    { id: 19, correct: "C", category: "Ngữ pháp", tags: ["topic_health", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "must: phải (quy định hạn chót)." },
-    { id: 20, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Ăn sâu bén rễ", exp: "deep-rooted: lâu đời, ăn sâu bén rễ." },
-    { id: 21, correct: "A", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Di tích lịch sử", exp: "historic: có ý nghĩa lịch sử (historic monument)." },
-    { id: 22, correct: "C", category: "Ngữ pháp", tags: ["topic_edu", "skill_gram_tense"], detail: "Quá khứ tiếp diễn (Tobe)", exp: "were: Chủ ngữ số nhiều đi với trợ động từ were." },
-    { id: 23, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Bảo tồn giá trị", exp: "preserve: bảo tồn, gìn giữ." },
-    { id: 24, correct: "A", category: "Từ vựng", tags: ["topic_community", "skill_vocab_core"], detail: "Tương lai", exp: "future: tương lai (build a better future)." },
-    { id: 25, correct: "C", category: "Đọc hiểu văn bản", tags: ["topic_tech", "skill_vocab_core"], detail: "Ý chính bài đọc", exp: "Ý chính: Tác động tiêu cực của màn hình điện tử đối với giấc ngủ." },
-    { id: 26, correct: "A", category: "Đọc hiểu văn bản", tags: ["topic_living", "skill_vocab_core"], detail: "Từ đồng nghĩa", exp: "habit = routine (thói quen)." },
-    { id: 27, correct: "C", category: "Đọc hiểu văn bản", tags: ["topic_health", "skill_vocab_phrasal"], detail: "Từ trái nghĩa", exp: "relaxed: thư giãn (trái nghĩa với stressed out)." },
-    { id: 28, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_edu", "skill_gram_connector"], detail: "Đại từ thay thế", exp: "they thay thế cho danh từ students ở câu trước." },
-    { id: 29, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_tech", "skill_vocab_core"], detail: "Tìm thông tin chi tiết", exp: "Ánh sáng xanh khiến não bộ lầm tưởng là ban ngày." },
-    { id: 30, correct: "B", category: "Đọc hiểu văn bản", tags: ["topic_health", "skill_gram_tense"], detail: "Tìm thông tin chi tiết", exp: "Đang quan sát thói quen (were observing)." },
-    { id: 31, correct: "B", category: "Viết lại câu", tags: ["topic_health", "skill_gram_modal"], detail: "Khuyên bảo (should)", exp: "good idea = should." },
-    { id: 32, correct: "C", category: "Viết lại câu", tags: ["topic_culture", "skill_gram_wish"], detail: "Câu điều ước", exp: "What a pity = I wish (lùi về Quá khứ đơn)." },
-    { id: 33, correct: "A", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_tense"], detail: "Nối câu bằng while", exp: "Hành động đang xảy ra thì hành động khác xen vào." },
-    { id: 34, correct: "B", category: "Viết lại câu", tags: ["topic_travel", "skill_gram_modal"], detail: "Sự bắt buộc (must)", exp: "necessary = must." },
-    { id: 35, correct: "A", category: "Viết lại câu", tags: ["topic_living", "skill_gram_wish"], detail: "Câu điều ước", exp: "Thực tế hiện tại không biết -> Ước là biết (knew)." },
-    { id: 36, correct: "A", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_conditional"], detail: "Câu điều kiện loại 1", exp: "If + HTĐ, S + must + V." },
-    { id: 37, correct: "B", category: "Kết hợp câu", tags: ["topic_culture", "skill_gram_tense"], detail: "Nối câu bằng while", exp: "Hai hành động đang xảy ra song song trong quá khứ." },
-    { id: 38, correct: "C", category: "Viết lại câu", tags: ["topic_tech", "skill_gram_conditional"], detail: "Cấu trúc Unless", exp: "Unless = If not." },
-    { id: 39, correct: "A", category: "Kết hợp câu", tags: ["topic_edu", "skill_gram_conditional"], detail: "Câu điều kiện + should", exp: "Mệnh đề chính dùng should để đưa lời khuyên." },
-    { id: 40, correct: "B", category: "Kết hợp câu", tags: ["topic_health", "skill_gram_tense"], detail: "Nối câu bằng when", exp: "Liên từ when đứng trước hành động bất ngờ xen vào." }
+    { id: 1, correct: "C", category: "Phát âm", tags: ["topic_travel", "skill_vocab_core"], detail: "Cách phát âm phụ âm đầu /j/ và /w/", exp: "Chữ 'w' trong <b>wild</b> phát âm là phụ âm /w/, các từ còn lại (yellow, young, yesterday) phát âm là /j/[cite: 8]." },
+    { id: 2, correct: "C", category: "Phát âm", tags: ["topic_living", "skill_vocab_core"], detail: "Cách phát âm cụm phụ âm /fl/ và /fr/", exp: "Cụm phụ âm trong <b>fresh</b> phát âm là /fr/, các từ còn lại (flute, flame, flight) phát âm là /fl/[cite: 8]." },
+    { id: 3, correct: "A", category: "Kỹ năng giao tiếp", tags: ["topic_edu", "skill_vocab_core"], detail: "Hội thoại giao tiếp: Xin lỗi và phản hồi lỗi lầm", exp: "Trật tự logic: <b>a - c - b</b>. Học sinh xin lỗi vì đầu óc trống rỗng (a) -> Giáo viên thông cảm nhưng nhắc nhở (c) -> Học sinh hứa hiểu bài thay vì học vẹt (b)[cite: 8]." },
+    { id: 4, correct: "B", category: "Kỹ năng giao tiếp", tags: ["topic_edu", "skill_vocab_core"], detail: "Hội thoại giao tiếp: Đưa ra lời hứa", exp: "Trật tự logic: <b>a - b - c - d - e</b>. Con hứa học chăm (a) -> Mẹ đưa điều kiện tham gia eco-tour (b) -> Con cảm ơn (c) -> Mẹ dặn quản lý thời gian (d) -> Con hứa không làm mẹ thất vọng (e)[cite: 8]." },
+    { id: 5, correct: "B", category: "Từ vựng", tags: ["topic_hobbies", "skill_vocab_core"], detail: "Tính từ miêu tả trải nghiệm cảm giác mạnh", exp: "<b>exhilarating</b> (làm vui vẻ, phấn khích): Các môn thể thao mạo hiểm (extreme sports) như nhảy dù mang lại trải nghiệm đầy phấn khích[cite: 8]." },
+    { id: 6, correct: "A", category: "Cụm từ cố định", tags: ["topic_edu", "skill_vocab_phrasal"], detail: "Thành ngữ chỉ trạng thái đầu óc trống rỗng", exp: "<b>went blank</b>: Cụm từ cố định 'my mind went blank' mang nghĩa là <i>đầu óc hoàn toàn trống rỗng, không nhớ gì cả</i>[cite: 8]." },
+    { id: 7, correct: "D", category: "Từ vựng", tags: ["topic_edu", "skill_vocab_core"], detail: "Cụm từ chỉ phương pháp học vẹt", exp: "<b>learning</b>: Kết hợp thành cụm <i>learning by rote</i> mang nghĩa là 'học vẹt', dẫn đến việc nhanh quên (quick forgetting)[cite: 8]." },
+    { id: 8, correct: "C", category: "Từ vựng", tags: ["topic_family", "skill_vocab_core"], detail: "Từ vựng về gia đình đa thế hệ", exp: "<b>extended</b>: Cụm <i>extended families</i> (gia đình đa thế hệ) được giải thích rõ bởi vế sau 'three or four generations share the same house'[cite: 8]." },
+    { id: 9, correct: "B", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_core"], detail: "Kết hợp động từ chỉ hành động tự làm đồ chơi", exp: "<b>make</b>: Động từ 'make toys from natural materials' (làm đồ chơi từ vật liệu thiên nhiên) là sự kết hợp chính xác với bối cảnh nông thôn xưa[cite: 8]." },
+    { id: 10, correct: "B", category: "Từ vựng", tags: ["topic_family", "skill_vocab_core"], detail: "Cụm từ chỉ khoảng cách thế hệ", exp: "<b>generation gap</b>: Nghĩa là <i>khoảng cách thế hệ</i> giữa cha mẹ và con cái, do sự khác biệt trong quan điểm về công nghệ (different views on technology)[cite: 8]." },
+    { id: 11, correct: "A", category: "Ngữ pháp", tags: ["topic_travel", "skill_gram_tense"], detail: "Thì HTHT chỉ số lần trải nghiệm", exp: "<b>have gone</b>: Dấu hiệu 'twice' (hai lần) diễn tả trải nghiệm tính đến hiện tại, do đó phải chia thì Hiện tại hoàn thành[cite: 8]." },
+    { id: 12, correct: "A", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_tense"], detail: "Sự phối hợp thì với since", exp: "<b>hasn't played</b>: Cấu trúc <i>Hiện tại hoàn thành + since + Quá khứ đơn</i>. Dấu hiệu 'since' chỉ thời điểm bắt đầu trong quá khứ[cite: 8]." },
+    { id: 13, correct: "B", category: "Ngữ pháp", tags: ["topic_travel", "skill_gram_tense"], detail: "So sánh nhất phối hợp thì HTHT", exp: "<b>have ever taken</b>: Trong mệnh đề tính ngữ theo sau so sánh nhất (the most thrilling excursion), ta bắt buộc dùng thì Hiện tại hoàn thành với 'ever'[cite: 8]." },
+    { id: 14, correct: "B", category: "Ngữ pháp", tags: ["topic_hobbies", "skill_vocab_colloc"], detail: "Cấu trúc động từ đi kèm V-ing", exp: "<b>using</b>: Theo sau động từ 'fancy' (yêu thích) luôn là một danh động từ (V-ing)[cite: 8]." },
+    { id: 15, correct: "C", category: "Ngữ pháp", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Cấu trúc động từ đi kèm To-Infinitive", exp: "<b>to visit</b>: Theo sau động từ 'decide' (quyết định) luôn là một động từ nguyên thể có To (to-V)[cite: 8]." },
+    { id: 16, correct: "A", category: "Ngữ pháp", tags: ["topic_env", "skill_vocab_colloc"], detail: "Cấu trúc suggest/avoid + V-ing", exp: "<b>building / staying</b>: Cả hai động từ 'suggest' (gợi ý) và 'avoid' (tránh) đều yêu cầu động từ theo sau ở dạng V-ing[cite: 8]." },
+    { id: 17, correct: "A", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_context"], detail: "Giới từ chỉ địa điểm cụ thể", exp: "<b>at</b>: Dùng giới từ 'at' để chỉ một địa điểm cụ thể mang tính sự kiện/không gian như bảo tàng (at the city museum)[cite: 8]." },
+    { id: 18, correct: "C", category: "Từ vựng", tags: ["topic_culture", "skill_vocab_context"], detail: "Tính từ miêu tả trải nghiệm tích cực", exp: "<b>memorable</b> (đáng nhớ): Tính từ tích cực phù hợp với chuỗi hoạt động thú vị (seeing old appliances, learning, listening) tại bảo tàng[cite: 8]." },
+    { id: 19, correct: "A", category: "Ngữ pháp", tags: ["topic_culture", "skill_gram_modal"], detail: "Động từ khuyết thiếu chỉ sự bắt buộc", exp: "<b>must</b>: Thể hiện sự bắt buộc hoặc quy định điều kiện (phải đăng ký trực tuyến để lấy vé miễn phí)[cite: 8]." },
+    { id: 20, correct: "C", category: "Từ vựng", tags: ["topic_travel", "skill_vocab_context"], detail: "Tính từ miêu tả trải nghiệm", exp: "<b>thrilling</b> (kỳ thú, hấp dẫn): Phù hợp với ngữ cảnh chuyến thám hiểm 10 ngày trong rừng quốc gia và các hoạt động thú vị[cite: 8]." },
+    { id: 21, correct: "A", category: "Ngữ pháp", tags: ["topic_travel", "skill_gram_tense"], detail: "Quá khứ tiếp diễn với While", exp: "<b>were putting</b>: Cấu trúc <i>While + QK tiếp diễn</i> diễn tả hành động đang diễn ra (đang dựng lều) thì có hành động khác xen vào (bạn trượt ngã)[cite: 8]." },
+    { id: 22, correct: "B", category: "Ngữ pháp", tags: ["topic_travel", "skill_gram_connector"], detail: "Trạng từ liên kết chỉ sự tương phản", exp: "<b>However</b>: Thể hiện sự tương phản giữa ngày đầu tiên xui xẻo (thời tiết xấu, trượt ngã) và ngày thứ hai tràn ngập các hoạt động thú vị[cite: 8]." },
+    { id: 23, correct: "B", category: "Từ vựng", tags: ["topic_travel", "skill_vocab_context"], detail: "Tính từ miêu tả tính cách", exp: "<b>independent</b> (tự lập): Chuyến đi dạy học sinh cách trở nên độc lập và biết hợp tác với nhau (cooperative)[cite: 8]." },
+    { id: 24, correct: "A", category: "Ngữ pháp", tags: ["topic_travel", "skill_vocab_colloc"], detail: "Cấu trúc avoid + V-ing", exp: "<b>depending</b>: Theo sau động từ 'avoid' (tránh) bắt buộc là danh động từ V-ing. (avoid depending on electronic devices)[cite: 8]." },
+    { id: 25, correct: "C", category: "Đọc hiểu", tags: ["topic_living", "skill_vocab_context"], detail: "Đọc hiểu: Xác định ý chính của văn bản", exp: "Đoạn văn miêu tả chi tiết sự khác biệt giữa phương pháp và cơ sở vật chất học tập ở Việt Nam qua các thế hệ (từ thời ông Nam đến cháu Mai)[cite: 8]." },
+    { id: 26, correct: "B", category: "Đọc hiểu", tags: ["topic_edu", "skill_vocab_context"], detail: "Đọc hiểu: Tìm từ đồng nghĩa trong ngữ cảnh", exp: "<b>learn by heart</b>: Đồng nghĩa với 'memorise' mang nghĩa là học thuộc lòng/ghi nhớ các bài học dài[cite: 8]." },
+    { id: 27, correct: "B", category: "Đọc hiểu", tags: ["topic_edu", "skill_vocab_context"], detail: "Đọc hiểu: Tìm từ trái nghĩa", exp: "<b>reliant</b> (dựa dẫm, phụ thuộc): Là từ trái nghĩa trực tiếp của 'independent' (độc lập, tự chủ)[cite: 8]." },
+    { id: 28, correct: "D", category: "Đọc hiểu", tags: ["topic_edu", "skill_vocab_context"], detail: "Đọc hiểu: Xác định đại từ thay thế", exp: "<b>Educators</b>: Đại từ 'They' thay thế cho danh từ 'some educators' (một số nhà giáo dục) được đề cập ngay ở câu liền trước[cite: 8]." },
+    { id: 29, correct: "B", category: "Đọc hiểu", tags: ["topic_living", "skill_vocab_context"], detail: "Đọc hiểu: Trích xuất thông tin chi tiết", exp: "<b>They studied under the light of oil lamps</b>: Theo đoạn 1, học sinh thời xưa phải học bài dưới ánh sáng mờ ảo của đèn dầu[cite: 8]." },
+    { id: 30, correct: "C", category: "Đọc hiểu", tags: ["topic_edu", "skill_vocab_context"], detail: "Đọc hiểu: Phân tích thông tin không chính xác", exp: "<b>C</b> là mệnh đề SAI. Theo đoạn 2, 'Instead of learning by rote...' (Thay vì học vẹt), học sinh hiện đại được khuyến khích độc lập[cite: 8]." },
+    { id: 31, correct: "A", category: "Viết lại câu", tags: ["topic_travel", "skill_gram_tense"], detail: "Viết lại câu Hiện tại hoàn thành có before", exp: "Cấu trúc 'This is the first time + HTHT' (Đây là lần đầu tiên làm gì) tương đương với 'I have never + V3/ed... before' (Chưa bao giờ làm việc này trước đây)[cite: 8]." },
+    { id: 32, correct: "B", category: "Viết lại câu", tags: ["topic_travel", "skill_gram_tense"], detail: "Chuyển đổi thì QK đơn sang HTHT phủ định", exp: "Cấu trúc 'The last time + QK đơn... was + thời gian' tương đương với 'S + hasn't/haven't + V3/ed + for + khoảng thời gian'[cite: 8]." },
+    { id: 33, correct: "B", category: "Viết lại câu", tags: ["topic_travel", "skill_gram_reported"], detail: "Chuyển câu đề nghị trực tiếp sang gián tiếp", exp: "Cấu trúc đề nghị trực tiếp 'Why don't we + V' khi tường thuật lại sẽ dùng cấu trúc <i>suggest + V-ing</i> (suggested going)[cite: 8]." },
+    { id: 34, correct: "A", category: "Viết lại câu", tags: ["topic_culture", "skill_vocab_colloc"], detail: "Chuyển đổi want to-V sang fancy V-ing", exp: "<b>fancy wearing</b>: 'Want to + V' (Muốn làm gì) có thể được thay thế bằng động từ chỉ sở thích/mong muốn 'fancy + V-ing'[cite: 8]." },
+    { id: 35, correct: "B", category: "Viết lại câu", tags: ["topic_family", "skill_vocab_colloc"], detail: "Chuyển đổi danh từ sang động từ tương đương", exp: "Cụm danh từ 'make a decision to do sth' (Đưa ra quyết định) hoàn toàn tương đương với động từ nguyên bản <i>decide to do sth</i>[cite: 8]." },
+    { id: 36, correct: "A", category: "Ghép câu", tags: ["topic_culture", "skill_gram_tense"], detail: "Ghép câu dùng liên từ While", exp: "<b>While</b> nối mệnh đề chia Quá khứ tiếp diễn, diễn tả hành động nền (đang tiến hành nghiên cứu) thì hành động khác (gặp người dân) xen vào[cite: 8]." },
+    { id: 37, correct: "B", category: "Ghép câu", tags: ["topic_hobbies", "skill_gram_tense"], detail: "Ghép câu diễn tả hành động xen vào dùng when", exp: "<b>when</b> đứng trước mệnh đề Quá khứ đơn diễn tả một hành động bất ngờ xen vào (micro hỏng) khi hành động khác (đang biểu diễn) đang diễn ra[cite: 8]." },
+    { id: 38, correct: "A", category: "Ghép câu", tags: ["topic_culture", "skill_gram_connector"], detail: "Ghép câu diễn tả sự nhượng bộ bằng Although", exp: "<b>Although</b> (Mặc dù) đứng đầu câu để nối hai mệnh đề mang ý nghĩa tương phản (không có sách hiện đại >< vẫn học được nhiều thứ)[cite: 8]." },
+    { id: 39, correct: "C", category: "Ghép câu", tags: ["topic_culture", "skill_gram_connector"], detail: "Ghép câu chỉ nguyên nhân - kết quả", exp: "<b>Because</b> đứng đầu câu, nối mệnh đề nguyên nhân (cuộc sống đơn giản, ít tốn kém) với mệnh đề kết quả (trẻ em có thể tự làm đồ chơi)[cite: 8]." },
+    { id: 40, correct: "B", category: "Ghép câu", tags: ["topic_living", "skill_gram_connector"], detail: "Ghép câu độc lập chỉ sự tương phản", exp: "Trạng từ liên kết <b>however</b> (tuy nhiên) được đặt sau dấu chấm phẩy (;) và trước dấu phẩy (,) để nối hai mệnh đề độc lập mang nghĩa trái ngược nhau[cite: 8]." }
 ];
 
 function renderAnswerSheet() {
@@ -283,6 +357,8 @@ function updateProgress() {
     document.getElementById('progressPercent').innerText = `${percent}%`;
     document.getElementById('progressBar').style.width = `${percent}%`;
 }
+
+let skillsChartInstance = null;
 
 function submitQuiz() {
     const studentName = document.getElementById('student-name').value.trim();
@@ -349,12 +425,16 @@ function submitQuiz() {
     document.getElementById('overallFeedback').innerText = feedback;
 
     let detailedHtml = "";
+    let labels = [];
+    let correctData = [];
     let strengths = [];
     let weaknesses = [];
     let actionPlan = [];
 
     for (let cat in categoryStats) {
+        labels.push(cat);
         let pct = Math.round((categoryStats[cat].correct / categoryStats[cat].total) * 100);
+        correctData.push(pct);
 
         let badgeClass = "badge-weak";
         let statusText = "Cần ôn tập";
@@ -390,6 +470,26 @@ function submitQuiz() {
         document.getElementById('actionPlanSection').style.display = "block";
         document.getElementById('actionPlanList').innerHTML = [...new Set(actionPlan)].map(a => `<li>${a}</li>`).join('');
     }
+
+    if (skillsChartInstance) { skillsChartInstance.destroy(); }
+    const ctx = document.getElementById('skillsChart').getContext('2d');
+    skillsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Tỷ lệ đúng (%)',
+                data: correctData,
+                backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                borderWidth: 1, borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            scales: { x: { min: 0, max: 100 } }
+        }
+    });
 
     let formData = new URLSearchParams();
     formData.append('studentName', studentName);
